@@ -4,16 +4,15 @@ Workspace for our Sea × OpenAI Codex Hackathon team.
 
 ## Current stage
 
-We are validating and selecting one pre-build product direction:
+The team has selected one pre-build product direction:
 
 - **Order Rescue Agent** — a policy-gated AI decision layer for failed last-mile deliveries.
-- **AI Grocery Planner** — a constraint-aware weekly grocery and meal planner.
 
 Project research, meeting briefs, and source materials are in [`process/context/ideas/`](process/context/ideas/).
 
 ## Team
 
-Lucas (Technical PO), Hải, Kha, and Phúc.
+Lucas, Hải, Kha, and Phúc.
 
 ## Working principle
 

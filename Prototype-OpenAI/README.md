@@ -60,13 +60,15 @@ npm run build
 
 Demo cases: `OR-001` buyer reply → retry, `OR-009` timeout → operations, `OR-023` address-change request → operations, `OR-038` verified flooding → hold, `OR-051` unsafe note → stop before AI.
 
+The operations interface starts with a case selector and one decision card. Key delivery facts and the next available action are visible; Evidence and History are separate views. Replay/live mode and five quick scenarios are inside collapsed Demo options; pipeline, raw sources and policy fields are inside collapsed Technical details. The help button provides a short walkthrough.
+
 ## Important demo distinction
 
 `fixtures/replay/` contains **hand-authored seeds**, not recorded model outputs. A 25/25 replay match validates the code path and rules, not model accuracy. Live GPT can give a different proposal; validation and policy checks still apply.
 
 ## Code map
 
-- `app/page.tsx`, `app/globals.css`: responsive workbench.
+- `app/page.tsx`, `app/globals.css`: focused, responsive workbench with five quick scenarios and optional technical details.
 - `app/api/`: case, run, event, virtual-clock and configuration routes.
 - `lib/order-rescue/pipeline.ts`: fixed seven-stage orchestration; optional OpenAI tracing.
 - `lib/order-rescue/skills/`: the seven skills and original prompt.

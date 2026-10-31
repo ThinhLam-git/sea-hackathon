@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./theme.css";
 export const metadata: Metadata = {
   title: "Order Rescue · GPT Operations",
   description: "Make every remaining delivery attempt count. A policy-controlled OpenAI agent for delivery recovery.",

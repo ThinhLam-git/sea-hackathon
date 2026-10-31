@@ -13,3 +13,5 @@ The header language button switches Vietnamese/English locally and remembers the
 The read-only Agent trace tab shows recorded backend stages, measured durations, the final assessment’s evidence, policy rules and service operations. OpenAI private reasoning is not collected. A dark inspector separates app skills, agent assessment and Decisions scoring; the current assessor has zero tools configured. Older decisions show their saved stages with unavailable timing rather than invented durations. New No reply events record only selection/audit and no new AI service operations.
 
 Replay recorded trace animates the saved stages locally. It never submits input, calls OpenAI, or changes the decision. While an assessment request is pending, the previous record stays visible with an explicit waiting banner; this MVP does not stream intermediate server events.
+
+The trace opens in Timeline view, with precise saved timestamps, durations and nested API operations. Select an event to open its Inspector; switch back to Timeline to present the chronological record. These view controls do not run inference.

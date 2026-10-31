@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){.trace-deck *{transition:none!important;animation:none!important}}
 
 .judge-main.is-trace>.judge-title,.judge-main.is-trace>.judge-cases,.judge-main.is-trace>.judge-steps{display:none}
+
+.trace-view-switch{display:flex;align-items:center;gap:5px;flex-wrap:wrap;border-bottom:1px solid #2b3f60;margin:0 0 16px;padding-bottom:12px}.trace-view-switch button{display:flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid #3d557e;border-radius:6px;background:#162740;color:#aabede;font-size:12px}.trace-view-switch button[aria-pressed=true]{background:#344774;border-color:#99b3ec;color:#fff}.trace-view-switch>span{color:#8da7cd;font-size:10px;margin-left:auto}@media(max-width:600px){.trace-view-switch>span{width:100%;margin-top:5px}}

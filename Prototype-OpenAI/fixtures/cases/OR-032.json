@@ -1,0 +1,130 @@
+{
+  "case_id": "OR-032",
+  "group": "G4 Từ chối/COD/ý định",
+  "title": "COD – buyer chưa chuẩn bị đủ tiền mặt",
+  "input": {
+    "case_id": "OR-032",
+    "failed_event": {
+      "status": "DELIVERY_FAILED_OTHER",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Người nhận chưa đủ tiền thanh toán COD",
+      "courier_note": "Khách xin lui giao vì chưa đủ tiền.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "COD",
+      "cod_vnd": 1250000,
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-032-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "DELIVERY_FAILED_OTHER",
+        "reported_reason": "Người nhận chưa đủ tiền thanh toán COD",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-032-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Khách xin lui giao vì chưa đủ tiền."
+    },
+    {
+      "source_ref": "OR-032-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-032-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-032-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-032-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-032-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-032-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-032-EV1",
+      "phase": "RUNTIME",
+      "source_type": "BUYER_REPLY",
+      "actor": "buyer_simulator",
+      "occurred_at": "2026-10-16T15:20:00+07:00",
+      "content": {
+        "text": "Vẫn muốn nhận, ngày mai có đủ tiền COD và mình có ở nhà.",
+        "question_id": "OR-032-Q1"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": "CONFIRM_INTENT",
+    "script": [
+      "OR-032-EV1"
+    ],
+    "agent": {
+      "hypothesis": "PAYMENT_NOT_READY",
+      "confidence": "MEDIUM",
+      "missing_info": null,
+      "question_key": "CONFIRM_INTENT",
+      "candidate_action": "STANDARD_REATTEMPT",
+      "evidence": "failed_event.status=DELIVERY_FAILED_OTHER (raw status) | courier_note: Khách xin lui giao vì chưa đủ tiền. (chưa xác minh) | buyer reply trực tiếp: Vẫn muốn nhận, ngày mai có đủ tiền COD và mình có ở nhà."
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "PERMITTED",
+      "final_action": "STANDARD_REATTEMPT",
+      "reason": "Buyer xác nhận vẫn muốn nhận và sẽ chuẩn bị COD; chỉ khuyến nghị retry."
+    }
+  }
+}

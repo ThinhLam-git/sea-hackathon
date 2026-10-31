@@ -1,0 +1,106 @@
+{
+  "case_id": "OR-055",
+  "group": "G7 An toàn/dữ liệu",
+  "title": "Sự kiện trùng lặp / lỗi thời so với trạng thái mới nhất",
+  "input": {
+    "case_id": "OR-055",
+    "failed_event": {
+      "status": "CONTACT_FAILED",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Không liên hệ được người nhận",
+      "courier_note": "Sự kiện gửi lại do lỗi mạng.",
+      "as_of": "2026-10-16T18:30:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-19T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12",
+      "latest_status": "DELIVERED",
+      "duplicate_trigger": true
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-055-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "CONTACT_FAILED",
+        "reported_reason": "Không liên hệ được người nhận",
+        "as_of": "2026-10-16T18:30:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-055-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Sự kiện gửi lại do lỗi mạng."
+    },
+    {
+      "source_ref": "OR-055-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-055-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-055-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-055-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-055-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-055-PAST-B"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "NO_CHANGE",
+    "question_during_runtime": null,
+    "script": [],
+    "agent": null,
+    "policy": null
+  }
+}

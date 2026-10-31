@@ -1,0 +1,87 @@
+{
+  "case_id": "OR-009",
+  "group": "G2 Không liên lạc được",
+  "title": "Không có phản hồi buyer sau câu hỏi; timeout",
+  "input": {
+    "case_id": "OR-009",
+    "failed_event": {
+      "status": "CONTACT_FAILED",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Không liên hệ được người nhận",
+      "courier_note": "Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-19T15:00:00+07:00",
+    "buyer_history": [],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-009-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "CONTACT_FAILED",
+        "reported_reason": "Không liên hệ được người nhận",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-009-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer."
+    },
+    {
+      "source_ref": "OR-009-EV1",
+      "phase": "RUNTIME",
+      "source_type": "NO_REPLY_OBSERVED",
+      "actor": "simulator",
+      "occurred_at": "2026-10-16T15:30:00+07:00",
+      "content": {
+        "text": "Không có phản hồi sau 30 phút."
+      }
+    },
+    {
+      "source_ref": "OR-009-EV2",
+      "phase": "RUNTIME",
+      "source_type": "QUESTION_TIMEOUT",
+      "actor": "simulator",
+      "occurred_at": "2026-10-16T19:00:00+07:00",
+      "content": {
+        "question_id": "OR-009-Q1"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": "CONFIRM_INTENT",
+    "script": [
+      "OR-009-EV1",
+      "OR-009-EV2"
+    ],
+    "agent": {
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "missing_info": "CURRENT_BUYER_INTENT",
+      "question_key": "CONFIRM_INTENT",
+      "candidate_action": "CLARIFY",
+      "evidence": "failed_event.status=CONTACT_FAILED (raw status) | courier_note: Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer. (chưa xác minh) | simulator: QUESTION_TIMEOUT"
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "ESCALATED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Hết response window mà chưa có buyer reply; chuyển Ops, không kết luận buyer từ chối."
+    }
+  }
+}

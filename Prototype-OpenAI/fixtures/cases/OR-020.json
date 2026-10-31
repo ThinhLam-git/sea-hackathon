@@ -1,0 +1,116 @@
+{
+  "case_id": "OR-020",
+  "group": "G3 Địa chỉ/landmark",
+  "title": "Địa chỉ trên đơn và thực tế lệch nhau (sai tên đường)",
+  "input": {
+    "case_id": "OR-020",
+    "failed_event": {
+      "status": "ADDRESS_ISSUE",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Địa chỉ không đúng",
+      "courier_note": "Số nhà trùng nhưng ở đường khác, khách nói đúng địa chỉ.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-020-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "ADDRESS_ISSUE",
+        "reported_reason": "Địa chỉ không đúng",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-020-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Số nhà trùng nhưng ở đường khác, khách nói đúng địa chỉ."
+    },
+    {
+      "source_ref": "OR-020-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-020-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-020-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-020-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-020-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-020-PAST-B"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": null,
+    "script": [],
+    "agent": {
+      "hypothesis": "UNCLEAR_LANDMARK",
+      "confidence": "MEDIUM",
+      "missing_info": "CONFLICT_RESOLUTION",
+      "question_key": null,
+      "candidate_action": "ESCALATE_REVIEW",
+      "evidence": "failed_event.status=ADDRESS_ISSUE (raw status) | courier_note: Số nhà trùng nhưng ở đường khác, khách nói đúng địa chỉ. (chưa xác minh)"
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "ESCALATED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Địa chỉ ghi nhận khác thực tế, yêu cầu điều chỉnh địa chỉ ngoài MVP."
+    }
+  }
+}

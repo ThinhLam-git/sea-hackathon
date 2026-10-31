@@ -1,0 +1,164 @@
+{
+  "START": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "CURRENT_BUYER_INTENT"
+      ],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "candidate_action": "CLARIFY",
+      "explanation": "Chưa có xác nhận trực tiếp từ người mua; không thể kết luận nguyên nhân.",
+      "evidence": [
+        {
+          "source_ref": "OR-009-FAIL",
+          "fact": "failed_event.status=CONTACT_FAILED (raw status)",
+          "quote": "CONTACT_FAILED",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-009-NOTE",
+          "fact": "courier_note: Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer. (chưa xác minh)",
+          "quote": "Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer.",
+          "verified": false
+        }
+      ]
+    }
+  },
+  "START+OR-009-EV1": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "CURRENT_BUYER_INTENT"
+      ],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "candidate_action": "CLARIFY",
+      "explanation": "Chưa có xác nhận trực tiếp từ người mua; không thể kết luận nguyên nhân.",
+      "evidence": [
+        {
+          "source_ref": "OR-009-FAIL",
+          "fact": "failed_event.status=CONTACT_FAILED (raw status)",
+          "quote": "CONTACT_FAILED",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-009-NOTE",
+          "fact": "courier_note: Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer. (chưa xác minh)",
+          "quote": "Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-009-EV1",
+          "fact": "no_reply_observed: Không có phản hồi sau 30 phút.",
+          "quote": "Không có phản hồi sau 30 phút.",
+          "verified": false
+        }
+      ]
+    }
+  },
+  "START+OR-009-EV1+OR-009-EV2": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "CURRENT_BUYER_INTENT"
+      ],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "candidate_action": "CLARIFY",
+      "explanation": "Chưa có xác nhận trực tiếp từ người mua; không thể kết luận nguyên nhân.",
+      "evidence": [
+        {
+          "source_ref": "OR-009-FAIL",
+          "fact": "failed_event.status=CONTACT_FAILED (raw status)",
+          "quote": "CONTACT_FAILED",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-009-NOTE",
+          "fact": "courier_note: Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer. (chưa xác minh)",
+          "quote": "Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-009-EV2",
+          "fact": "question_timeout: {\"question_id\": \"OR-009-Q1\"}",
+          "quote": "OR-009-Q1",
+          "verified": false
+        }
+      ]
+    }
+  },
+  "START+OR-009-EV2": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "CURRENT_BUYER_INTENT"
+      ],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "candidate_action": "CLARIFY",
+      "explanation": "Chưa có xác nhận trực tiếp từ người mua; không thể kết luận nguyên nhân.",
+      "evidence": [
+        {
+          "source_ref": "OR-009-FAIL",
+          "fact": "failed_event.status=CONTACT_FAILED (raw status)",
+          "quote": "CONTACT_FAILED",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-009-NOTE",
+          "fact": "courier_note: Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer. (chưa xác minh)",
+          "quote": "Shipper ghi nhận không thể bàn giao hàng; không có xác nhận trực tiếp từ buyer.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-009-EV2",
+          "fact": "question_timeout: {\"question_id\": \"OR-009-Q1\"}",
+          "quote": "OR-009-Q1",
+          "verified": false
+        }
+      ]
+    }
+  }
+}

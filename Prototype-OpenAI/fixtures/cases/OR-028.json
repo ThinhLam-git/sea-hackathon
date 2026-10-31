@@ -1,0 +1,108 @@
+{
+  "case_id": "OR-028",
+  "group": "G4 Từ chối/COD/ý định",
+  "title": "Status 'refused' nhưng thiếu bằng chứng hỗ trợ (case an toàn lõi)",
+  "input": {
+    "case_id": "OR-028",
+    "failed_event": {
+      "status": "REFUSED",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Người nhận từ chối",
+      "courier_note": "",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-028-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "REFUSED",
+        "reported_reason": "Người nhận từ chối",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-028-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-028-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-028-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-028-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-028-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-028-PAST-B"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": null,
+    "script": [],
+    "agent": {
+      "hypothesis": "UNVERIFIED_REFUSAL",
+      "confidence": "LOW",
+      "missing_info": "VERIFIED_BUYER_REFUSAL",
+      "question_key": null,
+      "candidate_action": "ESCALATE_REVIEW",
+      "evidence": "failed_event.status=REFUSED (raw status)"
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "ESCALATED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Trạng thái từ chối chưa có xác nhận trực tiếp; Ops kiểm tra."
+    }
+  }
+}

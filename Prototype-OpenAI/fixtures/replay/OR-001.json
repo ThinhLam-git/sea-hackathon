@@ -1,0 +1,78 @@
+{
+  "START": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "CURRENT_BUYER_INTENT"
+      ],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "TEMP_AVAILABILITY_CONFLICT",
+      "confidence": "MEDIUM",
+      "candidate_action": "CLARIFY",
+      "explanation": "Ghi chú shipper cho thấy người nhận vắng mặt tạm thời; chưa biết người mua còn muốn nhận không.",
+      "evidence": [
+        {
+          "source_ref": "OR-001-FAIL",
+          "fact": "failed_event.status=RECIPIENT_UNAVAILABLE (raw status)",
+          "quote": "RECIPIENT_UNAVAILABLE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-001-NOTE",
+          "fact": "courier_note: Khách báo đang ở cơ quan, chưa hẹn được giờ về. (chưa xác minh)",
+          "quote": "Khách báo đang ở cơ quan, chưa hẹn được giờ về.",
+          "verified": false
+        }
+      ]
+    }
+  },
+  "START+OR-001-EV1": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "WANTS",
+      "availability": "CONFIRMED",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "TEMP_AVAILABILITY_CONFLICT",
+      "confidence": "MEDIUM",
+      "candidate_action": "STANDARD_REATTEMPT",
+      "explanation": "Người mua trực tiếp trả lời về ý định nhận hàng và thời điểm có người nhận.",
+      "evidence": [
+        {
+          "source_ref": "OR-001-FAIL",
+          "fact": "failed_event.status=RECIPIENT_UNAVAILABLE (raw status)",
+          "quote": "RECIPIENT_UNAVAILABLE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-001-NOTE",
+          "fact": "courier_note: Khách báo đang ở cơ quan, chưa hẹn được giờ về. (chưa xác minh)",
+          "quote": "Khách báo đang ở cơ quan, chưa hẹn được giờ về.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-001-EV1",
+          "fact": "buyer_reply: Vẫn muốn nhận. Ngày mai có người ở nhà có thể nhận hàng.",
+          "quote": "Vẫn muốn nhận. Ngày mai có người ở nhà có thể nhận hàng.",
+          "verified": true
+        }
+      ]
+    }
+  }
+}

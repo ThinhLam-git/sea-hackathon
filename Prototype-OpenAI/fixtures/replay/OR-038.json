@@ -1,0 +1,90 @@
+{
+  "START": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [],
+      "question_key": null,
+      "hypothesis": "SERVICE_DISRUPTION",
+      "confidence": "HIGH",
+      "candidate_action": "HOLD_DISRUPTION",
+      "explanation": "Gián đoạn ngập đã xác minh, khớp tuyến và thời điểm giao.",
+      "evidence": [
+        {
+          "source_ref": "OR-038-FAIL",
+          "fact": "failed_event.status=RECIPIENT_UNAVAILABLE (raw status)",
+          "quote": "RECIPIENT_UNAVAILABLE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-038-NOTE",
+          "fact": "courier_note: Tuyến giao tạm ngưng do ngập, chưa tiếp cận được khu vực. (chưa xác minh)",
+          "quote": "Tuyến giao tạm ngưng do ngập, chưa tiếp cận được khu vực.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-038-DISR",
+          "fact": "disruption_signal: {\"kind\": \"FLOOD_HUB_PAUSE\", \"scope_route_token\": \"HCM-urban-R12\", \"started_at\": \"2026-10-16T12:30:00+07:00\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"reassess_at\": \"2026-10-16T17:00:00+07:00\"}",
+          "quote": "FLOOD_HUB_PAUSE",
+          "verified": true
+        }
+      ]
+    }
+  },
+  "START+OR-038-EV1": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "CURRENT_BUYER_INTENT"
+      ],
+      "question_key": "CONFIRM_INTENT",
+      "hypothesis": "SERVICE_DISRUPTION",
+      "confidence": "MEDIUM",
+      "candidate_action": "CLARIFY",
+      "explanation": "Tuyến đã hoạt động lại; cần xác nhận người mua còn muốn nhận trước khi giao lại.",
+      "evidence": [
+        {
+          "source_ref": "OR-038-FAIL",
+          "fact": "failed_event.status=RECIPIENT_UNAVAILABLE (raw status)",
+          "quote": "RECIPIENT_UNAVAILABLE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-038-NOTE",
+          "fact": "courier_note: Tuyến giao tạm ngưng do ngập, chưa tiếp cận được khu vực. (chưa xác minh)",
+          "quote": "Tuyến giao tạm ngưng do ngập, chưa tiếp cận được khu vực.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-038-DISR",
+          "fact": "disruption_signal: {\"kind\": \"FLOOD_HUB_PAUSE\", \"scope_route_token\": \"HCM-urban-R12\", \"started_at\": \"2026-10-16T12:30:00+07:00\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"reassess_at\": \"2026-10-16T17:00:00+07:00\"}",
+          "quote": "FLOOD_HUB_PAUSE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-038-EV1",
+          "fact": "disruption_resolved: Ops xác nhận tuyến hoạt động trở lại, disruption resolved.",
+          "quote": "Ops xác nhận tuyến hoạt động trở lại, disruption resolved.",
+          "verified": false
+        }
+      ]
+    }
+  }
+}

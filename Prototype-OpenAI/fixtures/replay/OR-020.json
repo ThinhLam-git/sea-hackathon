@@ -1,0 +1,38 @@
+{
+  "START": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": true,
+      "sources_conflict": false,
+      "missing_info": [
+        "CONFLICT_RESOLUTION"
+      ],
+      "question_key": null,
+      "hypothesis": "UNCLEAR_LANDMARK",
+      "confidence": "MEDIUM",
+      "candidate_action": "ESCALATE_REVIEW",
+      "explanation": "Địa chỉ trên đơn lệch với thực tế; cần điều chỉnh địa chỉ, ngoài phạm vi MVP.",
+      "evidence": [
+        {
+          "source_ref": "OR-020-FAIL",
+          "fact": "failed_event.status=ADDRESS_ISSUE (raw status)",
+          "quote": "ADDRESS_ISSUE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-020-NOTE",
+          "fact": "courier_note: Số nhà trùng nhưng ở đường khác, khách nói đúng địa chỉ. (chưa xác minh)",
+          "quote": "Số nhà trùng nhưng ở đường khác, khách nói đúng địa chỉ.",
+          "verified": false
+        }
+      ]
+    }
+  }
+}

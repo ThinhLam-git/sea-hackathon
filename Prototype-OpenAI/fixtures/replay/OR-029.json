@@ -1,0 +1,38 @@
+{
+  "START": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "VERIFIED_BUYER_REFUSAL"
+      ],
+      "question_key": null,
+      "hypothesis": "UNVERIFIED_REFUSAL",
+      "confidence": "LOW",
+      "candidate_action": "ESCALATE_REVIEW",
+      "explanation": "Chỉ có lời thuật của shipper, chưa có xác nhận độc lập từ người mua.",
+      "evidence": [
+        {
+          "source_ref": "OR-029-FAIL",
+          "fact": "failed_event.status=REFUSED (raw status)",
+          "quote": "REFUSED",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-029-NOTE",
+          "fact": "courier_note: Khách nói không cần nữa khi shipper đến giao. (chưa xác minh)",
+          "quote": "Khách nói không cần nữa khi shipper đến giao.",
+          "verified": false
+        }
+      ]
+    }
+  }
+}

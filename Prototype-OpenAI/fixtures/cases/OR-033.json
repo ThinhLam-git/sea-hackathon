@@ -1,0 +1,225 @@
+{
+  "case_id": "OR-033",
+  "group": "G4 Từ chối/COD/ý định",
+  "title": "COD giá trị cao + lịch sử thất bại – không auto-deny",
+  "input": {
+    "case_id": "OR-033",
+    "failed_event": {
+      "status": "CONTACT_FAILED",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Không liên hệ được người nhận",
+      "courier_note": "Shipper ghi nhận chưa có xác nhận buyer cho lần giao này.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-19T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-08-19T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-08-26T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "FAILED_COD"
+      },
+      {
+        "time": "2026-09-02T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-09T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-16T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "FAILED_COD"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-30T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      }
+    ],
+    "operational_context": {
+      "payment": "COD",
+      "cod_vnd": 3200000,
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-033-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "CONTACT_FAILED",
+        "reported_reason": "Không liên hệ được người nhận",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-033-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Shipper ghi nhận chưa có xác nhận buyer cho lần giao này."
+    },
+    {
+      "source_ref": "OR-033-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-033-PREV-01"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-19T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-033-PREV-02"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-26T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "FAILED_COD",
+        "order": "SYN-033-PREV-03"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH04",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-02T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-033-PREV-04"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH05",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-09T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-033-PREV-05"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH06",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-16T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "FAILED_COD",
+        "order": "SYN-033-PREV-06"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH07",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-033-PREV-07"
+      }
+    },
+    {
+      "source_ref": "OR-033-BH08",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-30T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-033-PREV-08"
+      }
+    },
+    {
+      "source_ref": "OR-033-EV1",
+      "phase": "RUNTIME",
+      "source_type": "NO_REPLY_OBSERVED",
+      "actor": "simulator",
+      "occurred_at": "2026-10-16T15:30:00+07:00",
+      "content": {
+        "text": "Chưa phản hồi trong response window."
+      }
+    },
+    {
+      "source_ref": "OR-033-EV2",
+      "phase": "RUNTIME",
+      "source_type": "QUESTION_TIMEOUT",
+      "actor": "simulator",
+      "occurred_at": "2026-10-16T19:00:00+07:00",
+      "content": {
+        "question_id": "OR-033-Q1"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": "CONFIRM_INTENT",
+    "script": [
+      "OR-033-EV1",
+      "OR-033-EV2"
+    ],
+    "agent": {
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "missing_info": "CURRENT_BUYER_INTENT",
+      "question_key": "CONFIRM_INTENT",
+      "candidate_action": "CLARIFY",
+      "evidence": "failed_event.status=CONTACT_FAILED (raw status) | courier_note: Shipper ghi nhận chưa có xác nhận buyer cho lần giao này. (chưa xác minh) | simulator: QUESTION_TIMEOUT"
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "ESCALATED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Hết hạn trả lời; lịch sử COD không được dùng để tự từ chối."
+    }
+  }
+}

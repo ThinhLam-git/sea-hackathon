@@ -17,3 +17,17 @@ Lucas, Hải, Kha, and Phúc.
 ## Working principle
 
 Prototype only what we can demonstrate truthfully. Any unavailable integrations, live data, or business outcomes must be clearly labelled **SIMULATED** or **FUTURE**.
+
+## OpenAI prototype (`phuc-dev`)
+
+The working prototype is in [`Prototype-OpenAI/`](Prototype-OpenAI/README.md). It uses OpenAI Agents SDK + Responses API, a dark navy React workbench, the same seven-step policy pipeline, and all 25 v0.5 simulation cases.
+
+```bash
+cd Prototype-OpenAI
+npm ci
+npm test
+npm run typecheck
+npm run build
+```
+
+See the project README for local database setup, secure API-key configuration, and the private Sites preview. API keys and local run data are excluded from Git.

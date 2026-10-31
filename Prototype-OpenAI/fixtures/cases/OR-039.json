@@ -1,0 +1,127 @@
+{
+  "case_id": "OR-039",
+  "group": "G5 Gián đoạn/bối cảnh",
+  "title": "Có cờ gián đoạn nhưng khác tuyến/khác thời điểm",
+  "input": {
+    "case_id": "OR-039",
+    "failed_event": {
+      "status": "RECIPIENT_UNAVAILABLE",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Người nhận không có mặt",
+      "courier_note": "Không ai nhận hàng.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12",
+      "disruption": {
+        "kind": "HUB_PAUSE",
+        "scope_route_token": "HN-urban-R03",
+        "started_at": "2026-10-15T08:30:00+07:00",
+        "status": "ACTIVE",
+        "verification": "VERIFIED",
+        "reassess_at": null
+      }
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-039-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "RECIPIENT_UNAVAILABLE",
+        "reported_reason": "Người nhận không có mặt",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-039-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Không ai nhận hàng."
+    },
+    {
+      "source_ref": "OR-039-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-039-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-039-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-039-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-039-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-039-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-039-DISR",
+      "phase": "T0",
+      "source_type": "DISRUPTION_SIGNAL",
+      "actor": "ops_simulator",
+      "occurred_at": "2026-10-15T08:30:00+07:00",
+      "content": {
+        "kind": "HUB_PAUSE",
+        "scope_route_token": "HN-urban-R03",
+        "started_at": "2026-10-15T08:30:00+07:00",
+        "status": "ACTIVE",
+        "verification": "VERIFIED",
+        "reassess_at": null
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "PENDING",
+    "question_during_runtime": "CONFIRM_INTENT",
+    "script": [],
+    "agent": null,
+    "policy": null
+  }
+}

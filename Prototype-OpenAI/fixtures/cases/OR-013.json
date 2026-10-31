@@ -1,0 +1,129 @@
+{
+  "case_id": "OR-013",
+  "group": "G2 Không liên lạc được",
+  "title": "Courrier note mâu thuẫn với buyer reply",
+  "input": {
+    "case_id": "OR-013",
+    "failed_event": {
+      "status": "CONTACT_FAILED",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Không liên hệ được người nhận",
+      "courier_note": "Shipper ghi chú chưa có xác nhận từ người nhận.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-19T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-013-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "CONTACT_FAILED",
+        "reported_reason": "Không liên hệ được người nhận",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-013-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Shipper ghi chú chưa có xác nhận từ người nhận."
+    },
+    {
+      "source_ref": "OR-013-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-013-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-013-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-013-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-013-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-013-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-013-EV1",
+      "phase": "RUNTIME",
+      "source_type": "BUYER_REPLY",
+      "actor": "buyer_simulator",
+      "occurred_at": "2026-10-16T15:20:00+07:00",
+      "content": {
+        "text": "Mình ở nhà cả ngày, máy không có cuộc gọi nào. Mình vẫn muốn nhận.",
+        "question_id": "OR-013-Q1"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": "CONFIRM_INTENT",
+    "script": [
+      "OR-013-EV1"
+    ],
+    "agent": {
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "missing_info": null,
+      "question_key": "CONFIRM_INTENT",
+      "candidate_action": "ESCALATE_REVIEW",
+      "evidence": "failed_event.status=CONTACT_FAILED (raw status) | courier_note: Shipper ghi chú chưa có xác nhận từ người nhận. (chưa xác minh) | buyer reply trực tiếp: Mình ở nhà cả ngày, máy không có cuộc gọi nào. Mình vẫn muốn nhận."
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "ESCALATED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Courier note mâu thuẫn với lời buyer; không đủ cơ sở tự retry."
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "START": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "UNKNOWN",
+      "availability": "UNKNOWN",
+      "location_clarified": false,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [
+        "LANDMARK"
+      ],
+      "question_key": "CLARIFY_LANDMARK",
+      "hypothesis": "UNCLEAR_LANDMARK",
+      "confidence": "MEDIUM",
+      "candidate_action": "CLARIFY",
+      "explanation": "Shipper không tìm được vị trí; cần mốc chỉ đường.",
+      "evidence": [
+        {
+          "source_ref": "OR-018-FAIL",
+          "fact": "failed_event.status=ADDRESS_ISSUE (raw status)",
+          "quote": "ADDRESS_ISSUE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-018-NOTE",
+          "fact": "courier_note: Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc. (chưa xác minh)",
+          "quote": "Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc.",
+          "verified": false
+        }
+      ]
+    }
+  },
+  "START+OR-018-EV1": {
+    "source": "hand_authored_seed",
+    "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
+    "model": null,
+    "prompt_version": "assess-v0.5",
+    "policy_version": "demo-policy-v0.5",
+    "output": {
+      "buyer_intent": "WANTS",
+      "availability": "CONFIRMED",
+      "location_clarified": true,
+      "address_change_needed": false,
+      "sources_conflict": false,
+      "missing_info": [],
+      "question_key": "CLARIFY_LANDMARK",
+      "hypothesis": "UNCLEAR_LANDMARK",
+      "confidence": "MEDIUM",
+      "candidate_action": "STANDARD_REATTEMPT",
+      "explanation": "Người mua cung cấp mốc chỉ đường và xác nhận muốn nhận.",
+      "evidence": [
+        {
+          "source_ref": "OR-018-FAIL",
+          "fact": "failed_event.status=ADDRESS_ISSUE (raw status)",
+          "quote": "ADDRESS_ISSUE",
+          "verified": true
+        },
+        {
+          "source_ref": "OR-018-NOTE",
+          "fact": "courier_note: Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc. (chưa xác minh)",
+          "quote": "Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc.",
+          "verified": false
+        },
+        {
+          "source_ref": "OR-018-EV1",
+          "fact": "buyer_reply: Có mốc tiệm tạp hóa đầu hẻm. Mình vẫn muốn nhận và ngày mai có người ở nhà.",
+          "quote": "Có mốc tiệm tạp hóa đầu hẻm. Mình vẫn muốn nhận và ngày mai có người ở nhà.",
+          "verified": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "case_id": "OR-018",
+  "group": "G3 Địa chỉ/landmark",
+  "title": "Hẻm sâu, không tìm thấy lối vào – xin landmark",
+  "input": {
+    "case_id": "OR-018",
+    "failed_event": {
+      "status": "ADDRESS_ISSUE",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Không tìm thấy địa chỉ",
+      "courier_note": "Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-018-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "ADDRESS_ISSUE",
+        "reported_reason": "Không tìm thấy địa chỉ",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-018-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc."
+    },
+    {
+      "source_ref": "OR-018-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-018-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-018-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-018-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-018-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-018-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-018-EV1",
+      "phase": "RUNTIME",
+      "source_type": "BUYER_REPLY",
+      "actor": "buyer_simulator",
+      "occurred_at": "2026-10-16T15:20:00+07:00",
+      "content": {
+        "text": "Có mốc tiệm tạp hóa đầu hẻm. Mình vẫn muốn nhận và ngày mai có người ở nhà.",
+        "question_id": "OR-018-Q1"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": "CLARIFY_LANDMARK",
+    "script": [
+      "OR-018-EV1"
+    ],
+    "agent": {
+      "hypothesis": "UNCLEAR_LANDMARK",
+      "confidence": "MEDIUM",
+      "missing_info": null,
+      "question_key": "CLARIFY_LANDMARK",
+      "candidate_action": "STANDARD_REATTEMPT",
+      "evidence": "failed_event.status=ADDRESS_ISSUE (raw status) | courier_note: Hẻm nhiều ngã rẽ, không thấy số nhà, không có mốc. (chưa xác minh) | buyer reply trực tiếp: Có mốc tiệm tạp hóa đầu hẻm. Mình vẫn muốn nhận và ngày mai có người ở nhà."
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "PERMITTED",
+      "final_action": "STANDARD_REATTEMPT",
+      "reason": "Buyer cung cấp landmark làm rõ vị trí; đề xuất retry nếu policy cho phép."
+    }
+  }
+}

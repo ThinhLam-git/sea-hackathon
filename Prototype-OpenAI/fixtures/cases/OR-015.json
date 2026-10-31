@@ -1,0 +1,122 @@
+{
+  "case_id": "OR-015",
+  "group": "G2 Không liên lạc được",
+  "title": "Buyer trả lời 'vẫn muốn nhận' sau khi đơn đã bắt đầu hoàn",
+  "input": {
+    "case_id": "OR-015",
+    "failed_event": {
+      "status": "CONTACT_FAILED",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Không liên hệ được người nhận",
+      "courier_note": "Đơn đã quét chuyển hoàn tại trạm.",
+      "as_of": "2026-10-17T14:30:00+07:00"
+    },
+    "attempts_used": 3,
+    "return_state": "STARTED",
+    "deadline": "2026-10-17T02:30:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-015-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "CONTACT_FAILED",
+        "reported_reason": "Không liên hệ được người nhận",
+        "as_of": "2026-10-17T14:30:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-015-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Đơn đã quét chuyển hoàn tại trạm."
+    },
+    {
+      "source_ref": "OR-015-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-015-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-015-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-015-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-015-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-015-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-015-EV1",
+      "phase": "RUNTIME",
+      "source_type": "BUYER_REPLY",
+      "actor": "buyer_simulator",
+      "occurred_at": "2026-10-17T14:50:00+07:00",
+      "content": {
+        "text": "Mình vẫn muốn nhận đơn này (trả lời tự phát sau khi hoàn đã bắt đầu).",
+        "question_id": "UNSOLICITED"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": null,
+    "script": [
+      "OR-015-EV1"
+    ],
+    "agent": null,
+    "policy": {
+      "eligibility": "INELIGIBLE",
+      "policy_gate": "BLOCKED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Return đã bắt đầu; buyer reply muộn không đảo trạng thái hoàn."
+    }
+  }
+}

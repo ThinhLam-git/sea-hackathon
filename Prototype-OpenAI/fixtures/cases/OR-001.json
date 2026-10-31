@@ -1,0 +1,129 @@
+{
+  "case_id": "OR-001",
+  "group": "G1 Vắng mặt tạm thời",
+  "title": "Người nhận đang đi làm – hỏi lại ý định rồi giao lại (case demo chính)",
+  "input": {
+    "case_id": "OR-001",
+    "failed_event": {
+      "status": "RECIPIENT_UNAVAILABLE",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Người nhận không có mặt",
+      "courier_note": "Khách báo đang ở cơ quan, chưa hẹn được giờ về.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-001-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "RECIPIENT_UNAVAILABLE",
+        "reported_reason": "Người nhận không có mặt",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-001-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Khách báo đang ở cơ quan, chưa hẹn được giờ về."
+    },
+    {
+      "source_ref": "OR-001-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-001-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-001-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-001-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-001-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-001-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-001-EV1",
+      "phase": "RUNTIME",
+      "source_type": "BUYER_REPLY",
+      "actor": "buyer_simulator",
+      "occurred_at": "2026-10-16T15:20:00+07:00",
+      "content": {
+        "text": "Vẫn muốn nhận. Ngày mai có người ở nhà có thể nhận hàng.",
+        "question_id": "OR-001-Q1"
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": "CONFIRM_INTENT",
+    "script": [
+      "OR-001-EV1"
+    ],
+    "agent": {
+      "hypothesis": "TEMP_AVAILABILITY_CONFLICT",
+      "confidence": "MEDIUM",
+      "missing_info": null,
+      "question_key": "CONFIRM_INTENT",
+      "candidate_action": "STANDARD_REATTEMPT",
+      "evidence": "failed_event.status=RECIPIENT_UNAVAILABLE (raw status) | courier_note: Khách báo đang ở cơ quan, chưa hẹn được giờ về. (chưa xác minh) | buyer reply trực tiếp: Vẫn muốn nhận. Ngày mai có người ở nhà có thể nhận hàng."
+    },
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "PERMITTED",
+      "final_action": "STANDARD_REATTEMPT",
+      "reason": "Buyer trực tiếp xác nhận muốn nhận và có người nhận; còn deadline/attempt."
+    }
+  }
+}

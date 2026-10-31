@@ -1,0 +1,122 @@
+{
+  "case_id": "OR-050",
+  "group": "G6 Vòng đời/chính sách",
+  "title": "Người gửi (seller) xác nhận giao lại",
+  "input": {
+    "case_id": "OR-050",
+    "failed_event": {
+      "status": "RECIPIENT_UNAVAILABLE",
+      "time": "2026-10-16T14:30:00+07:00",
+      "reported_reason": "Đơn chờ người gửi xác nhận",
+      "courier_note": "Đơn đang ở trạng thái chờ người gửi xác nhận.",
+      "as_of": "2026-10-16T15:00:00+07:00"
+    },
+    "attempts_used": 1,
+    "return_state": "NOT_STARTED",
+    "deadline": "2026-10-20T15:00:00+07:00",
+    "buyer_history": [
+      {
+        "time": "2026-08-12T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED"
+      },
+      {
+        "time": "2026-09-22T14:30:00+07:00",
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE"
+      },
+      {
+        "time": "2026-09-23T14:30:00+07:00",
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY"
+      }
+    ],
+    "operational_context": {
+      "payment": "PREPAID",
+      "route": "HCM-urban-R12",
+      "request_actor_role": "SELLER"
+    }
+  },
+  "sources": [
+    {
+      "source_ref": "OR-050-FAIL",
+      "phase": "T0",
+      "source_type": "FAILED_DELIVERY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": {
+        "status": "RECIPIENT_UNAVAILABLE",
+        "reported_reason": "Đơn chờ người gửi xác nhận",
+        "as_of": "2026-10-16T15:00:00+07:00"
+      }
+    },
+    {
+      "source_ref": "OR-050-NOTE",
+      "phase": "T0",
+      "source_type": "COURIER_NOTE",
+      "actor": "courier",
+      "occurred_at": "2026-10-16T14:30:00+07:00",
+      "content": "Đơn đang ở trạng thái chờ người gửi xác nhận."
+    },
+    {
+      "source_ref": "OR-050-BH01",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-08-12T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED",
+        "order": "SYN-050-PAST-A"
+      }
+    },
+    {
+      "source_ref": "OR-050-BH02",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-22T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_ATTEMPT",
+        "outcome": "UNAVAILABLE",
+        "order": "SYN-050-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-050-BH03",
+      "phase": "T0",
+      "source_type": "BUYER_HISTORY",
+      "actor": "delivery_system",
+      "occurred_at": "2026-09-23T14:30:00+07:00",
+      "content": {
+        "event": "DELIVERY_RESULT",
+        "outcome": "DELIVERED_AFTER_RETRY",
+        "order": "SYN-050-PAST-B"
+      }
+    },
+    {
+      "source_ref": "OR-050-EV1",
+      "phase": "RUNTIME",
+      "source_type": "SELLER_REPLY",
+      "actor": "seller_simulator",
+      "occurred_at": "2026-10-16T15:20:00+07:00",
+      "content": {
+        "text": "Seller xác nhận đồng ý giao lại (không có buyer confirmation)."
+      }
+    }
+  ],
+  "expected": {
+    "record_status": "FINAL",
+    "question_during_runtime": null,
+    "script": [
+      "OR-050-EV1"
+    ],
+    "agent": null,
+    "policy": {
+      "eligibility": "ELIGIBLE",
+      "policy_gate": "ESCALATED",
+      "final_action": "ESCALATE_REVIEW",
+      "reason": "Seller đồng ý nhưng buyer intent vẫn UNKNOWN; chuyển Ops."
+    }
+  }
+}

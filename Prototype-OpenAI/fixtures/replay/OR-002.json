@@ -3,7 +3,7 @@
     "source": "hand_authored_seed",
     "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
     "model": null,
-    "prompt_version": "assess-v0.5",
+    "prompt_version": "assess-v0.5.1",
     "policy_version": "demo-policy-v0.5",
     "output": {
       "buyer_intent": "UNKNOWN",
@@ -39,7 +39,7 @@
     "source": "hand_authored_seed",
     "note": "Hand-written from the v0.5 golden columns. NOT a real model output.",
     "model": null,
-    "prompt_version": "assess-v0.5",
+    "prompt_version": "assess-v0.5.1",
     "policy_version": "demo-policy-v0.5",
     "output": {
       "buyer_intent": "WANTS",

@@ -5,7 +5,7 @@ import { PROMPT } from "./prompt";
 import type { RuntimeConfig } from "../../pipeline";
 
 export const RUNS_WHEN_HALTED = false;
-export const PROMPT_VERSION = "assess-v0.5";
+export const PROMPT_VERSION = "assess-v0.5.1";
 export const MODEL = "gpt-5.4-mini";
 
 export function createAssessmentAgent(model = MODEL) {

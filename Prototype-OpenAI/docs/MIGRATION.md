@@ -6,7 +6,7 @@ The original Python and VoltAgent prototypes use 25 synthetic v0.5 cases, hand-a
 
 ## Implemented transition
 
-The new default implementation replaces VoltAgent workflow/agent objects and the AI SDK model adapter with OpenAI Agents SDK orchestration and the Responses API. Non-AI skills and fixtures are carried forward. The model and prompt defaults remain `gpt-5.4-mini` and `assess-v0.5`.
+The new default implementation replaces VoltAgent workflow/agent objects and the AI SDK model adapter with OpenAI Agents SDK orchestration and the Responses API. Non-AI skills and fixtures are carried forward. The model default remains `gpt-5.4-mini`. Prompt `assess-v0.5.1` clarifies that relative dates use source timestamps and the virtual clock. Hand-authored replay metadata is versioned for this clarified prompt; replay outputs and golden answers are unchanged. These are still hand-authored seeds, not newly recorded live results.
 
 The browser/API experience is rebuilt as a private ChatGPT Site. D1 replaces local JSONL persistence for the hosted server: a run's state and new decision rows are saved together, earlier rows are never updated, and stale concurrent writes are rejected. An export produces JSONL. Local CLI tests keep their history in memory.
 

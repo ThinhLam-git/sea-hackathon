@@ -19,13 +19,13 @@ export async function run(s:PipelineState,config:RuntimeConfig={}){
    const model=config.model??MODEL;
    const audit:AgentAudit={status:"creating"};s.model_info.hosted_agent=audit;s.model_info.model=model;s.model_info.reasoning_effort="medium";
    const agentCall={service:"Agents API",operation:"Create isolated assessment session",status:"started",started_at:new Date().toISOString(),duration_ms:0};
-   s.model_info.service_calls.push(agentCall);const agentStarted=Date.now();
-   try{s.assessment=await assessWithHostedAgent(key,model,s.snapshot,audit,{run_id:s.run.run_id,stage:s.stage});agentCall.status="completed";}
+   s.model_info.service_calls.push(agentCall);s.onProgress?.("agents-api","started");const agentStarted=Date.now();
+   try{s.assessment=await assessWithHostedAgent(key,model,s.snapshot,audit,{run_id:s.run.run_id,stage:s.stage});agentCall.status="completed";s.onProgress?.("agents-api","completed");}
    catch(e){agentCall.status="failed";throw e;}finally{agentCall.duration_ms=Math.max(0,Date.now()-agentStarted);}
    s.model_info.confidence_scoring={status:"pending",model:CONFIDENCE_MODEL,rubric_version:RUBRIC_VERSION};
    const scoreCall={service:"Decisions API",operation:"Score evidence support",status:"started",started_at:new Date().toISOString(),duration_ms:0};
-   s.model_info.service_calls.push(scoreCall);const scoreStarted=Date.now();
-   try{s.confidence_score=await score(key,s.snapshot,s.assessment);s.assessment.confidence=s.confidence_score.level;scoreCall.status="completed";}
+   s.model_info.service_calls.push(scoreCall);s.onProgress?.("decisions-api","started");const scoreStarted=Date.now();
+   try{s.confidence_score=await score(key,s.snapshot,s.assessment);s.assessment.confidence=s.confidence_score.level;scoreCall.status="completed";s.onProgress?.("decisions-api","completed");}
    catch(e){scoreCall.status="failed";throw e;}finally{scoreCall.duration_ms=Math.max(0,Date.now()-scoreStarted);}
    s.model_info.confidence_scoring.status="scored";
   }

@@ -18,11 +18,28 @@ const CASES=[
 const CAUSES:Record<string,string>={AVAILABILITY_ISSUE:"Chưa bố trí được người nhận",ADDRESS_ISSUE:"Thông tin điểm nhận chưa rõ",CONTACT_ISSUE:"Có trở ngại liên hệ",BUYER_INTENT_ISSUE:"Ý định nhận hàng chưa rõ",PAYMENT_ISSUE:"Có trở ngại thanh toán",LOGISTICS_ISSUE:"Gián đoạn vận hành giao hàng",UNKNOWN_CAUSE:"Chưa đủ dữ kiện xác định nguyên nhân"};
 const GAPS:Record<string,string>={CURRENT_BUYER_INTENT:"Ý định nhận hàng",RECEIVING_AVAILABILITY:"Khả năng bố trí người nhận",ADDRESS_CLARIFICATION:"Thông tin điểm nhận",CONTACT_CLARIFICATION:"Kênh liên hệ",COD_READINESS:"Khả năng thanh toán COD",DELIVERY_ACCESS:"Lối tiếp cận điểm nhận",LOGISTICS_VERIFICATION:"Ops xác minh vận hành",CAUSE_CLARIFICATION:"Nguyên nhân giao thất bại"};
 const LEVELS={LOW:"Thấp",MEDIUM:"Trung bình",HIGH:"Cao"};
+const ACTION_LABELS:Record<string,string>={CLARIFY:"Cần làm rõ",STANDARD_REATTEMPT:"Đề xuất giao lại",ESCALATE_REVIEW:"Chuyển Ops",NO_ACTION:"Chưa có hành động"};
 const PROVENANCE:Record<string,string>={SOURCE_RECORD:"Sự kiện hệ thống",UNVERIFIED_REPORT:"Báo cáo chưa xác minh",DIRECT_BUYER_STATEMENT:"Người mua xác nhận",VERIFIED_OPS_SIGNAL:"Ops đã xác minh"};
 class ApiError extends Error {constructor(public status:number,message:string){super(message);}}
 async function api<T>(path:string,body?:unknown):Promise<T>{
  const response=await fetch(`/api${path}`,{method:body?"POST":"GET",headers:body?{"Content-Type":"application/json"}:undefined,body:body?JSON.stringify(body):undefined});
  const data=await response.json();if(!response.ok)throw new ApiError(response.status,data&&typeof data==="object"&&"detail" in data?String(data.detail):"Chưa thể hoàn thành yêu cầu. Hãy thử lại.");return data as T;
+}
+async function apiProgress<T>(path:string,body:unknown,onProgress:(name:string,status:string)=>void):Promise<T>{
+ const response=await fetch(`/api${path}?progress=1`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ if(!response.ok||!response.body)throw new ApiError(response.status,"Chưa thể bắt đầu đánh giá. Hãy thử lại.");
+ const reader=response.body.getReader(),decoder=new TextDecoder();let buffer="";
+ while(true){
+  const {done,value}=await reader.read();buffer+=decoder.decode(value??new Uint8Array(),{stream:!done});
+  let lineEnd=buffer.indexOf("\n");
+  while(lineEnd>=0){const line=buffer.slice(0,lineEnd);buffer=buffer.slice(lineEnd+1);
+   if(line){const event=JSON.parse(line);if(event.type==="progress")onProgress(event.name,event.status);
+    if(event.type==="error")throw new Error(event.detail);
+    if(event.type==="result")return event.data as T;}
+   lineEnd=buffer.indexOf("\n");
+  }
+  if(done)throw new Error("Kết nối kết thúc trước khi có kết quả. Tải lại review để kiểm tra trạng thái.");
+ }
 }
 function text(content:Record<string,unknown>){return typeof content.text==="string"?content.text:"";}
 const errorText=(e:unknown)=>e instanceof Error?e.message:"Chưa thể hoàn thành yêu cầu.";
@@ -37,9 +54,12 @@ export default function JudgeDemo(){
  const [run,setRun]=useState<RunView|null>(null),[config,setConfig]=useState<Config|null>(null),[cases,setCases]=useState<Case[]>([]);
  const [busy,setBusy]=useState(true),[error,setError]=useState(""),[replyText,setReplyText]=useState(""),[copied,setCopied]=useState("");
  const [boot,setBoot]=useState(0);
+ const [pendingKind,setPendingKind]=useState<"start"|"reply"|null>(null);
+ const [pendingCaseId,setPendingCaseId]=useState<string|null>(null);
+ const [progress,setProgress]=useState<{name:string;status:string}|null>(null);
  const working=useRef(false);
  const pending=useRef<{runId:string;kind:"reply"|"no-reply";text:string;eventId:string}|null>(null);
- function save(result:RunView){setRun(result);setReplyText("");setCopied("");sessionStorage.setItem("order-rescue-run",result.run_id);}
+ function save(result:RunView){setPendingCaseId(null);setRun(result);setReplyText("");setCopied("");sessionStorage.setItem("order-rescue-run",result.run_id);}
  useEffect(()=>{let alive=true;setBusy(true);setError("");
   (async()=>{
    const [list,status]=await Promise.all([api<Case[]>("/cases"),api<Config>("/status")]);
@@ -52,12 +72,13 @@ export default function JudgeDemo(){
   })().catch(e=>{if(alive)setError(errorText(e));}).finally(()=>{if(alive)setBusy(false);});
   return()=>{alive=false;};
  },[boot]);
- async function perform(task:()=>Promise<RunView>){
-  if(working.current)return;working.current=true;setBusy(true);setError("");setCopied("");
-  try{save(await task());}catch(e){setError(errorText(e));}finally{working.current=false;setBusy(false);}
+ async function perform(task:()=>Promise<RunView>,kind:"start"|"reply"|null=null){
+  if(working.current)return;working.current=true;setBusy(true);setPendingKind(kind);setProgress(null);setError("");setCopied("");
+  try{save(await task());}catch(e){setError(errorText(e));}finally{working.current=false;setBusy(false);setPendingKind(null);setProgress(null);}
  }
  function start(id:string,mode:Mode=run?.mode??"REPLAY"){
-  if(busy)return;pending.current=null;void perform(()=>api<RunView>("/runs",{case_id:id,mode}));
+  if(busy)return;pending.current=null;if(run?.case_id!==id){setPendingCaseId(id);setRun(null);}
+  void perform(()=>apiProgress<RunView>("/runs",{case_id:id,mode},(name,status)=>setProgress({name,status})),"start");
  }
  function submit(kind:"reply"|"no-reply"){
   if(!run||busy||run.lifecycle!=="WAITING_FOR_BUYER")return;
@@ -65,8 +86,8 @@ export default function JudgeDemo(){
   if(pending.current?.runId!==run.run_id||pending.current.kind!==kind||pending.current.text!==value)
    pending.current={runId:run.run_id,kind,text:value,eventId:crypto.randomUUID()};
   const event=pending.current;
-  void perform(()=>api<RunView>(`/runs/${run.run_id}/${kind}`,{event_id:event.eventId,question_id:run.question.question_id,
-   ...(kind==="reply"?{text:value,use_live:submissionUsesLive(run,value)}:{})}));
+  const payload={event_id:event.eventId,question_id:run.question.question_id,...(kind==="reply"?{text:value,use_live:submissionUsesLive(run,value)}:{})};
+  void perform(()=>kind==="reply"?apiProgress<RunView>(`/runs/${run.run_id}/reply`,payload,(name,status)=>setProgress({name,status})):api<RunView>(`/runs/${run.run_id}/no-reply`,payload),kind==="reply"?"reply":null);
  }
  async function copy(kind:"question"|"recommendation"){
   if(!run)return;const latest=run.history.at(-1)!,question=run.history.find(d=>d.question_text)?.question_text;
@@ -83,19 +104,23 @@ export default function JudgeDemo(){
  const activeCase=CASES.find(c=>c.id===run?.case_id),presentation=run?decisionPresentation(run):null;
  const liveReply=!!run&&(run.mode==="LIVE_AI"||!!replyText.trim()&&submissionUsesLive(run,replyText)),live=run?.mode==="LIVE_AI";
  const signIn=error.toLowerCase().includes("sign in with chatgpt");
- const step=busy?1:waiting?2:3;
+ const stage=progress?.name;
+ const policyRunning=busy&&["policy-gate","compose-recommendation","audit-log"].includes(stage??"");
+ const step=busy?(policyRunning?3:1):waiting?2:3;
+ const progressLabel=stage==="agents-api"?t("Agent đang đánh giá bằng chứng"):stage==="decisions-api"?t("Đang chấm mức hỗ trợ bằng chứng"):stage==="policy-gate"?t("Policy đang kiểm tra điều kiện"):stage==="compose-recommendation"||stage==="audit-log"?t("Đang lưu đề xuất và lịch sử"):stage==="load-case"||stage==="prepare-input"?t("Đang đọc dữ liệu case"):stage==="validate-output"?t("Đang xác thực kết quả Agent"):t("Yêu cầu đã được ghi nhận");
  const steps=[{name:t("Giao thất bại"),icon:Package},{name:t("Agent đọc bằng chứng"),icon:Search},{name:t("Làm rõ nếu cần"),icon:MessageCircle},{name:t("Policy kiểm tra"),icon:ShieldCheck},{name:t("Ops quyết định"),icon:UserRound}];
  return <div className="judge-app">
   <header className="judge-header"><a href="/" className="judge-brand"><Package size={23}/>Order Rescue</a><span>{t("Demo mô phỏng · dữ liệu giả lập")}</span><button className="judge-language" aria-label={language==="vi"?"Switch to English":"Chuyển sang Tiếng Việt"} onClick={()=>changeLanguage(language==="vi"?"en":"vi")}>{language==="vi"?"English":"Tiếng Việt"}</button><div className="judge-mode" role="group" aria-label={t("Chế độ đánh giá")}><button aria-pressed={!live} disabled={busy} onClick={()=>run&&start(run.case_id,"REPLAY")}>Replay</button><button aria-pressed={live} disabled={busy||!config?.live_available} onClick={()=>run&&start(run.case_id,"LIVE_AI")}>Live Agent</button></div></header>
   <main className={`judge-main ${workspaceTab==="trace"?"is-trace":""}`}>
    <div className="judge-title"><div><h1>{t("Từ giao thất bại đến bước xử lý tiếp theo")}</h1><p>{t("Agent tổng hợp bằng chứng và đề xuất. Policy kiểm tra điều kiện. Ops quyết định.")}</p></div><button className="judge-reset" disabled={busy||!run} onClick={()=>run&&start(run.case_id)}><RotateCcw size={15}/>{t("Chạy lại")}</button></div>
-   <nav className="judge-cases" aria-label={t("Tình huống nổi bật")}>{CASES.map((c,i)=><button key={c.id} aria-pressed={run?.case_id===c.id} disabled={busy} onClick={()=>start(c.id)}><span className="judge-case-index">{i+1}</span><span><strong>{t(c.name)}</strong><small>{t(c.lesson)}</small></span>{run?.case_id===c.id&&<Check size={18}/>}</button>)}</nav>
-   <ol className="judge-steps" aria-label={t("Luồng hoạt động của agent")}>{steps.map((s,i)=>{const Icon=s.icon,skip=i===2&&finished&&!run?.question.asked;return <li key={s.name} className={skip?"skip":i<step?"done":i===step?"active":""} aria-current={i===step?"step":undefined}><span>{i<step&&!skip?<Check size={17}/>:<Icon size={17}/>}</span><strong>{s.name}</strong><small>{skip?t("Không cần hỏi"):i===4?t("Ops xem xét thực tế"):i===step?busy?t("Đang xử lý"):waiting?t("Chờ phản hồi"):t("Đã có đề xuất"):i<step?t("Đã hoàn tất"):""}</small></li>})}</ol>
+   <div className="judge-demo-navigation"><span className="judge-nav-label">{t("Chọn tình huống để demo")}</span><nav className="judge-cases" aria-label={t("Tình huống nổi bật")}>{CASES.map((c,i)=><button key={c.id} aria-pressed={run?.case_id===c.id} disabled={busy} onClick={()=>start(c.id)}><span className="judge-case-index">{i+1}</span><span><strong>{t(c.name)}</strong><small>{t(c.lesson)}</small></span>{run?.case_id===c.id&&<Check size={18}/>}</button>)}</nav></div>
+   <ol className="judge-steps" aria-label={t("Luồng hoạt động của agent")}>{steps.map((s,i)=>{const Icon=s.icon,skip=i===2&&finished&&!run?.question.asked;return <li key={s.name} className={skip?"skip":busy?(i===0||policyRunning&&i===1||pendingKind==="reply"&&i===2?"done":i===step?"active":""):i<step?"done":i===step?"active":""} aria-current={i===step?"step":undefined}><span>{i<step&&!skip?<Check size={17}/>:<Icon size={17}/>}</span><strong>{s.name}</strong><small>{skip?t("Không cần hỏi"):i===4?t("Ops xem xét thực tế"):i===step?busy?progressLabel:waiting?t("Chờ phản hồi"):t("Đã có đề xuất"):i<step?t("Đã hoàn tất"):""}</small></li>})}</ol>
    {error&&<div className="judge-error" role="alert"><p>{signIn?t("Đăng nhập ChatGPT để lưu lượt trải nghiệm của bạn."):t(error)}</p>{signIn?<a href="/signin-with-chatgpt?return_to=%2F" target="_top">{t("Đăng nhập ChatGPT")}</a>:<button disabled={busy} onClick={()=>run?void perform(()=>api<RunView>(`/runs/${run.run_id}`)):setBoot(v=>v+1)}>{run?t("Tải lại trạng thái"):t("Thử lại")}</button>}</div>}
-   {!run?<div className="judge-loading" role="status">{busy?<><LoaderCircle className="spin"/>{t("Đang chuẩn bị tình huống…")}</>:t("Demo chưa tải được. Chọn Thử lại để tiếp tục.")}</div>:<>
+   {run&&<div className={`judge-guide ${busy?"is-working":""}`} role="status" aria-live="polite">{busy?<LoaderCircle className="spin" size={18}/>:<ArrowRight size={18}/>}<div><strong>{busy?progressLabel:waiting?t("Bước tiếp theo: ghi phản hồi của người mua"):finished?t("Đề xuất đã sẵn sàng để Ops xem xét"):t("Đang chuẩn bị tình huống…")}</strong><p>{busy?t("Giữ nguyên dữ liệu case; kết quả mới xuất hiện sau khi policy chốt."):t(presentation!.guide)}</p></div></div>}
+   {!run?pendingKind==="start"&&pendingCaseId?<div className="judge-board" aria-busy="true"><section className="judge-panel judge-case-panel"><header><Package size={17}/><h2>{t("Case giao thất bại")}</h2><span>{pendingCaseId}</span></header><div className="judge-panel-body"><h3>{t(CASES.find(c=>c.id===pendingCaseId)?.name??cases.find(c=>c.case_id===pendingCaseId)?.title??pendingCaseId)}</h3><p>{t("Đang đọc dữ liệu case")}</p></div></section><section className="judge-panel judge-agent-panel"><header><Search size={17}/><h2>{t("Agent làm rõ")}</h2></header><div className="judge-panel-body"><div className="judge-live-progress" role="status" aria-live="polite"><LoaderCircle className="spin" size={20}/><strong>{progressLabel}</strong><p>{t("Case đang được đánh giá. Kết quả sẽ xuất hiện sau khi policy kiểm tra.")}</p></div></div></section><aside className="judge-panel judge-policy-panel"><header><ShieldCheck size={17}/><h2>{t("Đề xuất sau kiểm tra policy")}</h2></header><div className="judge-panel-body"><div className="judge-policy-pending"><strong>{t("Chưa có đề xuất cuối cho lượt này")}</strong><p>{t("Policy sẽ kiểm tra assessment mới trước khi hiển thị hành động đề xuất.")}</p></div></div></aside></div>:<div className="judge-loading" role="status">{busy?<><LoaderCircle className="spin"/>{t("Đang chuẩn bị tình huống…")}</>:t("Demo chưa tải được. Chọn Thử lại để tiếp tục.")}</div>:<>
     <div className="judge-workspace-tabs" role="tablist" aria-label={language==="vi"?"Góc nhìn workspace":"Workspace view"}><button id="case-tab" role="tab" aria-selected={workspaceTab==="case"} aria-controls="case-workspace" onClick={()=>setWorkspaceTab("case")}><Package size={14}/>{language==="vi"?"Xử lý case":"Case workspace"}</button><button id="trace-tab" role="tab" aria-selected={workspaceTab==="trace"} aria-controls="agent-trace-panel" onClick={()=>setWorkspaceTab("trace")}><Sparkles size={14}/>{language==="vi"?"Trace của agent":"Agent trace"}<small>{language==="vi"?"Quan sát":"Observe"}</small></button></div>
     {workspaceTab==="trace"?<div id="agent-trace-panel" role="tabpanel" aria-labelledby="trace-tab"><AgentTrace run={run} language={language} busy={busy}/></div>:<div id="case-workspace" role="tabpanel" aria-labelledby="case-tab"><div className="judge-board" aria-busy={busy}>
-     <section className="judge-panel judge-case-panel" aria-labelledby="case-title"><header><Package size={17}/><h2 id="case-title">{t("Case giao thất bại")}</h2><span>{run.case_id}</span></header><div className="judge-panel-body">
+     <section className="judge-panel judge-case-panel" aria-labelledby="case-title"><header><Package size={17}/><h2 id="case-title"><small className="judge-panel-number">01</small>{t("Case giao thất bại")}</h2><span>{run.case_id}</span></header><div className="judge-panel-body">
       <h3>{t(activeCase?.name??run.title)}</h3><div className="judge-failed">{t("Lần giao chưa thành công")}</div>
       {note&&<blockquote className="judge-note"><span>{t("Ghi chú tài xế")}</span><p>{text(note.content)}</p><small>{t("Báo cáo chưa xác minh")}</small></blockquote>}
       {verifiedDisruption&&<div className="judge-ops-signal"><ShieldCheck size={17}/><div><strong>{t("Ops đã xác minh")}</strong><p>{t("Gián đoạn còn hiệu lực, đúng tuyến và thời điểm. Phản hồi người mua không gỡ được gián đoạn.")}</p></div></div>}
@@ -103,24 +128,27 @@ export default function JudgeDemo(){
       <details className="judge-details"><summary>{t("Bằng chứng agent đã sử dụng (")}{assessment?.evidence.length??0})</summary>{assessment?.evidence.map((e,i)=><article key={i}><strong>{t(PROVENANCE[e.verification])}</strong><p>{e.fact}</p><blockquote>{e.quote}</blockquote></article>)}</details>
       <p className="judge-footnote">{t("Không có dữ liệu khách hàng thật hoặc tích hợp hãng vận chuyển.")}</p>
      </div></section>
-     <section className={`judge-panel judge-agent-panel ${waiting?"is-current":""}`} aria-labelledby="agent-title"><header><Search size={17}/><h2 id="agent-title">{t("Agent làm rõ")}</h2><span>{busy?t("Đang đánh giá"):waiting?t("Cần phản hồi"):t("Đã đánh giá")}</span></header><div className="judge-panel-body">
+     <section className={`judge-panel judge-agent-panel ${waiting?"is-current":""}`} aria-labelledby="agent-title"><header><Search size={17}/><h2 id="agent-title"><small className="judge-panel-number">02</small>{t("Agent làm rõ")}</h2><span>{busy?t("Đang đánh giá"):waiting?t("Cần phản hồi"):t("Đã đánh giá")}</span></header><div className="judge-panel-body">
+      {busy&&pendingKind?<div className="judge-live-progress" role="status" aria-live="polite"><LoaderCircle className="spin" size={20}/><strong>{progressLabel}</strong><p>{pendingKind==="reply"?t("Phản hồi đã được gửi để đánh giá. Kết quả mới sẽ xuất hiện sau khi policy kiểm tra."):t("Case đang được đánh giá. Kết quả sẽ xuất hiện sau khi policy kiểm tra.")}</p>{pendingKind==="reply"&&replyText&&<blockquote><span>{t("Phản hồi đang đánh giá")}</span><p>{replyText}</p></blockquote>}<small>{t("Các bước hiển thị theo sự kiện backend thực tế; chưa có đề xuất cuối cho lượt này.")}</small></div>:<>
       <div className="judge-assessment"><span>{t("Nhận định từ bằng chứng")}</span><h3>{assessment?t(CAUSES[assessment.hypothesis]):t("Cần người xem xét")}</h3><small>{latest?.model_info.mode==="LIVE_AI"?"OpenAI hosted Agents API":t("Nhận định Replay dựng sẵn")}</small></div>
       {!!assessment?.missing_info.length&&<div className="judge-gaps"><span>{t("Còn thiếu")}</span><p>{assessment.missing_info.map(g=>t(GAPS[g]??g)).join(" · ")}</p></div>}
       {question?<div className="judge-question"><span><MessageCircle size={14}/>{waiting?t("Một câu hỏi làm rõ"):t("Câu hỏi đã ghi nhận · không hỏi thêm")}</span><p>{t(question)}</p>{waiting&&<button className="judge-text" disabled={busy} onClick={()=>void copy("question")}><Copy size={13}/>{copied==="question"?t("Đã sao chép"):t("Sao chép câu hỏi")}</button>}</div>:<div className="judge-no-contact"><ShieldCheck size={25}/><h3>{t("Không hỏi người mua")}</h3><p>{t("Đánh giá hiện tại không yêu cầu liên hệ. Ops xem xét đề xuất và bằng chứng.")}</p></div>}
       {waiting&&<div className="judge-interaction"><div className="judge-reply-heading"><label htmlFor="judge-reply">{t("Phản hồi của người mua")}</label>{sample&&<button className="judge-text" disabled={busy} onClick={()=>setReplyText(sample.text)}>{t("Dùng phản hồi mẫu")}</button>}</div><textarea id="judge-reply" value={replyText} maxLength={2000} disabled={busy} onChange={e=>setReplyText(e.target.value)} placeholder={t("Ghi lại nguyên văn phản hồi…")}/><button className="judge-primary" disabled={busy||!replyText.trim()||(liveReply&&!config?.live_available)} onClick={()=>submit("reply")}>{busy?<><LoaderCircle size={16} className="spin"/>{t("Đang đánh giá…")}</>:<>{liveReply?t("Đánh giá với Live Agent"):t("Đánh giá phản hồi")}<ArrowRight size={16}/></>}</button><button className="judge-secondary judge-no-reply" disabled={busy} onClick={()=>submit("no-reply")}>{t("Không có phản hồi")}</button><small>{liveReply?t("Live Agent + Decisions · dùng API credits."):t("Phản hồi mẫu dùng Replay · không gọi AI.")}{" "}{t("Không có phản hồi giữ đánh giá đầu, không gọi thêm AI.")}</small></div>}
       {reply&&<blockquote className="judge-buyer"><span>{t("Phản hồi đã ghi nhận")}</span><p>{text(reply.content)}</p><small><Check size={13}/>{t("Đã đánh giá lại · không hỏi thêm")}</small></blockquote>}
       {run.question.no_reply&&<div className="judge-no-contact"><h3>{t("Không có phản hồi")}</h3><p>{t("Giữ nguyên đánh giá ban đầu. Thông tin chưa rõ cần Ops xem xét.")}</p></div>}
-      <section className="judge-confidence" aria-label={t("Mức hỗ trợ bằng chứng")}><span><Sparkles size={14}/>{t("Mức hỗ trợ bằng chứng")}</span><strong>{busy?t("Đang cập nhật…"):score?`${score.score}/100`:assessment?t(LEVELS[assessment.confidence]):t("Chưa có đánh giá hợp lệ")}</strong>{score&&!busy&&<div role="meter" aria-label={t("Điểm hỗ trợ bằng chứng")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={score.score} className="judge-confidence-track"><span style={{width:`${score.score}%`}}/></div>}<p>{score?`OpenAI Decisions · ${t(LEVELS[score.level])}${score.capped?t(" · đã giới hạn theo bằng chứng"):""}`:latest?.model_info.mode==="REPLAY"?t("Nhãn Replay dựng sẵn, không phải điểm API."):t("Không có điểm AI đã xác thực.")}{" "}{t("Không phải xác suất giao thành công.")}</p></section>
+      <section className="judge-confidence" aria-label={t("Mức hỗ trợ cho nguyên nhân giao thất bại")}><span><Sparkles size={14}/>{t("Mức hỗ trợ cho nguyên nhân giao thất bại")}</span><strong>{busy?t("Đang cập nhật…"):score?t(LEVELS[score.level]):assessment?t(LEVELS[assessment.confidence]):t("Chưa có đánh giá hợp lệ")}</strong><p>{score?`OpenAI Decisions${score.capped?t(" · đã giới hạn theo bằng chứng"):""}`:latest?.model_info.mode==="REPLAY"?t("Nhãn Replay dựng sẵn, không phải điểm API."):t("Không có điểm AI đã xác thực.")}{" "}{t("Không phải độ tin cậy của đề xuất giao lại.")}</p></section>
+      </>}
      </div></section>
-     <aside className={`judge-panel judge-policy-panel ${finished?"is-current":""}`} aria-labelledby="policy-title"><header><ShieldCheck size={17}/><h2 id="policy-title">{t("Policy & đề xuất")}</h2><span>{waiting?t("Ban đầu"):t("Đã chốt")}</span></header><div className="judge-panel-body">
+     <aside className={`judge-panel judge-policy-panel ${finished?"is-current":""}`} aria-labelledby="policy-title"><header><ShieldCheck size={17}/><h2 id="policy-title"><small className="judge-panel-number">03</small>{t("Đề xuất sau kiểm tra policy")}</h2><span>{waiting?t("Ban đầu"):t("Đã chốt")}</span></header><div className="judge-panel-body">
+      {busy&&pendingKind?<div className="judge-policy-pending"><ShieldCheck size={22}/><strong>{t("Chưa có đề xuất cuối cho lượt này")}</strong><p>{t("Policy sẽ kiểm tra assessment mới trước khi hiển thị hành động đề xuất.")}</p></div>:<>
       <div className={`judge-outcome ${presentation!.tone}`}><span>{t(presentation!.label)}</span><h3>{t(presentation!.title)}</h3><p>{latest&&policyReason(latest,language)}</p>{language==="en"&&latest&&<details className="judge-original"><summary>{t("Ghi chú policy gốc")}</summary><p lang="vi">{latest.reason}</p></details>}</div>
-      {reply&&<div className="judge-change"><span>{t("Điều gì đã thay đổi?")}</span><p>{t("Đã đánh giá lại từ phản hồi thực tế của người mua và kiểm tra policy. Xem lý do đề xuất cùng bằng chứng; phản hồi không tự động cho phép giao lại.")}</p></div>}
+      {reply&&run.history.length>1&&<div className="judge-change"><span>{t("Sau phản hồi của người mua")}</span><div className="judge-action-flow"><span>{t(ACTION_LABELS[run.history[0].final_action]??run.history[0].final_action)}</span><ArrowRight size={15}/><strong>{t(ACTION_LABELS[latest?.final_action??""]??latest?.final_action??"")}</strong></div><p>{t("Đề xuất cuối đã qua kiểm tra policy; Ops quyết định bước thực hiện.")}</p></div>}
       <div className="judge-human"><UserRound size={20}/><div><strong>{t("Quyền quyết định thuộc Ops")}</strong><p>{waiting?t("Chờ thông tin cần thiết và kiểm tra điều kiện trước khi xử lý."):t("Xem xét đề xuất và chọn bước xử lý theo quy trình hiện tại.")}</p></div></div>
       {finished&&<button className="judge-secondary" disabled={busy} onClick={()=>void copy("recommendation")}>{copied==="recommendation"?<Check size={15}/>:<Copy size={15}/>} {copied==="recommendation"?t("Đã sao chép"):t("Sao chép đề xuất cho Ops")}</button>}
       <p className="judge-footnote">{t("Không tự điều phối, gửi tin, đổi địa chỉ, hoàn hàng hoặc refund.")}</p>
+      </>}
      </div></aside>
     </div>
-    <div className="judge-guide" role="status">{busy?<LoaderCircle className="spin" size={20}/>:<ArrowRight size={20}/>}<p>{busy?t("Đang đánh giá bằng chứng và kiểm tra policy…"):t(presentation!.guide)}</p></div>
     </div>}
     <details className="judge-history"><summary>{t("Các tình huống khác & thông tin demo")}</summary><label className="judge-case-select">{t("Chọn trong 30 case")}<select aria-label={t("Chọn case demo")} value={run.case_id} disabled={busy} onChange={e=>start(e.target.value)}>{cases.map(c=><option key={c.case_id} value={c.case_id}>{c.case_id} · {t(CASES.find(x=>x.id===c.case_id)?.name??c.title)}</option>)}</select></label><p>{live?`Live Agent · ${config?.model??"GPT"}${t(" · sử dụng API credits.")}`:t("Replay miễn phí. Chọn Live Agent ở đầu trang để chạy agent và Decisions API thực tế.")}{" "}{t("Thời gian và kết quả thuộc tình huống giả lập. Mỗi tài khoản chỉ xem lượt của mình.")}</p></details>
    </>}

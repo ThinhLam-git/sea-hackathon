@@ -39,7 +39,7 @@ export interface PipelineState {
  run:RunState;mode:"REPLAY"|"LIVE_AI";stage:"INITIAL"|"AFTER_REPLY";trigger:string;
  snapshot:any;source_index:Record<string,Source>;assessment:Assessment|null;confidence_score?:ConfidenceScore;
  result:PolicyOutput|null;rules:string[];issues:string[];model_info:Record<string,any>;
- halted:boolean;trace:string[];decision:Decision|null;execution_id:string;
+ halted:boolean;trace:string[];decision:Decision|null;execution_id:string;onProgress?:(name:string,status:"started"|"completed"|"skipped")=>void;
 }
 export const ms=(value:string)=>Date.parse(value);
 export const normalize=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();

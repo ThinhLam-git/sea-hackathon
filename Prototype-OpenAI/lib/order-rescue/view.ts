@@ -12,7 +12,7 @@ export function runView(sim: Simulator, id: string) {
     sources: [...run.case.sources.filter(s => s.phase === "T0"), ...run.applied],
     events: run.case.sources.filter(s => s.phase === "RUNTIME").map(s => ({ source_ref: s.source_ref,
       type: s.source_type, text: sourceText(s), occurred_at: s.occurred_at,
-      applied: applied.has(s.source_ref), available: sim.canApply(run,s) })),
+      applied: applied.has(s.source_ref), available: sim.canApply(run,s) && !(s.source_type === "BUYER_REPLY" && run.replied_after_question) })),
     pipeline: PIPELINE.map(([name,,purpose]) => ({name,purpose})), history,
     golden: compare(run.case, history.at(-1)!), expected: run.case.expected };
 }

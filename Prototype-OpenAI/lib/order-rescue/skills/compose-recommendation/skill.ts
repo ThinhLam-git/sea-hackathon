@@ -37,6 +37,9 @@ export const RULE_TEXT: Record<string, string> = {
 };
 
 const AI_ERRORS: Record<string, string> = {
+  "confidence_unavailable": "Không gọi được dịch vụ đánh giá độ mạnh bằng chứng.",
+  "confidence_refused": "Dịch vụ đánh giá độ mạnh bằng chứng không trả kết quả.",
+  "invalid_confidence_output": "Kết quả đánh giá độ mạnh bằng chứng không hợp lệ.",
   "model_unavailable": "Không gọi được AI.",
   "model_refused_or_empty": "AI không trả kết quả.",
   "invalid_model_output": "Kết quả AI sai định dạng.",
@@ -70,6 +73,7 @@ export function run(state: PipelineState): PipelineState {
     headline: HEADLINES[res.final_action ?? "NO_CHANGE"],
     rules: res.rules,
     agent: a,
+    confidence_score: state.confidence_score,
     question_text: questionText,
     reassess_at: res.reassess_at,
     validation_issues: state.validation_issues,

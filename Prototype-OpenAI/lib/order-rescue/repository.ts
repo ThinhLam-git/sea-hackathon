@@ -24,7 +24,7 @@ export async function persist(sim: Simulator, id: string, owner: string, revisio
   const db = database(), run = sim.runs.get(id)!, history = sim.history(id), token = crypto.randomUUID();
   const mutation = revision === undefined
     ? db.prepare("INSERT INTO rescue_runs (id,owner,mode,state,revision,write_token,created_at) VALUES (?,?,?,?,0,?,?)").bind(id,owner,sim.mode,JSON.stringify(run),token,new Date().toISOString())
-    : db.prepare("UPDATE rescue_runs SET state = ?, revision = revision + 1, write_token = ? WHERE id = ? AND owner = ? AND revision = ?").bind(JSON.stringify(run),token,id,owner,revision);
+    : db.prepare("UPDATE rescue_runs SET state = ?, mode = ?, revision = revision + 1, write_token = ? WHERE id = ? AND owner = ? AND revision = ?").bind(JSON.stringify(run),sim.mode,token,id,owner,revision);
   const inserts = history.map((d,i) => db.prepare("INSERT OR IGNORE INTO rescue_decisions (id,run_id,sequence,payload) SELECT ?,?,?,? WHERE EXISTS (SELECT 1 FROM rescue_runs WHERE id = ? AND write_token = ?)")
     .bind(d.decision_id,id,i,JSON.stringify(d),id,token));
   const results = await db.batch([mutation,...inserts]);

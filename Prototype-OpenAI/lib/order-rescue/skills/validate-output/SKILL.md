@@ -28,3 +28,5 @@ description: Checks the evidence the AI built against the raw sources. Rejects i
 - No evidence → LOW.
 - No buyer reply and no verified disruption signal among the evidence (for example only status + courier note) → at most MEDIUM.
 - `sources_conflict` → at most MEDIUM.
+
+When a Decisions score exists, keep its displayed rating and band within the same code confidence cap. No evidence caps the rating at zero. A rejected citation invalidates the score; raw API output is marked invalidated in model metadata for audit. This stage performs no API calls.

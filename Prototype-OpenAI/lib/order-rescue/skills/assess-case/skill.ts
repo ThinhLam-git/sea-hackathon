@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { Assessment, stop, type PipelineState } from "../../models";
 import { PROMPT } from "./prompt";
 import type { RuntimeConfig } from "../../pipeline";
+import { ConfidenceError, CONFIDENCE_MODEL, CONFIDENCE_RUBRIC_VERSION, scoreConfidence } from "../../confidence";
 
 export const RUNS_WHEN_HALTED = false;
 export const PROMPT_VERSION = "assess-v0.5.1";
@@ -41,6 +42,18 @@ export async function run(state: PipelineState, config: RuntimeConfig = {}): Pro
       state.assessment = parsed.data;
       state.model_info.model = model;
       state.model_info.replay_source = "live_model";
+      state.model_info.confidence_scoring = { status: "pending", model: CONFIDENCE_MODEL, rubric_version: CONFIDENCE_RUBRIC_VERSION };
+      try {
+        state.confidence_score = await scoreConfidence(client, state.snapshot, state.assessment);
+        state.assessment.confidence = state.confidence_score.level;
+        state.model_info.confidence_scoring.status = "scored";
+      } catch (error) {
+        const code = error instanceof ConfidenceError ? error.code : "confidence_unavailable";
+        state.model_info.confidence_scoring = { status: "failed", model: CONFIDENCE_MODEL, rubric_version: CONFIDENCE_RUBRIC_VERSION, code };
+        state.assessment = null;
+        state.confidence_score = undefined;
+        stop(state, `AI:${code}`);
+      }
     }
   } catch (error) {
     const known = ["replay_missing", "replay_version_mismatch", "invalid_model_output", "model_refused_or_empty"];

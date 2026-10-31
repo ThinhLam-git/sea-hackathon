@@ -6,9 +6,12 @@ A delivery-recovery workbench for the Sea × OpenAI Hackathon. **Synthetic data 
 
 - **OpenAI Agents SDK**: one structured, tool-free assessment agent.
 - **OpenAI Responses API**: GPT inference; default model remains `gpt-5.4-mini`.
-- **ChatGPT Sites**: private hosted preview with ChatGPT sign-in.
+- **OpenAI Decisions API**: evidence-support scoring with `gpt-6-luna` in Live GPT mode.
+- **ChatGPT Sites**: public hosted preview with ChatGPT sign-in for interactive features.
 - **React / Vinext / TypeScript**: site and server API.
 - **Cloudflare D1**: durable runs and append-only decision history.
+
+The public site lets teammates sign in with their own ChatGPT accounts; each user’s runs are isolated.
 
 The earlier Python and VoltAgent prototypes are retained in the original workspace for comparison. This version has no VoltAgent or Vercel AI SDK dependency.
 
@@ -60,7 +63,7 @@ npm run build
 
 Demo cases: `OR-001` buyer reply → retry, `OR-009` timeout → operations, `OR-023` address-change request → operations, `OR-038` verified flooding → hold, `OR-051` unsafe note → stop before AI.
 
-The operations interface starts with a case selector and one decision card. Key delivery facts and the next available action are visible; Evidence and History are separate views. Replay/live mode and five quick scenarios are inside collapsed Demo options; pipeline, raw sources and policy fields are inside collapsed Technical details. The help button provides a short walkthrough.
+The operations interface starts with a case selector and one decision card. Key delivery facts and the next available action are visible; a right-side panel contains confidence, Evidence and History. Replay/live mode and five quick scenarios are inside collapsed Demo options; pipeline, raw sources and policy fields are inside collapsed Technical details. The help button provides a short walkthrough.
 
 ## Important demo distinction
 
@@ -78,8 +81,22 @@ The operations interface starts with a case selector and one decision card. Key 
 - `db/schema.ts`, `drizzle/`: schema and immutable migrations.
 - `tests/`: preserved regressions plus migration-specific checks.
 
-Live assessments use one SDK turn and no tools or handoffs. API persistence disables response storage; trace export is off by default. The decision timeline works in both modes.
+Live assessments use one SDK turn with no tools or handoffs, followed by one Decisions API scoring request inside the same assessment stage. API persistence disables response storage; trace export is off by default. The decision timeline works in both modes.
 
 ## Deployment
 
 `.openai/hosting.json` retains this preview's Site identity and D1 binding. Use the Sites source/build/publication workflow to update it. Hosted migrations are applied by Sites before deployment. Never commit `.env`, `.dev.vars`, credentials, local databases, generated builds or `node_modules`.
+
+## Confidence score
+
+The side panel shows a Decisions API evidence-support rating in Live GPT mode. The LOW/MEDIUM/HIGH rubric produces a weighted 0–2 score, rounded to 0–100. Demo bands are 0–24 LOW, 25–74 MEDIUM and 75–100 HIGH. Code caps the score and band together; zero validated evidence caps the rating at zero. Business-policy decisions do not use new numerical thresholds.
+
+This is **not delivery-success probability**. Thresholds are a demo rubric and have not been calibrated against real delivery outcomes. The API's own `confidence` (certainty in its rating) and probability distribution are stored separately and visible in Technical details, not substituted for evidence support.
+
+Replay continues to show its hand-authored qualitative confidence, without invented numeric/API results. Use **Start live assessment** in the side panel to begin a new run with Responses + Decisions calls; it uses API credits. Existing history is preserved and not rescored. Scorer failures or refusals go to operations.
+
+## Staff workflow
+
+Choose a demo delivery, copy the approved buyer question into your usual contact channel, then record exactly what the buyer said. **Use sample response → Review response** keeps the prepared Replay path. Custom text explicitly uses a live assessment (and API credits) while preserving the same run and earlier decisions. One response is accepted during the question window; duplicate submissions do not create extra decisions. Copy the resulting recommendation for human review. The app does not send messages or dispatch deliveries.
+
+The right-side panel holds confidence, evidence and history. Clock simulation and scenario/mode switches stay under Demo options. This MVP uses the existing ChatGPT sign-in and per-user records, without roles, teams or administration screens.

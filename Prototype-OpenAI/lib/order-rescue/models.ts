@@ -84,6 +84,20 @@ export interface PolicyResult {
   reassess_at: string | null;
 }
 
+export interface ConfidenceScore {
+  source: "openai_decisions";
+  model: string;
+  rubric_version: string;
+  /** Validated evidence-support rating (0–100), never delivery-success probability. */
+  score: number;
+  raw_score: number;
+  rubric_score: number;
+  level: Assessment["confidence"];
+  scorer_confidence: number;
+  probabilities: {value:number;label:string;probability:number}[];
+  capped: boolean;
+}
+
 export interface Decision {
   decision_id: string;
   run_id: string;
@@ -98,6 +112,7 @@ export interface Decision {
   headline: string;
   rules: string[];
   agent: Assessment | null;
+  confidence_score?: ConfidenceScore;
   question_text: string | null;
   reassess_at: string | null;
   validation_issues: string[];
@@ -119,6 +134,7 @@ export interface PipelineState {
   snapshot: any;
   source_index: Record<string, Source>;
   assessment: Assessment | null;
+  confidence_score?: ConfidenceScore;
   model_info: Record<string, any>;
   validation_issues: string[];
   result: PolicyResult | null;

@@ -1,5 +1,7 @@
 import { minLevel, sourceText, stop, type PipelineState } from "../../models.js";
 
+import { applyConfidenceCap } from "../../confidence";
+
 export const RUNS_WHEN_HALTED = false;
 
 const normalize = (t: unknown) => String(t).normalize("NFC").toLowerCase().split(/\s+/).filter(Boolean).join(" ");
@@ -20,6 +22,10 @@ export function run(state: PipelineState): PipelineState {
   const reason = rejection(state);
   if (reason) {
     state.validation_issues.push(reason);
+    if (state.confidence_score) {
+      state.model_info.confidence_scoring = { status: "invalidated", reason, raw_result: state.confidence_score };
+      state.confidence_score = undefined;
+    }
     stop(state, `AI:${reason}`);
     return state;
   }
@@ -45,5 +51,6 @@ export function run(state: PipelineState): PipelineState {
     issues.push(`confidence_capped:${a.confidence}->${cap}`);
     a.confidence = cap;
   }
+  applyConfidenceCap(state);
   return state;
 }

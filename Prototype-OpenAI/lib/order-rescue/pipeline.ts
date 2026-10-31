@@ -12,7 +12,7 @@ export interface RuntimeConfig { apiKey?: string; model?: string; tracing?: bool
 export const PIPELINE: [string, Skill, string][] = [
   ["load-case", loadCase, "Gate 1 · eligibility"],
   ["prepare-input", prepareInput, "Current facts only"],
-  ["assess-case", assessCase, "GPT · evidence and proposal"],
+  ["assess-case", assessCase, "GPT assessment + Decisions confidence"],
   ["validate-output", validateOutput, "Check citations and confidence"],
   ["policy-gate", policyGate, "Gate 2 · policy rules"],
   ["compose-recommendation", composeRecommendation, "Approved recommendation"],

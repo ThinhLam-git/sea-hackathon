@@ -29,3 +29,9 @@ Replay remains the default for a stable, no-cost demo. Live GPT is an explicit m
 ## Rollback
 
 The earlier implementations and their datasets remain intact in the original workspace. GitHub's default branch is unchanged; this work is isolated on `phuc-dev`. Sites versions support returning to a previously saved version after subsequent updates. The initial deployment only adds new D1 tables; it migrates no existing customer records.
+
+## Decisions scoring addition
+
+The user requested confidence scoring through Decisions API. LIVE_AI now makes its generative Responses call and a separate `gpt-6-luna` scoring call within the existing assess-case stage. The output contract keeps the six qualitative Agent fields and adds optional score metadata to the decision JSON; D1 stores it without a schema migration. Replay outputs remain unchanged.
+
+The score is a demo evidence-support rubric rating with validation caps, not an outcome probability. No action thresholds or policy rules change. Tests cover request isolation, independent scorer certainty, malformed results, refusals/outages, invalidated citations, policy caps, replay/pre-AI call skipping, and immutable prior scores.

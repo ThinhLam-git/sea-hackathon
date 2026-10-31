@@ -2,7 +2,7 @@
  * Presenter-side simulator: loads the 25 sheet cases, applies RUNTIME sources, moves the virtual clock.
  * It supplies raw data and events. The workflow decides what to recommend.
  */
-import { ms, type CaseFile, type Decision, type PipelineState, type RunState, type Source } from "./models";
+import { ms, sourceText, type CaseFile, type Decision, type PipelineState, type RunState, type Source } from "./models";
 import { runPipeline, type RuntimeConfig } from "./pipeline";
 import { cases, policy, replays } from "./fixtures";
 const addMinutes = (iso: string, m: number) => new Date(ms(iso) + m * 60_000).toISOString();
@@ -15,6 +15,10 @@ export const loadCase = (caseId: string): CaseFile => {
 export function needsQuestion(s: Source): boolean {
   if (s.source_type === "NO_REPLY_OBSERVED" || s.source_type === "QUESTION_TIMEOUT") return true;
   return s.source_type === "BUYER_REPLY" && s.content?.question_id !== "UNSOLICITED";
+}
+
+export class BuyerReplyError extends Error {
+  constructor(public code: "invalid_reply" | "not_asked" | "already_recorded" | "timed_out" | "live_required" | "event_conflict") { super(code); }
 }
 
 export class Simulator {
@@ -52,6 +56,30 @@ export class Simulator {
     if (!s) throw new Error(`${ref} is not a runtime event of ${run.case.case_id}`);
     if (!this.canApply(run, s)) throw new Error(`${ref} is a reply to a question that has not been asked yet`);
     return this.apply(run, s);
+  }
+
+  /** Staff records what the buyer said; arbitrary text requires an explicit live assessment. */
+  async recordBuyerReply(runId: string, text: string, eventId: string, useLive = false): Promise<Decision | null> {
+    const run = this.runs.get(runId)!, reply = text.trim();
+    if (!reply || reply.length > 2000 || !/^[0-9a-f-]{36}$/i.test(eventId)) throw new BuyerReplyError("invalid_reply");
+    const ref = `${run.case.case_id}-REPLY-${eventId}`;
+    const prior = run.applied.find(s => s.source_ref === ref);
+    if (prior) {
+      if (sourceText(prior) !== reply) throw new BuyerReplyError("event_conflict");
+      return null;
+    }
+    const prepared = run.case.sources.find(s => s.phase === "RUNTIME" && s.source_type === "BUYER_REPLY" && needsQuestion(s) && sourceText(s).trim() === reply);
+    if (prepared && run.applied.some(s => s.source_ref === prepared.source_ref)) return null;
+    if (!run.questions_asked) throw new BuyerReplyError("not_asked");
+    if (run.replied_after_question) throw new BuyerReplyError("already_recorded");
+    if (run.timeout_fired || (run.question_deadline && ms(run.now) >= ms(run.question_deadline))) throw new BuyerReplyError("timed_out");
+    if (this.mode === "REPLAY" && !prepared && !useLive) throw new BuyerReplyError("live_required");
+    if (useLive) this.mode = "LIVE_AI";
+    if (prepared) return this.applyEvent(runId, prepared.source_ref);
+    return this.apply(run, {
+      source_ref: ref, phase: "RUNTIME", source_type: "BUYER_REPLY", actor: "buyer_recorded_by_staff",
+      occurred_at: run.now, content: { text: reply, question_id: `${run.case.case_id}-Q1` },
+    });
   }
 
   /** Move the virtual clock. Fires QUESTION_TIMEOUT when the reply window passes. */

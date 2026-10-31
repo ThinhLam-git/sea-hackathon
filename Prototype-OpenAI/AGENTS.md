@@ -39,6 +39,12 @@ LIVE_AI uses one tool-free hosted Agents API session/turn (native HTTPS, environ
 - Decisions rubric `evidence-support-v2.2` scales weighted LOW/MEDIUM/HIGH (0–2) to 0–100. Demo bands: 0–24 LOW, 25–74 MEDIUM, 75–100 HIGH. Code caps rating and band together. Never describe it as calibrated delivery-success probability. API scorer certainty stays separate.
 - Bump the prompt version and generated replay metadata together when the prompt changes. Keep existing audit records unchanged.
 
+## Staff interface
+
+The homepage uses Lucas’s layout in `features/judge-demo/`, adapted to this v2.2 backend. Keep UI rendering driven by actual policy state; do not import newer Lucas fixtures, backend rules or Site identity for a visual change. A pending buyer question can coexist with HOLD. No reply can preserve unresolved initial CLARIFY. Never hard-code every reply as readiness for retry.
+
+The header switches Vietnamese/English locally and persists the choice. Language changes must preserve the current review, typed input and API-call count. Translate interface text, approved questions and policy explanations; retain original buyer/source content and unchanged audit exports. English policy explanations map actual rule IDs, with the original policy note available.
+
 ## Verification and publication
 
 `npm test`; `npm run typecheck`; `npm run demo` (30 draft scenarios); `npm run demo:legacy` (25-case rollback path); Sites build helper.

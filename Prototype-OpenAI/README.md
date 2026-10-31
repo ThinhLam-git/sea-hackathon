@@ -6,13 +6,13 @@ A delivery-recovery workspace for operations staff. **30 synthetic cases, demo p
 
 ## Use the app
 
-1. Choose a demo delivery. The top tracker shows progress.
-2. The blue panel shows delivery facts; the amber panel holds the approved buyer question and response.
-3. Choose **Use sample response → Review response** for a free Replay walkthrough, or type a custom response for Live GPT (API credits).
-4. Choose **No reply** to finalize with the initial assessment without another API call. There is no fixed wait or timer.
-5. Review the recommendation in the green decision desk. Purple identifies AI confidence; Evidence and History remain in this side panel. **Copy recommendation** prepares the handoff to staff.
+1. Use the header button to switch **Tiếng Việt / English**. Your choice is remembered.
+2. Choose **Buyer at work** or **Flooded delivery route**, or expand the scenario selector for all 30 cases.
+3. **Replay → Use sample response → Review response** walks through prepared results without AI charges. **Live Agent** starts a real hosted assessment; a typed custom response explicitly uses Live Agent and API credits.
+4. Copy the approved question into your normal channel, record the buyer’s exact reply, then assess it. **No reply** selects the initial result without another AI call.
+5. Read **Policy & recommendation** in the right panel. Review evidence, the Decisions evidence-support score and history, then copy the recommendation for Ops.
 
-Clock values belong to the synthetic scenario. An initial CLARIFY kept after No reply means unresolved information for Ops, not a second question. Demo scenarios/modes and technical fields stay collapsed.
+The homepage now uses Lucas’s Vietnamese/English UI with the existing v2.2 hosted agent backend. It derives holds, retries and unresolved outcomes from real API state. Source notes and buyer text remain in their original language. No real messages or delivery actions are executed. Reload restores the current review.
 
 ## Stack and flow
 
@@ -89,7 +89,7 @@ The policy workbook contains broader proposals and public references. Only the s
 
 ## Code map / publishing
 
-- `app/page.tsx`, `app/globals.css`: colored three-panel workflow board.
+- `app/page.tsx`, `features/judge-demo/`: Lucas’s three-panel UI, live API adapter and local language switch.
 - `app/api/`: authenticated case/session, reply and manual no-reply routes.
 - `lib/order-rescue-v2/`: active v2.2 projection, simulator, seven skills, policy, scoring, storage and evaluator.
 - `fixtures/v2/`: versioned synthetic inputs and isolated replay/test data.

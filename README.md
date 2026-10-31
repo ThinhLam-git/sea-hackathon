@@ -20,7 +20,7 @@ Prototype only what we can demonstrate truthfully. Any unavailable integrations,
 
 ## OpenAI prototype (`phuc-dev`)
 
-The working prototype is in [`Prototype-OpenAI/`](Prototype-OpenAI/README.md). It uses the hosted OpenAI Agents API + Decisions API over native HTTPS, a colored three-panel staff workspace with a progress tracker and confidence/evidence side panel, the same seven-step assessment pipeline, and all 30 supplied v2.2 synthetic cases. Manual No reply selects the initial assessment; a matching reply selects the second. The original 25-case version remains available for regression checks and rollback.
+The working prototype is in [`Prototype-OpenAI/`](Prototype-OpenAI/README.md). It uses the hosted OpenAI Agents API + Decisions API over native HTTPS, Lucas’s three-panel staff interface with Vietnamese/English switching, a progress tracker and confidence/evidence panel, the same seven-step assessment pipeline, and all 30 supplied v2.2 synthetic cases. Manual No reply selects the initial assessment; a matching reply selects the second. The original 25-case version remains available for regression checks and rollback.
 
 ```bash
 cd Prototype-OpenAI

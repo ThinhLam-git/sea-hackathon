@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Package, Search, MessageCircle, ShieldCheck, UserRound, Check, ArrowRight, RotateCcw, LoaderCircle, Copy, Download, Sparkles } from "lucide-react";
+import { Package, Search, MessageCircle, ShieldCheck, UserRound, Check, ArrowRight, RotateCcw, LoaderCircle, Copy, Sparkles } from "lucide-react";
 import type { RunView } from "@/lib/order-rescue-v2/view";
 import { decisionPresentation, submissionUsesLive } from "./presentation";
 import { translate, type Language } from "./i18n";
@@ -25,7 +25,6 @@ async function api<T>(path:string,body?:unknown):Promise<T>{
  const data=await response.json();if(!response.ok)throw new ApiError(response.status,data&&typeof data==="object"&&"detail" in data?String(data.detail):"Chưa thể hoàn thành yêu cầu. Hãy thử lại.");return data as T;
 }
 function text(content:Record<string,unknown>){return typeof content.text==="string"?content.text:"";}
-function exportHistory(run:RunView){const url=URL.createObjectURL(new Blob([run.history.map(d=>JSON.stringify(d)).join("\n")+"\n"],{type:"application/x-ndjson"}));const a=document.createElement("a");a.href=url;a.download=`${run.run_id}.jsonl`;a.click();URL.revokeObjectURL(url);}
 const errorText=(e:unknown)=>e instanceof Error?e.message:"Chưa thể hoàn thành yêu cầu.";
 
 export default function JudgeDemo(){
@@ -35,7 +34,7 @@ export default function JudgeDemo(){
  useEffect(()=>{const saved=localStorage.getItem("order-rescue-language");if(saved==="vi"||saved==="en")setLanguage(saved);},[]);
  function changeLanguage(next:Language){setLanguage(next);localStorage.setItem("order-rescue-language",next);document.documentElement.lang=next;}
  useEffect(()=>{document.documentElement.lang=language;},[language]);
- const [run,setRun]=useState<RunView|null>(null),[config,setConfig]=useState<Config|null>(null),[cases,setCases]=useState<Case[]>([]);
+ const [run,setRun]=useState<RunView|null>(null),[config,setConfig]=useState<Config|null>(null);
  const [busy,setBusy]=useState(true),[error,setError]=useState(""),[replyText,setReplyText]=useState(""),[copied,setCopied]=useState("");
  const [boot,setBoot]=useState(0);
  const working=useRef(false);
@@ -44,7 +43,7 @@ export default function JudgeDemo(){
  useEffect(()=>{let alive=true;setBusy(true);setError("");
   (async()=>{
    const [list,status]=await Promise.all([api<Case[]>("/cases"),api<Config>("/status")]);
-   if(!alive)return;setCases(list);setConfig(status);
+   if(!alive)return;setConfig(status);
    const requested=new URLSearchParams(location.search).get("case"),saved=sessionStorage.getItem("order-rescue-run");
    if(saved&&!requested){try{const restored=await api<RunView>(`/runs/${saved}`);if(alive)save(restored);return;}catch(e){if(!(e instanceof ApiError)||![404,409].includes(e.status))throw e;sessionStorage.removeItem("order-rescue-run");}}
    if(!alive)return;
@@ -123,8 +122,6 @@ export default function JudgeDemo(){
     </div>
     <div className="judge-guide" role="status">{busy?<LoaderCircle className="spin" size={20}/>:<ArrowRight size={20}/>}<p>{busy?t("Đang đánh giá bằng chứng và kiểm tra policy…"):t(presentation!.guide)}</p></div>
     </div>}
-    <details className="judge-history"><summary>{t("Lịch sử đánh giá & cách hệ thống hoạt động")}</summary><p>{t("Hợp đồng v")}{run.contract_version} · {latest?.policy_version}{t(". Tối đa hai assessment; không có lượt thứ ba. Replay dùng nhãn FINAL_FIXTURE_USER_REVIEWED, không chứng minh độ chính xác model.")}</p><ol>{run.history.map((d,i)=><li key={d.decision_id}><strong>{d.trigger==="USER_NO_REPLY"?t("Chọn kết quả ban đầu · không gọi AI"):i===0?t("Đánh giá ban đầu"):t("Đánh giá sau phản hồi")}</strong><span>{d.final_action} · {d.policy_gate} · {d.model_info.mode}</span><p>{policyReason(d,language)}</p>{d.model_info.hosted_agent&&<details><summary>{t("Phiên hosted agent")}</summary><pre>{JSON.stringify(d.model_info.hosted_agent,null,2)}</pre></details>}</li>)}</ol><details><summary>{t("Bảy bước xử lý cố định")}</summary><p>{run.pipeline.map(s=>s.name).join(" → ")}</p></details><button className="judge-text" onClick={()=>exportHistory(run)}><Download size={14}/>{t("Xuất lịch sử")}</button></details>
-    <details className="judge-history"><summary>{t("Các tình huống khác & thông tin demo")}</summary><label className="judge-case-select">{t("Chọn trong 30 case")}<select aria-label={t("Chọn case demo")} value={run.case_id} disabled={busy} onChange={e=>start(e.target.value)}>{cases.map(c=><option key={c.case_id} value={c.case_id}>{c.case_id} · {t(CASES.find(x=>x.id===c.case_id)?.name??c.title)}</option>)}</select></label><p>{live?`Live Agent · ${config?.model??"GPT"}${t(" · sử dụng API credits.")}`:t("Replay miễn phí. Chọn Live Agent ở đầu trang để chạy agent và Decisions API thực tế.")}{" "}{t("Thời gian và kết quả thuộc tình huống giả lập. Mỗi tài khoản chỉ xem lượt của mình.")}</p></details>
    </>}
    <footer className="judge-footer"><span>{t("Sea × OpenAI Codex Hackathon")}</span><span>{t("Dữ liệu giả lập · Luật minh họa · Ops quyết định")}</span></footer>
   </main>

@@ -30,3 +30,9 @@ Chưa publish lên link hosted, chưa commit/push phần UI mới. Cần xác mi
 ## Tách module và publish
 
 UI được tách vào `Prototype-OpenAI/features/judge-demo/`; `app/page.tsx` chỉ mount component. Typecheck và build sau tách đều exit 0. Target Site mới lưu ở `.openai/hosting.judge.json`, không thay project ID cũ. Quyền truy cập và kết quả deployment được báo riêng sau khi publish hoàn tất.
+
+## Theme tương phản cao
+
+Theo phản hồi Lucas, đổi nền sang xanh sáng #edf2fa, header navy #10264f, action cobalt #1646cb, chữ #142642. Tăng độ rõ chữ phụ, viền panel và trạng thái được chọn. Build gói publish mới PASS. Browser connector bị lỗi kết nối ở lượt kiểm tra theme cuối, nên chưa có ảnh/QA render mới; ảnh và audit phía trên thuộc theme trước đó.
+
+Site mới đã được đặt public theo yêu cầu. Người dùng vẫn đăng nhập ChatGPT để tạo run có ownership riêng. Không cấu hình API key trên Site Replay.

@@ -4,6 +4,10 @@ Ngày cập nhật: 31/10/2026. Baseline trước triển khai: `phuc-dev`, comm
 
 Trạng thái: đã đồng bộ contract v2.5 theo workbook mới nhất đã được team xác nhận. Nguồn chuẩn: `Prototype-OpenAI/fixtures/source/Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx`. Kiểm tra v2.5: 143 tests/10 files PASS, 30/30 Replay khớp, đối chiếu workbook PASS, typecheck và build PASS. Các kết quả 133 tests/9 files và 10 request Live bên dưới thuộc baseline v2.4; không coi đó là xác minh Live v2.5. Không gọi thêm Live trong đợt này.
 
+## UI showcase dành cho giám khảo — cập nhật 31/10/2026
+
+Màn hình chính chỉ có DEMO-001 (hỏi một câu, cập nhật đề xuất giao lại) và DEMO-023 (logistics, chuyển Ops không hỏi buyer). Ba vùng Case → Agent → Policy/Ops, tiến trình và hướng dẫn thao tác theo trạng thái. Replay-only ở UI; 30 case và Live vẫn là khả năng backend, không nằm trong hành trình giám khảo. Evidence chi tiết, confidence và audit thu gọn. Không có KPI hiệu quả hoặc hành động logistics thật. Xem `reports/judge-demo-review.md` cho kiểm tra và giới hạn phát hành. Phần mô tả UI cũ bên dưới là baseline trước showcase.
+
 ## 1. Sản phẩm và mục tiêu demo
 
 Business rules chuẩn bổ sung: `Prototype-OpenAI/docs/Order_Rescue_Agent_Business_Rules_v2.5.md`. Đợt đồng bộ bổ sung đạt 145 tests/10 files và typecheck. Policy dùng được xác nhận buyer có nguồn tại T0, không bắt hỏi khi đã đủ facts; retry trái điều kiện bắt buộc bị BLOCKED và chuyển review. SQL chín bảng là model tham chiếu, chưa thay thế storage run/audit D1 của demo.

@@ -1,0 +1,20 @@
+surface,kind,state,status,evidence,note
+Demo,data_view,loading,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Demo,data_view,empty,NA,,"Two fixed fixtures; absent run has loading or error, not an empty collection."
+Demo,data_view,error,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Demo,data_view,populated,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Demo,data_view,long_content,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Actions,action,default,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Actions,action,hover,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Actions,action,focus_visible,DONE,Prototype-OpenAI/work/showcase-desktop.json,Source review; browser happy-path checks recorded in judge-demo-review.md
+Actions,action,disabled,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Actions,action,busy,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Actions,action,failure,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Disclosures,control,default,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Disclosures,control,hover,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Disclosures,control,focus_visible,DONE,Prototype-OpenAI/work/showcase-desktop.json,Source review; browser happy-path checks recorded in judge-demo-review.md
+Disclosures,control,active,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md
+Disclosures,control,disabled,NA,,Read-only native details remain available; no disabled state required.
+Layout,page,narrow_320,DONE,Prototype-OpenAI/work/showcase-mobile.json,Source review; browser happy-path checks recorded in judge-demo-review.md
+Layout,page,wide_1440,DONE,Prototype-OpenAI/work/showcase-desktop.json,Source review; browser happy-path checks recorded in judge-demo-review.md
+Layout,page,long_content,DONE,Prototype-OpenAI/features/judge-demo/JudgeDemo.tsx,Source review; browser happy-path checks recorded in judge-demo-review.md

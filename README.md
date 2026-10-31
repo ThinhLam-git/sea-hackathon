@@ -31,3 +31,5 @@ npm run build
 ```
 
 See the project README for local database setup, secure API-key configuration, and the private Sites preview. API keys and local run data are excluded from Git.
+
+Private preview: [Order Rescue · GPT Operations](https://order-rescue-gpt-phuc.lankybluff1.chatgpt.site). Sign in with the owning ChatGPT account; access stays private.

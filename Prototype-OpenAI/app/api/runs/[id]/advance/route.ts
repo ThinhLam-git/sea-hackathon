@@ -1,9 +1,3 @@
-import { z } from "zod";
-import { restore, persist } from "@/lib/order-rescue/repository";
-import { runView } from "@/lib/order-rescue/view";
 import { handle, owner } from "@/lib/http";
-export const POST = (request: Request, context: {params: Promise<{id:string}>}) => handle(async () => {
-  const user=await owner(), {id}=await context.params;
-  const {minutes}=z.object({minutes:z.number().int().positive().max(10080)}).parse(await request.json());
-  const {sim,revision}=await restore(id,user); await sim.advance(id,minutes); await persist(sim,id,user,revision); return runView(sim,id);
-});
+import { HttpError } from "@/lib/order-rescue-v2/repository";
+export const POST=()=>handle(async()=>{await owner();throw new HttpError(409,"v2.2 uses a buyer reply or manual No reply. Start a v2.2 review to continue.");});

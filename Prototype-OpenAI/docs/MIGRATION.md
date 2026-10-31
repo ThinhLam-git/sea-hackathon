@@ -35,3 +35,7 @@ The earlier implementations and their datasets remain intact in the original wor
 The user requested confidence scoring through Decisions API. LIVE_AI now makes its generative Responses call and a separate `gpt-6-luna` scoring call within the existing assess-case stage. The output contract keeps the six qualitative Agent fields and adds optional score metadata to the decision JSON; D1 stores it without a schema migration. Replay outputs remain unchanged.
 
 The score is a demo evidence-support rubric rating with validation caps, not an outcome probability. No action thresholds or policy rules change. Tests cover request isolation, independent scorer certainty, malformed results, refusals/outages, invalidated citations, policy caps, replay/pre-AI call skipping, and immutable prior scores.
+
+## October 31, 2026: selected v2.2 data contract
+
+The active app now uses the user-provided 30-case pair, strict six-field v2.2 assessment and manual no-reply final selection. See DATA-SOURCES.md and the active AGENTS.md. The prior v0.5 implementation above remains intact for rollback. D1 tables were reused; existing runs/audit records were not migrated destructively or deleted. Reply/no-reply outcomes use a short reservation plus revision checks. The UI adopts a top progress tracker, three work panels and functional colors: blue delivery record, amber buyer input, green recommendations and purple AI scoring.

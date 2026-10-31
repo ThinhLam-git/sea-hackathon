@@ -1,46 +1,60 @@
-# Order Rescue · OpenAI prototype
+# Order Rescue · OpenAI MVP v2.2
 
-A delivery-recovery workbench for the Sea × OpenAI Hackathon. **Synthetic data · Demo policy · Simulated outcomes.** Operations makes the handling decision.
+A delivery-recovery workspace for operations staff. **30 synthetic cases, demo policy, simulated outcomes.** Staff approves every handling decision; no messages or logistics actions are executed.
 
-## Stack
+[Public demo](https://order-rescue-gpt-phuc.lankybluff1.chatgpt.site) · Teammates can sign in with their own ChatGPT accounts. Runs stay separate; the server uses the owner's API key for Live GPT.
 
-- **OpenAI Agents SDK**: one structured, tool-free assessment agent.
-- **OpenAI Responses API**: GPT inference; default model remains `gpt-5.4-mini`.
-- **OpenAI Decisions API**: evidence-support scoring with `gpt-6-luna` in Live GPT mode.
-- **ChatGPT Sites**: public hosted preview with ChatGPT sign-in for interactive features.
-- **React / Vinext / TypeScript**: site and server API.
-- **Cloudflare D1**: durable runs and append-only decision history.
+## Use the app
 
-The public site lets teammates sign in with their own ChatGPT accounts; each user’s runs are isolated.
+1. Choose a demo delivery. The top tracker shows progress.
+2. The blue panel shows delivery facts; the amber panel holds the approved buyer question and response.
+3. Choose **Use sample response → Review response** for a free Replay walkthrough, or type a custom response for Live GPT (API credits).
+4. Choose **No reply** to finalize with the initial assessment without another API call. There is no fixed wait or timer.
+5. Review the recommendation in the green decision desk. Purple identifies AI confidence; Evidence and History remain in this side panel. **Copy recommendation** prepares the handoff to staff.
 
-The earlier Python and VoltAgent prototypes are retained in the original workspace for comparison. This version has no VoltAgent or Vercel AI SDK dependency.
+Clock values belong to the synthetic scenario. An initial CLARIFY kept after No reply means unresolved information for Ops, not a second question. Demo scenarios/modes and technical fields stay collapsed.
 
-## Same seven-step pipeline
+## Stack and flow
 
-`load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`
+- OpenAI Agents SDK with one structured, tool-free Responses call per assessment (`gpt-5.4-mini`).
+- Decisions API evidence-support scoring (`gpt-6-luna`) after each live assessment.
+- React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
+- The same seven stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`.
 
-Only `assess-case` calls GPT. Code controls the order and both policy gates. The model receives current inputs and raw sources, never the case title, future replies or golden answers.
+At most **two assessments**: initial and after a matching buyer reply. Manual No reply selects initial exactly; there is no third assessment or second question. Concurrent outcomes are serialized before inference and saved with revision checks. Failures go to Ops without silent Replay fallback. Auth remains lightweight; no roles, teams or administration screens.
 
-The 25 cases, replay outputs, v0.5 policy and approved Vietnamese question/reason wording are preserved. New events append decisions; duplicates do not. A buyer can be asked at most one approved question. Timeout is not refusal. Model failures go to operations without a silent replay fallback.
+The nine logical tables from the supplied raw seed are joined into an explicit server-only input projection. Mutable review state uses the existing D1 tables, keeping the MVP small. Future replies, expected outputs and previous assessment/result slots are excluded from AI inputs. Buyer history stays empty where the seed provides none.
+
+## Data and reference documents
+
+The user-selected contract is `order-rescue-demo-30-v2.2`, policy `demo-two-assessment-v2`. See [source mapping](docs/DATA-SOURCES.md).
+
+`fixtures/v2/seed.json` and `test-cases.json` preserve the downloaded originals. `replay.json`, `controls.json` and `provenance.json` are generated from them. The supplied expected labels are **DRAFT_NEEDS_USER_REVIEW**; a Replay match demonstrates synthetic behavior, not real model accuracy.
+
+Regenerate from a downloaded reference folder:
+
+```bash
+node scripts/import-v2.mjs /absolute/path/to/HACKATHON-CODEX
+```
+
+Or run without an argument to rebuild generated files from the checked-in pair. Original v0.5 runtime/fixtures remain for rollback and regression checks. Old hosted sessions are preserved in storage; the v2 UI starts a fresh compatible session.
 
 ## Run locally
 
-Requires Node.js 22.13+ and npm.
+Node.js 22.13+ and npm:
 
 ```bash
 npm ci
 ```
 
-Create an ignored `.env` file in **this project directory** with your key:
+Create an ignored `.env` in this project:
 
 ```dotenv
 OPENAI_API_KEY=your-own-key
 ORDER_RESCUE_MODEL=gpt-5.4-mini
 ```
 
-Keep the key out of chat, Git and browser code. Replay does not need a key. The site defaults to Replay; choosing **Live GPT** starts a fresh run and uses your API credits.
-
-Build and initialize the local database once:
+Keep keys out of chat, Git and browser code. Replay needs no key. Build and initialize the local database once:
 
 ```bash
 npm run build
@@ -48,55 +62,32 @@ node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1
 npm run dev
 ```
 
-Open the Local URL printed by the server, normally `http://127.0.0.1:5173/`.
-
-Local development supports a local presenter. Production API routes require ChatGPT identity and isolate runs by user. Live availability is checked on the server; keys never enter client props or API responses. Hosted keys are configured as Sites runtime secrets, separately from local `.env` files.
+Open the printed Local URL, normally `http://127.0.0.1:5173/`. Hosted API keys are separate Sites runtime secrets. Local development has a local presenter identity; hosted API routes require ChatGPT sign-in.
 
 ## Verify
 
 ```bash
-npm test             # golden cases and safety/migration checks
+npm test
 npm run typecheck
-npm run demo         # all 25 cases against expected replay answers
-npm run build
+npm run demo          # 30 supplied draft v2.2 scenarios
+npm run demo:legacy   # preserved 25-case v0.5 regression path
 ```
 
-Demo cases: `OR-001` buyer reply → retry, `OR-009` timeout → operations, `OR-023` address-change request → operations, `OR-038` verified flooding → hold, `OR-051` unsafe note → stop before AI.
+Live results can differ from scripted labels. A custom reply is never forced to a canned answer.
 
-The operations interface starts with a case selector and one decision card. Key delivery facts and the next available action are visible; a right-side panel contains confidence, Evidence and History. Replay/live mode and five quick scenarios are inside collapsed Demo options; pipeline, raw sources and policy fields are inside collapsed Technical details. The help button provides a short walkthrough.
+## Confidence and boundaries
 
-## Important demo distinction
+The Decisions rating measures support for the proposed cause. Its weighted LOW/MEDIUM/HIGH score is scaled from 0–2 to 0–100, with demo bands 0–24, 25–74 and 75–100. Source validation caps score and band together. Scorer certainty is separate metadata. This is **not a calibrated delivery-success probability** and never overrides policy. T0 buyer context or verified operational evidence can support strong cause confidence while current intent/availability remain missing.
 
-`fixtures/replay/` contains **hand-authored seeds**, not recorded model outputs. A 25/25 replay match validates the code path and rules, not model accuracy. Live GPT can give a different proposal; validation and policy checks still apply.
+The policy workbook contains broader proposals and public references. Only the selected versioned demo profile supplies executable parameters; this is not verified live Shopee/SPX policy. No carrier integration, messaging, address/COD edits, refunds, returns or dispatch.
 
-## Code map
+## Code map / publishing
 
-- `app/page.tsx`, `app/globals.css`: focused, responsive workbench with five quick scenarios and optional technical details.
-- `app/api/`: case, run, event, virtual-clock and configuration routes.
-- `lib/order-rescue/pipeline.ts`: fixed seven-stage orchestration; optional OpenAI tracing.
-- `lib/order-rescue/skills/`: the seven skills and original prompt.
-- `lib/order-rescue/simulator.ts`: current state, prepared events, one-question limit and virtual clock.
-- `lib/order-rescue/repository.ts`: D1 persistence with revision checks and append-only history.
-- `fixtures/`: unchanged synthetic cases, replay seeds and demo policy.
-- `db/schema.ts`, `drizzle/`: schema and immutable migrations.
-- `tests/`: preserved regressions plus migration-specific checks.
+- `app/page.tsx`, `app/globals.css`: colored three-panel workflow board.
+- `app/api/`: authenticated case/session, reply and manual no-reply routes.
+- `lib/order-rescue-v2/`: active v2.2 projection, simulator, seven skills, policy, scoring, storage and evaluator.
+- `fixtures/v2/`: versioned synthetic inputs and isolated replay/test data.
+- `lib/order-rescue/`, original `fixtures/`: retained v0.5 rollback path.
+- `db/`, `drizzle/`: existing D1 schema and migration; no new operational-schema migration was needed.
 
-Live assessments use one SDK turn with no tools or handoffs, followed by one Decisions API scoring request inside the same assessment stage. API persistence disables response storage; trace export is off by default. The decision timeline works in both modes.
-
-## Deployment
-
-`.openai/hosting.json` retains this preview's Site identity and D1 binding. Use the Sites source/build/publication workflow to update it. Hosted migrations are applied by Sites before deployment. Never commit `.env`, `.dev.vars`, credentials, local databases, generated builds or `node_modules`.
-
-## Confidence score
-
-The side panel shows a Decisions API evidence-support rating in Live GPT mode. The LOW/MEDIUM/HIGH rubric produces a weighted 0–2 score, rounded to 0–100. Demo bands are 0–24 LOW, 25–74 MEDIUM and 75–100 HIGH. Code caps the score and band together; zero validated evidence caps the rating at zero. Business-policy decisions do not use new numerical thresholds.
-
-This is **not delivery-success probability**. Thresholds are a demo rubric and have not been calibrated against real delivery outcomes. The API's own `confidence` (certainty in its rating) and probability distribution are stored separately and visible in Technical details, not substituted for evidence support.
-
-Replay continues to show its hand-authored qualitative confidence, without invented numeric/API results. Use **Start live assessment** in the side panel to begin a new run with Responses + Decisions calls; it uses API credits. Existing history is preserved and not rescored. Scorer failures or refusals go to operations.
-
-## Staff workflow
-
-Choose a demo delivery, copy the approved buyer question into your usual contact channel, then record exactly what the buyer said. **Use sample response → Review response** keeps the prepared Replay path. Custom text explicitly uses a live assessment (and API credits) while preserving the same run and earlier decisions. One response is accepted during the question window; duplicate submissions do not create extra decisions. Copy the resulting recommendation for human review. The app does not send messages or dispatch deliveries.
-
-The right-side panel holds confidence, evidence and history. Clock simulation and scenario/mode switches stay under Demo options. This MVP uses the existing ChatGPT sign-in and per-user records, without roles, teams or administration screens.
+Preserve `.openai/hosting.json` Site identity/public audience and use Sites source/build/publication tools. Never commit env files, credentials, local databases, generated builds or node_modules.

@@ -14,7 +14,8 @@
     "db:generate": "drizzle-kit generate",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "demo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue/cli.ts"
+    "demo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue-v2/cli.ts",
+    "demo:legacy": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue/cli.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -74,5 +75,5 @@
       "sharp": "0.35.4"
     }
   },
-  "description": "Order Rescue hackathon prototype \u2014 OpenAI Agents SDK + Responses API"
+  "description": "Order Rescue v2.2 \u2014 OpenAI Agents SDK, Responses and Decisions; 30 synthetic delivery cases"
 }

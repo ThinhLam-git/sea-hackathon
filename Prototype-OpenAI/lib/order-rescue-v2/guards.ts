@@ -21,10 +21,7 @@ export function activeDisruption(s:PipelineState){const d=s.run.input.operationa
 export function buyerFacts(s:PipelineState){
  const text=normalize(s.run.applied.filter(x=>x.source_type==="BUYER_REPLY").map(sourceText).join(" "));
  return {
-  intent:/van muon nhan|toi muon nhan|toi dong y nhan|still want (?:to receive|the parcel)|i want to receive|i agree to receive/.test(text),
   declined:/khong (?:con )?muon nhan|khong con nhu cau|do not want|don.t want|refuse (?:the|this)/.test(text),
-  availability:/(?:ngay )?mai|ngay lam viec toi|hom nay|tomorrow|next working day/.test(text)&&/(?:o nha|co nguoi.*nhan|xuong cong.*nhan duoc|at home|someone.*receive)/.test(text),
-  cod:/mai du (?:tien|cod)|da du (?:cod|tien)|tien cod.*da chuan bi|cod.*san sang|enough (?:cash|money)|cod.*ready/.test(text),
   unsupported:/doi dia chi|doi dia diem|giao (?:qua|sang|den) (?:cho|dia chi) khac|chuyen.*dia chi|hoan tien|refund|dispatch|change.*address/.test(text),
   afterDeadline:/sau han|only after (?:the )?deadline/.test(text),
  };

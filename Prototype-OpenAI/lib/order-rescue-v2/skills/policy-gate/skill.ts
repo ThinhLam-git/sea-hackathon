@@ -12,19 +12,21 @@ export function run(s:PipelineState){
  if(facts.declined)return review("Buyer trực tiếp cho biết không muốn nhận; chuyển Ops, không tự hoàn đơn.","BUYER_DECLINED");
  if(facts.afterDeadline)return review("Khả năng nhận được nêu sau hạn xử lý; cần Ops xem xét.","AVAILABILITY_AFTER_DEADLINE");
  if(s.run.input.operational_context.sources_conflict)return review("Có nguồn dữ liệu xung đột chưa được giải quyết; chuyển người duyệt.","SOURCE_CONFLICT");
- if(activeDisruption(s))return decide("HOLD_DISRUPTION","Gián đoạn đã được Ops xác minh còn hoạt động và khớp tuyến/thời điểm; giữ đề xuất HOLD để Ops đánh giá lại. Buyer reply không gỡ gián đoạn.","VERIFIED_DISRUPTION");
- if(a.hypothesis==="LOGISTICS_ISSUE"&&s.stage==="AFTER_REPLY")return review("Chưa có xác minh Ops phù hợp cho nguyên nhân logistics; buyer reply không thay thế được.","LOGISTICS_UNVERIFIED");
+ if(activeDisruption(s))return review("Gián đoạn đã được Ops xác minh còn hoạt động; Ops cần xử lý logistics. Không hỏi buyer.","VERIFIED_DISRUPTION");
+ if(a.hypothesis==="LOGISTICS_ISSUE")return review("Chưa có xác minh Ops phù hợp cho nguyên nhân logistics; buyer reply không thay thế được.","LOGISTICS_UNVERIFIED");
  if(s.stage==="INITIAL"){
   if(a.candidate_action==="CLARIFY"&&a.question_key&&a.missing_info.length)return decide("CLARIFY","Cho phép một câu hỏi mô phỏng để làm rõ thông tin có thể đổi hướng xử lý.","ONE_QUESTION");
-  if(a.candidate_action==="HOLD_DISRUPTION")return review("Không có gián đoạn đã xác minh phù hợp để cho phép HOLD.","LOGISTICS_UNVERIFIED");
   if(a.candidate_action!=="STANDARD_REATTEMPT")return review("Thiếu thông tin hoặc đề xuất cần người duyệt; chuyển Ops.","ASSESSMENT_REVIEW");
  }
  if(a.candidate_action==="STANDARD_REATTEMPT"){
   const refs=new Set(a.evidence.filter(e=>e.verification==="DIRECT_BUYER_STATEMENT").map(e=>e.source_ref));
   const direct=s.run.applied.some(x=>x.source_type==="BUYER_REPLY"&&refs.has(x.source_ref));
-  const cod=s.run.input.operational_context.payment==="COD";
-  if(!direct||!facts.intent||!facts.availability||a.missing_info.length||cod&&!facts.cod)return review("Chưa đủ xác nhận trực tiếp về ý định, khả năng nhận, thông tin giao hoặc COD; chuyển Ops, không tự hỏi lần hai.","RETRY_REQUIREMENTS");
+  const reply=s.run.applied.find(x=>x.source_type==="BUYER_REPLY"&&refs.has(x.source_ref));
+  const hasWords=reply&&[...new Intl.Segmenter(undefined,{granularity:"word"}).segment(String(reply.content?.text??""))].some(part=>part.isWordLike);
+  if(!direct||!hasWords||a.missing_info.length)return review("Chưa đủ xác nhận trực tiếp về ý định, khả năng nhận, thông tin giao hoặc COD; chuyển Ops, không tự hỏi lần hai.","RETRY_REQUIREMENTS");
   return decide("STANDARD_REATTEMPT","Buyer trực tiếp xác nhận muốn nhận, có người nhận và đủ thông tin cần thiết; đề xuất giao lại tiêu chuẩn để Ops xem xét.","STANDARD_RETRY");
  }
- return review("Phản hồi chưa giải quyết đủ thông tin hoặc còn ranh giới chính sách; cần Ops xem xét. Không phát sinh câu hỏi thứ hai.","ASSESSMENT_REVIEW");
+ const labels:Record<string,string>={CURRENT_BUYER_INTENT:"ý định tiếp tục nhận đơn",RECEIVING_AVAILABILITY:"thời điểm có người nhận",ADDRESS_CLARIFICATION:"thông tin địa điểm nhận",CONTACT_CLARIFICATION:"kênh liên hệ",COD_READINESS:"khả năng thanh toán COD",DELIVERY_ACCESS:"lối tiếp cận điểm nhận",LOGISTICS_VERIFICATION:"xác minh vận hành",CAUSE_CLARIFICATION:"nguyên nhân lần giao thất bại"};
+ const unresolved=a.missing_info.map(x=>labels[x]??x).join(", ");
+ return review(unresolved?`Phản hồi còn thiếu xác nhận về ${unresolved}; chuyển Ops xem xét, không hỏi câu thứ hai.`:"Đề xuất của Agent chưa đủ điều kiện để chốt; chuyển Ops xem xét, không hỏi câu thứ hai.","ASSESSMENT_REVIEW");
 }

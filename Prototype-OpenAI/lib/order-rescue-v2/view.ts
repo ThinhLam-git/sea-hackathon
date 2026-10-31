@@ -16,6 +16,6 @@ export function runView(sim:Simulator,id:string){
   golden:comparison(r.case.case_id,{...latest,final_assessment_source:r.final_assessment_source}),expected:test.expected,
   assessment_slots:{initial:r.initial_assessment,after_reply:r.after_reply_assessment,final:r.final_assessment,selected:r.final_assessment_source},
   policy_slots:{initial:r.initial_policy_output,after_reply:r.after_reply_policy_output,final:r.final_policy_output},
-  ground_truth_status:"DRAFT_NEEDS_USER_REVIEW",final_event:r.final_event};
+  ground_truth_status:"FINAL_FIXTURE_USER_REVIEWED",final_event:r.final_event};
 }
 export type RunView=ReturnType<typeof runView>;

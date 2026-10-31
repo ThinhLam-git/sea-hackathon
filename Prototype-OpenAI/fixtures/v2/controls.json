@@ -115,7 +115,7 @@
   },
   {
     "case_id": "DEMO-020",
-    "group": "PAYMENT_ISSUE",
+    "group": "UNKNOWN_CAUSE",
     "buyer_reply": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà.",
     "response_mode": "BUYER_REPLY"
   },
@@ -134,30 +134,30 @@
   {
     "case_id": "DEMO-023",
     "group": "LOGISTICS_ISSUE",
-    "buyer_reply": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại.",
-    "response_mode": "BUYER_REPLY"
+    "buyer_reply": null,
+    "response_mode": "NOT_ASKED"
   },
   {
     "case_id": "DEMO-024",
-    "group": "LOGISTICS_ISSUE",
+    "group": "UNKNOWN_CAUSE",
     "buyer_reply": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà.",
     "response_mode": "BUYER_REPLY"
   },
   {
     "case_id": "DEMO-025",
     "group": "LOGISTICS_ISSUE",
-    "buyer_reply": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không.",
-    "response_mode": "BUYER_REPLY"
+    "buyer_reply": null,
+    "response_mode": "NOT_ASKED"
   },
   {
     "case_id": "DEMO-026",
     "group": "LOGISTICS_ISSUE",
     "buyer_reply": null,
-    "response_mode": "USER_NO_REPLY"
+    "response_mode": "NOT_ASKED"
   },
   {
     "case_id": "DEMO-027",
-    "group": "LOGISTICS_ISSUE",
+    "group": "UNKNOWN_CAUSE",
     "buyer_reply": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận.",
     "response_mode": "BUYER_REPLY"
   },

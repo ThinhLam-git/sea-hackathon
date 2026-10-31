@@ -1,0 +1,1401 @@
+{
+  "prompt_version": "assess-v2.2.1",
+  "policy_version": "demo-two-assessment-v2",
+  "source": "hand_authored_draft_fixture",
+  "cases": {
+    "DEMO-001": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-001-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-001-NOTE",
+            "fact": "Courier note: Người nhà nói buyer đang đi làm, chưa có người nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-001-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-001-NOTE",
+            "fact": "Courier note: Người nhà nói buyer đang đi làm, chưa có người nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-001-REPLY",
+            "fact": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-002": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-002-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-002-NOTE",
+            "fact": "Courier note: Không bàn giao được; có thể khách không có nhà.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-002-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-002-NOTE",
+            "fact": "Courier note: Không bàn giao được; có thể khách không có nhà.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-002-REPLY",
+            "fact": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-003": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-003-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-003-NOTE",
+            "fact": "Courier note: Không có người bàn giao ở thời điểm giao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-003-BUYER-T0",
+            "fact": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-003-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-003-NOTE",
+            "fact": "Courier note: Không có người bàn giao ở thời điểm giao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-003-BUYER-T0",
+            "fact": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          },
+          {
+            "source_ref": "DEMO-003-REPLY",
+            "fact": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-004": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-004-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-004-NOTE",
+            "fact": "Courier note: Buyer được ghi nhận đi vắng; chưa có xác nhận trực tiếp.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-004-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-004-NOTE",
+            "fact": "Courier note: Buyer được ghi nhận đi vắng; chưa có xác nhận trực tiếp.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-004-REPLY",
+            "fact": "Tôi vẫn muốn nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "ESCALATE_REVIEW"
+      }
+    },
+    "DEMO-005": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-005-FAIL",
+            "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-005-NOTE",
+            "fact": "Courier note: Shipper ghi người nhận đi làm.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": null
+    },
+    "DEMO-006": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-006-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-006-NOTE",
+            "fact": "Courier note: Hẻm nhiều ngã rẽ, thiếu mốc vào địa điểm nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "ADDRESS_CLARIFICATION"
+        ],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-006-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-006-NOTE",
+            "fact": "Courier note: Hẻm nhiều ngã rẽ, thiếu mốc vào địa điểm nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-006-REPLY",
+            "fact": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-007": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-007-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-007-NOTE",
+            "fact": "Courier note: Đến khu văn phòng nhưng chưa xác định được nơi bàn giao.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "ADDRESS_CLARIFICATION",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-007-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-007-NOTE",
+            "fact": "Courier note: Đến khu văn phòng nhưng chưa xác định được nơi bàn giao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-007-REPLY",
+            "fact": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-008": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-008-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-008-NOTE",
+            "fact": "Courier note: Đơn thiếu mốc của khu nhận hàng.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-008-OPS",
+            "fact": "{\"address_validation\": {\"landmark_missing\": true, \"verification\": \"VERIFIED\"}}",
+            "verification": "VERIFIED_OPS_SIGNAL"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "ADDRESS_CLARIFICATION"
+        ],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-008-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-008-NOTE",
+            "fact": "Courier note: Đơn thiếu mốc của khu nhận hàng.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-008-OPS",
+            "fact": "{\"address_validation\": {\"landmark_missing\": true, \"verification\": \"VERIFIED\"}}",
+            "verification": "VERIFIED_OPS_SIGNAL"
+          },
+          {
+            "source_ref": "DEMO-008-REPLY",
+            "fact": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-009": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-009-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-009-NOTE",
+            "fact": "Courier note: Không tìm được lối vào địa điểm trên đơn.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "ADDRESS_CLARIFICATION"
+        ],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-009-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-009-NOTE",
+            "fact": "Courier note: Không tìm được lối vào địa điểm trên đơn.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-009-REPLY",
+            "fact": "Cứ giao qua chỗ khác cho tôi nhé.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "RECEIVING_AVAILABILITY",
+          "ADDRESS_CLARIFICATION"
+        ],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "ESCALATE_REVIEW"
+      }
+    },
+    "DEMO-010": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-010-FAIL",
+            "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-010-NOTE",
+            "fact": "Courier note: Chỉ thấy tên khu, không có mốc nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "ADDRESS_CLARIFICATION"
+        ],
+        "question_key": "CLARIFY_LANDMARK",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": null
+    },
+    "DEMO-011": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-011-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-011-NOTE",
+            "fact": "Courier note: Hệ thống ghi CONTACT_FAILED; note không có nguyên nhân cụ thể.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-011-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-011-NOTE",
+            "fact": "Courier note: Hệ thống ghi CONTACT_FAILED; note không có nguyên nhân cụ thể.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-011-REPLY",
+            "fact": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-012": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-012-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-012-NOTE",
+            "fact": "Courier note: Shipper ghi liên hệ chưa thành công, nghi do mất sóng.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CONTACT_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-012-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-012-NOTE",
+            "fact": "Courier note: Shipper ghi liên hệ chưa thành công, nghi do mất sóng.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-012-REPLY",
+            "fact": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-013": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-013-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-013-NOTE",
+            "fact": "Courier note: Không có xác nhận buyer; không có contact logs.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-013-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-013-NOTE",
+            "fact": "Courier note: Không có xác nhận buyer; không có contact logs.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-013-REPLY",
+            "fact": "Tôi vẫn muốn nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "ESCALATE_REVIEW"
+      }
+    },
+    "DEMO-014": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-014-FAIL",
+            "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-014-NOTE",
+            "fact": "Courier note: CONTACT_FAILED; không có thông tin nguyên nhân.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": null
+    },
+    "DEMO-015": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-015-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-015-NOTE",
+            "fact": "Courier note: Status REFUSED, chưa có buyer confirmation.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "BUYER_INTENT_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-015-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-015-NOTE",
+            "fact": "Courier note: Status REFUSED, chưa có buyer confirmation.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-015-REPLY",
+            "fact": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "BUYER_INTENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "ESCALATE_REVIEW"
+      }
+    },
+    "DEMO-016": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-016-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-016-NOTE",
+            "fact": "Courier note: Shipper ghi buyer chưa đồng ý nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "BUYER_INTENT_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-016-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-016-NOTE",
+            "fact": "Courier note: Shipper ghi buyer chưa đồng ý nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-016-REPLY",
+            "fact": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-017": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-017-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-017-NOTE",
+            "fact": "Courier note: Người nhận nói không biết đơn quà.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-017-BUYER-T0",
+            "fact": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "BUYER_INTENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-017-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-017-NOTE",
+            "fact": "Courier note: Người nhận nói không biết đơn quà.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-017-BUYER-T0",
+            "fact": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          },
+          {
+            "source_ref": "DEMO-017-REPLY",
+            "fact": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "BUYER_INTENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-018": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-018-FAIL",
+            "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-018-NOTE",
+            "fact": "Courier note: Note ghi buyer phân vân có nhận hay không.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "BUYER_INTENT_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": null
+    },
+    "DEMO-019": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-019-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-019-NOTE",
+            "fact": "Courier note: Note cho biết chưa chuẩn bị đủ tiền mặt COD.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "COD_READINESS"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-019-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-019-NOTE",
+            "fact": "Courier note: Note cho biết chưa chuẩn bị đủ tiền mặt COD.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-019-REPLY",
+            "fact": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-020": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-020-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-020-NOTE",
+            "fact": "Courier note: Note mơ hồ: chưa bàn giao được đơn COD, chưa rõ vì sao.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "COD_READINESS",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-020-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-020-NOTE",
+            "fact": "Courier note: Note mơ hồ: chưa bàn giao được đơn COD, chưa rõ vì sao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-020-REPLY",
+            "fact": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-021": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-021-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-021-NOTE",
+            "fact": "Courier note: Buyer chưa thanh toán COD ở lần giao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-021-BUYER-T0",
+            "fact": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "COD_READINESS"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-021-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-021-NOTE",
+            "fact": "Courier note: Buyer chưa thanh toán COD ở lần giao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-021-BUYER-T0",
+            "fact": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          },
+          {
+            "source_ref": "DEMO-021-REPLY",
+            "fact": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-022": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-022-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-022-NOTE",
+            "fact": "Courier note: Shipper ghi chưa chuẩn bị tiền COD.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "COD_READINESS"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": null
+    },
+    "DEMO-023": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-023-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-023-NOTE",
+            "fact": "Courier note: Tuyến tạm dừng do ngập.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-023-OPS",
+            "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+            "verification": "VERIFIED_OPS_SIGNAL"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "HOLD_DISRUPTION"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-023-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-023-NOTE",
+            "fact": "Courier note: Tuyến tạm dừng do ngập.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-023-OPS",
+            "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+            "verification": "VERIFIED_OPS_SIGNAL"
+          },
+          {
+            "source_ref": "DEMO-023-REPLY",
+            "fact": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "HOLD_DISRUPTION"
+      }
+    },
+    "DEMO-024": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-024-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-024-NOTE",
+            "fact": "Courier note: Chưa bàn giao được; shipper ghi đường đông, chưa xác định trở ngại tại điểm nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-024-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-024-NOTE",
+            "fact": "Courier note: Chưa bàn giao được; shipper ghi đường đông, chưa xác định trở ngại tại điểm nhận.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-024-REPLY",
+            "fact": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "AVAILABILITY_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-025": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-025-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-025-NOTE",
+            "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "LOGISTICS_VERIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-025-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-025-NOTE",
+            "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-025-REPLY",
+            "fact": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "MEDIUM",
+        "missing_info": [
+          "LOGISTICS_VERIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "ESCALATE_REVIEW"
+      }
+    },
+    "DEMO-026": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-026-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-026-NOTE",
+            "fact": "Courier note: Ops xác nhận tuyến tạm dừng nhận giao vì quá tải.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-026-OPS",
+            "fact": "{\"disruption\": {\"kind\": \"CAPACITY_PAUSE\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+            "verification": "VERIFIED_OPS_SIGNAL"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "HOLD_DISRUPTION"
+      },
+      "AFTER_REPLY": null
+    },
+    "DEMO-027": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-027-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-027-NOTE",
+            "fact": "Courier note: Note chung chung: cao điểm, chưa hoàn tất bàn giao.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "LOGISTICS_ISSUE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-027-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-027-NOTE",
+            "fact": "Courier note: Note chung chung: cao điểm, chưa hoàn tất bàn giao.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-027-REPLY",
+            "fact": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "PAYMENT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-028": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-028-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-028-NOTE",
+            "fact": "Courier note: Chỉ ghi giao không thành công, không có chi tiết.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "UNKNOWN_CAUSE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-028-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-028-NOTE",
+            "fact": "Courier note: Chỉ ghi giao không thành công, không có chi tiết.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-028-REPLY",
+            "fact": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "ADDRESS_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-029": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-029-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-029-NOTE",
+            "fact": "Courier note: Giao thất bại; chưa biết do vắng mặt hay liên hệ.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "UNKNOWN_CAUSE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-029-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-029-NOTE",
+            "fact": "Courier note: Giao thất bại; chưa biết do vắng mặt hay liên hệ.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-029-REPLY",
+            "fact": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà.",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "CONTACT_ISSUE",
+        "confidence": "HIGH",
+        "missing_info": [],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "STANDARD_REATTEMPT"
+      }
+    },
+    "DEMO-030": {
+      "INITIAL": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-030-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-030-NOTE",
+            "fact": "Courier note: Giao thất bại, không có ghi chú giải thích.",
+            "verification": "UNVERIFIED_REPORT"
+          }
+        ],
+        "hypothesis": "UNKNOWN_CAUSE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "CLARIFY"
+      },
+      "AFTER_REPLY": {
+        "evidence": [
+          {
+            "source_ref": "DEMO-030-FAIL",
+            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+            "verification": "SOURCE_RECORD"
+          },
+          {
+            "source_ref": "DEMO-030-NOTE",
+            "fact": "Courier note: Giao thất bại, không có ghi chú giải thích.",
+            "verification": "UNVERIFIED_REPORT"
+          },
+          {
+            "source_ref": "DEMO-030-REPLY",
+            "fact": "👍",
+            "verification": "DIRECT_BUYER_STATEMENT"
+          }
+        ],
+        "hypothesis": "UNKNOWN_CAUSE",
+        "confidence": "LOW",
+        "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
+          "CAUSE_CLARIFICATION"
+        ],
+        "question_key": "CONFIRM_INTENT",
+        "candidate_action": "ESCALATE_REVIEW"
+      }
+    }
+  }
+}

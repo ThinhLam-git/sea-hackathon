@@ -3,7 +3,7 @@ import { openaiRequest, OpenAIHttpError } from "../openai-http";
 import { Assessment } from "./models";
 import { PROMPT, PROMPT_VERSION } from "./skills/assess-case/prompt";
 
-export const MODEL = "gpt-5.4-mini";
+export const MODEL = "gpt-6-sol";
 export type AgentAudit = {
   status: string; session_id?: string; turn_id?: string; agent_id?: string;
   cancellation?: "confirmed" | "unconfirmed"; error_code?: string;
@@ -34,10 +34,10 @@ export async function assessWithHostedAgent(apiKey: string, model: string, snaps
     const session = await openaiRequest<Session>(apiKey, "/agents/sessions", {
       signal, body: {
         environment: { type: "none" }, stream: false,
-        agent: { model, instructions: PROMPT, tools: [], multi_agent: { enabled: false },
+        agent: { model, reasoning: { effort: "medium" }, instructions: PROMPT, tools: [], multi_agent: { enabled: false },
           text: { format: { type: "json_schema", schema: z.toJSONSchema(Assessment) } } },
         input: JSON.stringify(snapshot),
-        metadata: { app: "order-rescue", contract: "2.2", prompt_version: PROMPT_VERSION, ...metadata },
+        metadata: { app: "order-rescue", contract: "2.5", prompt_version: PROMPT_VERSION, ...metadata },
       },
     });
     if (!session.id) throw new HostedAgentError("invalid_agent_session");

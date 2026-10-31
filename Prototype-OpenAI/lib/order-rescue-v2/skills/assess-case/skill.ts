@@ -17,7 +17,7 @@ export async function run(s:PipelineState,config:RuntimeConfig={}){
   }else{
    const key=config.apiKey??process.env.OPENAI_API_KEY;if(!key)throw new Error("model_unavailable");
    const model=config.model??MODEL;
-   const audit:AgentAudit={status:"creating"};s.model_info.hosted_agent=audit;s.model_info.model=model;
+   const audit:AgentAudit={status:"creating"};s.model_info.hosted_agent=audit;s.model_info.model=model;s.model_info.reasoning_effort="medium";
    const agentCall={service:"Agents API",operation:"Create isolated assessment session",status:"started",started_at:new Date().toISOString(),duration_ms:0};
    s.model_info.service_calls.push(agentCall);const agentStarted=Date.now();
    try{s.assessment=await assessWithHostedAgent(key,model,s.snapshot,audit,{run_id:s.run.run_id,stage:s.stage});agentCall.status="completed";}

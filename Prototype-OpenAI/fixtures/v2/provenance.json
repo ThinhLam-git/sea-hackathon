@@ -1,12 +1,12 @@
 {
-  "pair_id": "order-rescue-demo-30-v2.2",
-  "contract_version": "2.2",
+  "pair_id": "order-rescue-demo-30-v2.5",
+  "contract_version": "2.5",
   "synthetic": true,
   "case_count": 30,
-  "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
-  "source_folder": "https://drive.google.com/drive/folders/1QY7Qto0DnRzALgPabY-lTsgzu2DQGGyB",
+  "ground_truth_status": "FINAL_FIXTURE_USER_REVIEWED",
+  "source_folder": "BI-ref",
   "sha256": {
-    "seed": "34695129621a831b0528812dc19e04fde4a1765bc8801b7192872bfdb977642a",
-    "tests": "7c600bc911b806a128678707658ec76b9472063ee51d5baf221b8afb0778ec06"
+    "seed": "475e7dcafdf8e8f571d96021143ad7fcac070778bf27a3c6a4a515a95c9bd74e",
+    "tests": "3462a9bfb37c04220bd6c0d1a51dad4d6fa444f287bac2678ca6993f4bb06bd9"
   }
 }

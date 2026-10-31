@@ -27,12 +27,14 @@ function mock(options: {status?:string;sessionStatus?:string;emptyReads?:number;
   });vi.stubGlobal("fetch",fetch);return fetch;
 }
 const run=(audit:AgentAudit,timing={timeoutMs:1000,pollMs:1,cleanupMs:100}) =>
-  assessWithHostedAgent("test-key","gpt-5.4-mini",{only:"current raw facts"},audit,{run_id:"run_test",stage:"INITIAL"},timing);
+  assessWithHostedAgent("test-key","gpt-6-sol",{only:"current raw facts"},audit,{run_id:"run_test",stage:"INITIAL"},timing);
 describe("managed agent lifecycle",()=>{
   it("reads the completed turn's durable final answer and records provider IDs",async()=>{
     const fetch=mock(),audit:AgentAudit={status:"new"};expect(await run(audit)).toEqual(output);
     expect(audit).toMatchObject({session_id:"sess_test",turn_id:"turn_test",agent_id:"agent_test",status:"completed"});
     expect(fetch.mock.calls.filter(([,o])=>o?.method==="POST")).toHaveLength(1);
+    const creation=JSON.parse(String(fetch.mock.calls.find(([url])=>url.endsWith("/sessions"))?.[1]?.body));
+    expect(creation.agent).toMatchObject({model:"gpt-6-sol",reasoning:{effort:"medium"}});
   });
   it("recovers missing saved items without creating another turn",async()=>{
     const fetch=mock({emptyReads:1});expect(await run({status:"new"})).toEqual(output);

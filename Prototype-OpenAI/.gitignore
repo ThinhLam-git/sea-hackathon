@@ -8,6 +8,7 @@
 !/.yarn/plugins/
 !/.yarn/releases/
 !/.yarn/versions/
+BI-ref/
 
 # Generated builds and framework state
 /dist/

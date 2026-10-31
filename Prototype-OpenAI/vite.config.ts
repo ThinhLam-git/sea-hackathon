@@ -61,7 +61,7 @@ export default defineConfig(async ({ command }) => {
         inspectorPort: false,
         config: {
           ...localBindingConfig,
-          ...(command === "serve" && process.env.OPENAI_API_KEY ? { vars: { OPENAI_API_KEY: process.env.OPENAI_API_KEY, ORDER_RESCUE_MODEL: process.env.ORDER_RESCUE_MODEL || "gpt-5.4-mini" } } : {}),
+          ...(command === "serve" && process.env.OPENAI_API_KEY ? { vars: { OPENAI_API_KEY: process.env.OPENAI_API_KEY, ORDER_RESCUE_MODEL: process.env.ORDER_RESCUE_MODEL || "gpt-6-sol" } } : {}),
           ...(command === "serve"
             ? {
                 services: [

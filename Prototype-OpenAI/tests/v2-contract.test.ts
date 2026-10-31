@@ -5,15 +5,18 @@ import { loadCase, caseIds } from "../lib/order-rescue-v2/fixtures";
 import { run as prepare } from "../lib/order-rescue-v2/skills/prepare-input/skill";
 import type { PipelineState } from "../lib/order-rescue-v2/models";
 afterEach(()=>{vi.restoreAllMocks();vi.unstubAllGlobals();});
-describe("v2.2 two-assessment contract",()=>{
- it.each(scenarios.map(c=>[c.case_id,c] as const))("runs %s against the supplied draft behavior fixture",async(id,c)=>{
+describe("v2.5 two-assessment contract",()=>{
+ it.each(scenarios.map(c=>[c.case_id,c] as const))("runs %s against the supplied user-reviewed behavior fixture",async(id,c)=>{
   const sim=new Simulator(),[run,initial]=await sim.start(id),before=JSON.stringify(initial);
   const a=c.expected.initial_assessment;
   expect(initial.agent).toEqual(a);expect(initial.final_action).toBe(c.expected.initial_policy_output.final_action);
-  expect(run.current_status).toBe("WAITING_FOR_BUYER");expect(run.question_wait_state?.question_key).toBe(a.question_key);
-  const q=run.question_wait_state!.question_id,event=crypto.randomUUID();
-  if(c.simulation.buyer_reply)await sim.recordBuyerReply(run.run_id,c.simulation.buyer_reply,event,q);
-  else sim.noReply(run.run_id,event,q);
+  const mode=c.simulation.response_mode;
+  expect(run.current_status).toBe(mode==="NOT_ASKED"?"COMPLETED":"WAITING_FOR_BUYER");
+  expect(run.question_wait_state?.question_key??null).toBe(a.question_key);
+  if(mode!=="NOT_ASKED"){const q=run.question_wait_state!.question_id,event=crypto.randomUUID();
+   if(mode==="BUYER_REPLY")await sim.recordBuyerReply(run.run_id,c.simulation.buyer_reply!,event,q);
+   else sim.noReply(run.run_id,event,q);}
+
   expect(run.current_status).toBe("COMPLETED");expect(run.final_assessment_source).toBe(c.expected.final_assessment_source);
   expect(run.after_reply_assessment).toEqual(c.expected.after_reply_assessment);
   expect(run.final_assessment).toEqual(c.expected.final_assessment);
@@ -31,7 +34,7 @@ describe("v2.2 two-assessment contract",()=>{
   const transport=vi.fn();vi.stubGlobal("fetch",transport);const id=crypto.randomUUID(),q=run.question_wait_state!.question_id;
   sim.noReply(run.run_id,id,q);expect(sim.noReply(run.run_id,id,q)).toBeNull();
   expect(run.now).toBe(now);expect(run.after_reply_assessment).toBeNull();expect(JSON.stringify(run.final_assessment)).toBe(initial);
-  expect(run.final_policy_output?.final_action).toBe("CLARIFY");expect(run.question_wait_state?.status).toBe("NO_REPLY");expect(run.applied).toEqual([]);
+  expect(run.final_policy_output?.final_action).toBe("ESCALATE_REVIEW");expect(run.question_wait_state?.status).toBe("NO_REPLY");expect(run.applied).toEqual([]);
   expect(transport).not.toHaveBeenCalled();expect(sim.history(run.run_id)).toHaveLength(2);
   await expect(sim.recordBuyerReply(run.run_id,"Reply",crypto.randomUUID(),q,true)).rejects.toThrow("finalized");
  });

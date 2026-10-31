@@ -7,7 +7,7 @@ export async function restore(id:string,owner:string,forMutation=false){
  if(!row)throw new HttpError(404,"Review session not found.");
  if(forMutation&&row.write_token.startsWith("lock:")&&Number(row.write_token.split(":")[1])>Date.now())throw new HttpError(409,"This case is already being assessed. Wait for the current review to finish.");
  const state=JSON.parse(row.state) as RunState;
- if(state.contract_version!=="2.2")throw new HttpError(409,"This session uses the older demo. Start a new v2.2 review; the old record is preserved.");
+ if(state.contract_version!=="2.5")throw new HttpError(409,"This session uses the older demo. Start a new v2.5 review; the old record is preserved.");
  const sim=new Simulator(row.mode,runtime());sim.runs.set(id,state);
  const rows=await database().prepare("SELECT payload FROM rescue_decisions WHERE run_id = ? ORDER BY sequence").bind(id).all<{payload:string}>();
  sim.decisions.set(id,rows.results.map(r=>JSON.parse(r.payload) as Decision));return {sim,revision:row.revision};

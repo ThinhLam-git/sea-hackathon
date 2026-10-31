@@ -8,7 +8,7 @@ const ACTIONS: Record<string, {title:string;tone:string;label:string}> = {
 };
 export function decisionPresentation(run:RunView) {
  const latest=run.history.at(-1)!;
- if(run.question.no_reply&&latest.final_action==="CLARIFY")return {
+ if(run.question.no_reply)return {
   title:"Chưa có phản hồi — Ops cần xem xét",tone:"review",label:"Giữ đánh giá ban đầu",
   guide:"Đã chọn không có phản hồi. Giữ nguyên đánh giá ban đầu; không hỏi thêm hoặc gọi AI lần nữa.",
  };

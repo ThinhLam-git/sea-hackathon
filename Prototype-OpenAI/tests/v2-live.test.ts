@@ -56,6 +56,20 @@ describe("v2 live API boundaries",()=>{
   const {sim,scorer}=mock();scorer.mockRejectedValue(new Error("never-show-provider-detail"));const [run,d]=await sim.start("DEMO-001");
   expect(d.final_action).toBe("ESCALATE_REVIEW");expect(d.confidence_score).toBeUndefined();expect(d.agent).toBeNull();expect(run.current_status).toBe("COMPLETED");expect(JSON.stringify(d)).not.toContain("never-show-provider-detail");
  });
+ it("uses the Agent assessment for a terse reply instead of readiness phrases",async()=>{
+  const {sim,assessor}=mock(),[run]=await sim.start("DEMO-001");
+  assessor.mockResolvedValue({finalOutput:structuredClone(scenarios[0].expected.after_reply_assessment)} as any);
+  const d=await sim.recordBuyerReply(run.run_id,"yes, tommorow 2pm",crypto.randomUUID(),run.question_wait_state!.question_id);
+  expect(d?.final_action).toBe("STANDARD_REATTEMPT");
+ });
+ it("keeps unresolved intent in the Agent assessment as an Ops blocker",async()=>{
+  const {sim,assessor}=mock(),[run]=await sim.start("DEMO-001");
+  const assessment=structuredClone(scenarios[0].expected.after_reply_assessment);
+  assessment!.missing_info=["CURRENT_BUYER_INTENT"];
+  assessor.mockResolvedValue({finalOutput:assessment} as any);
+  const d=await sim.recordBuyerReply(run.run_id,"yes, tommorow 2pm",crypto.randomUUID(),run.question_wait_state!.question_id);
+  expect(d?.final_action).toBe("ESCALATE_REVIEW");
+ });
  it("does not permit retry without direct buyer readiness even if the model proposes it",async()=>{
   const {sim,assessor}=mock(),[run]=await sim.start("DEMO-001");
   assessor.mockResolvedValue({finalOutput:structuredClone(scenarios[0].expected.after_reply_assessment)} as any);

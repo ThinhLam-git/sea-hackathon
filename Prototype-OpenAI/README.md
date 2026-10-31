@@ -18,7 +18,7 @@ The homepage now uses Lucas’s Vietnamese/English UI with the existing v2.2 hos
 
 ## Stack and flow
 
-- Hosted OpenAI **Agents API** with one isolated, tool-free managed agent session per assessment (`gpt-5.4-mini`). The active backend uses native HTTPS, without an OpenAI client SDK.
+- Hosted OpenAI **Agents API** with one isolated, tool-free managed agent session per assessment (`gpt-6-sol`, reasoning effort `medium`). The active backend uses native HTTPS, without an OpenAI client SDK.
 - Direct Decisions API evidence-support scoring (`gpt-6-luna`) after each live assessment.
 - React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
 - The same seven stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`.
@@ -59,7 +59,7 @@ Create an ignored `.env` in this project:
 
 ```dotenv
 OPENAI_API_KEY=your-own-key
-ORDER_RESCUE_MODEL=gpt-5.4-mini
+ORDER_RESCUE_MODEL=gpt-6-sol
 ```
 
 Keep keys out of chat, Git and browser code. Replay needs no key. Build and initialize the local database once:

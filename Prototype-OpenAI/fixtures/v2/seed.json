@@ -1,13 +1,13 @@
 {
   "metadata": {
     "name": "Order Rescue — 30-case MVP database model and raw seed",
-    "version": "2.2-two-assessment-demo",
-    "pair_id": "order-rescue-demo-30-v2.2",
+    "version": "2.5-reconciled-one-question",
+    "pair_id": "order-rescue-demo-30-v2.5",
     "synthetic": true,
-    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.1.xlsx",
-    "companion_test_file": "Order_Rescue_Test_Cases_30_v2.2.json",
-    "status": "Implementation contract with synthetic seed; case labels remain draft in the test file.",
-    "scope": "Nine tables; two assessment slots; one immutable final selection. No golden answers or future replies are seeded.",
+    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx",
+    "companion_test_file": "Order_Rescue_Test_Cases_30_v2.5.json",
+    "status": "Aligned synthetic seed and implementation contract. Expected fixture labels are user-reviewed; actual Agent accuracy has not been measured.",
+    "scope": "Nine tables, 67 columns; two possible assessment slots; final policy can override policy 1 on no-reply. Raw sources only are seeded.",
     "row_counts": {
       "dim_buyer": 30,
       "dim_product": 0,
@@ -18,11 +18,15 @@
       "fact_delivery_event": 30,
       "order_rescue": 30,
       "fact_rescue_interaction": 3
-    }
+    },
+    "revision_date": "2026-10-31",
+    "revision_note": "Reconciled workbook plus approved v2.5 business rules: one focused question; direct Ops without contact; no-reply final review; complete logistics missing_info.",
+    "business_rules_file": "Order_Rescue_Agent_Business_Rules_v2.5.md",
+    "erd_file": "Order_Rescue_Data_Model_v2.5.mmd"
   },
   "shared_contract": {
-    "pair_id": "order-rescue-demo-30-v2.2",
-    "contract_version": "2.2",
+    "pair_id": "order-rescue-demo-30-v2.5",
+    "contract_version": "2.5",
     "hypothesis": [
       "AVAILABILITY_ISSUE",
       "ADDRESS_ISSUE",
@@ -50,7 +54,6 @@
     "candidate_action": [
       "CLARIFY",
       "STANDARD_REATTEMPT",
-      "HOLD_DISRUPTION",
       "ESCALATE_REVIEW",
       "NO_ACTION"
     ],
@@ -65,7 +68,50 @@
       "VERIFIED_OPS_SIGNAL"
     ],
     "hypothesis_status": "USER_APPROVED",
-    "missing_info_status": "USER_APPROVED"
+    "missing_info_status": "USER_APPROVED",
+    "assessment_rules": {
+      "payment_hypothesis": "PAYMENT_ISSUE requires a payment-specific observation or statement. Payment type COD alone, including a vague note merely repeating COD, is not cause evidence; use UNKNOWN_CAUSE when no main cause is supported.",
+      "cod_readiness": "For a COD order, include COD_READINESS while current readiness is not established by available sources, even when the main hypothesis is not PAYMENT_ISSUE. Remove it only after supporting information is available.",
+      "missing_info_scope": "All unresolved information relevant to rescuing this order, including buyer intent/availability when routed to Ops; not just information needed for the next action.",
+      "logistics": "Specific logistics barriers requiring Ops are ESCALATE_REVIEW and NOT_ASKED. Vague traffic/peak notes alone remain UNKNOWN_CAUSE/LOW.",
+      "retired_hold": "HOLD_DISRUPTION is legacy catalogue data only. It is excluded from new assessment/policy output enums and workbook active dropdowns."
+    },
+    "legacy_action_ids": [
+      "HOLD_DISRUPTION"
+    ],
+    "response_mode": [
+      "BUYER_REPLY",
+      "USER_NO_REPLY",
+      "NOT_ASKED"
+    ],
+    "question_contract": {
+      "maximum_questions_per_case": 1,
+      "maximum_primary_information_gaps": 1,
+      "primary_gap_selection": "One most important buyer-answerable unresolved gap that can change the recommendation; do not ask a compound or multi-part question.",
+      "no_followup_after_reply_or_no_reply": true,
+      "key_selection": {
+        "CLARIFY_LANDMARK": "Address/landmark/block/access or an address-related barrier at the registered receiving point.",
+        "CONFIRM_INTENT": "Other buyer-side clarification: intent, availability, contact, COD or cause. Classify by the primary purpose in case context."
+      }
+    },
+    "finalization": {
+      "BUYER_REPLY": {
+        "assessment_source": 2,
+        "policy_source": "AFTER_REPLY_POLICY"
+      },
+      "USER_NO_REPLY": {
+        "assessment_source": 1,
+        "policy_source": "NO_REPLY_FINALIZATION",
+        "preserve_initial_policy": true,
+        "policy_gate": "ESCALATED",
+        "final_action": "ESCALATE_REVIEW"
+      },
+      "NOT_ASKED": {
+        "assessment_source": 1,
+        "policy_source": "INITIAL_POLICY",
+        "question_wait_state": null
+      }
+    }
   },
   "schema": {
     "tables": {
@@ -115,7 +161,7 @@
         }
       },
       "dim_action": {
-        "role": "Permitted demo recommendation codes",
+        "role": "Action catalogue including retired legacy HOLD_DISRUPTION; use shared_contract.candidate_action for active new output codes.",
         "primary_key": [
           "action_id"
         ],
@@ -170,7 +216,7 @@
         }
       },
       "order_rescue": {
-        "role": "One rescue case; at most two stored Agent assessments; final is an immutable selection/copy, not a third Agent assessment.",
+        "role": "One rescue case; initial and optional after-reply assessment/policy snapshots; immutable final assessment selection with outcome-dependent final policy.",
         "primary_key": [
           "case_id"
         ],
@@ -202,9 +248,9 @@
           "question_wait_state": "object|null; schema.object_schemas.question_wait_state",
           "final_assessment_source": "integer 1|2|null",
           "final_assessment": "object|null; exact copy of selected assessment, not a third assessment",
-          "eligibility": "ELIGIBLE|INELIGIBLE|UNKNOWN|null; selected final policy result",
-          "policy_gate": "PERMITTED|BLOCKED|ESCALATED|null; selected final policy result",
-          "final_action_id": "string|null; selected policy final_action; FK to dim_action.action_id",
+          "eligibility": "ELIGIBLE|INELIGIBLE|UNKNOWN|null; final policy result; may override policy 1 after no-reply",
+          "policy_gate": "PERMITTED|BLOCKED|ESCALATED|null; final policy result; may override policy 1 after no-reply",
+          "final_action_id": "string|null; final policy action, including no-reply review override; FK to dim_action.action_id",
           "reason": "string|null; selected policy reason",
           "updated_at": "ISO datetime, required"
         },
@@ -239,20 +285,20 @@
               1,
               2
             ],
-            "rule": "1 = initial; 2 = after reply; null before final or for a pre-AI bypass outside this suite."
+            "rule": "1 = initial assessment for USER_NO_REPLY or NOT_ASKED; 2 = after reply; null before final or pre-AI bypass. This selector does not force final policy to copy the same stage."
           }
         },
         "cross_field_constraints": [
-          "Persist initial_assessment and initial_policy_output before emitting the first buyer question.",
-          "At most one AI_QUESTION per case; question_key in the stored initial assessment is the planned category.",
-          "after_reply_assessment/policy may be set only after a matching BUYER_REPLY interaction; never create them for USER_NO_REPLY.",
-          "USER_NO_REPLY preserves the initial assessment/policy exactly. It does not advance the logistics clock or imply refusal.",
-          "When final_assessment_source=1, after_reply_assessment and after_reply_policy_output are null in this suite, and final_assessment equals initial_assessment.",
-          "When final_assessment_source=2, both after_reply objects exist and final_assessment equals after_reply_assessment.",
-          "eligibility, policy_gate, final_action_id and reason copy the selected policy output. final_action_id maps from its final_action key.",
-          "Write final selection and selected policy columns atomically; do not overwrite an already COMPLETED case.",
-          "A final candidate CLARIFY is an unresolved-information outcome; it must not issue another question or permit retry.",
-          "If pre-AI validation blocks outside these 30 fixtures, all Agent assessment fields remain null; policy handoff may still be stored."
+          "Validate populated Agent output and policy, then persist initial slots before emitting or displaying a buyer question.",
+          "At most one AI_QUESTION per case and one primary information gap in its text; no follow-up after reply/no-reply.",
+          "after_reply slots exist only after one valid matching BUYER_REPLY. USER_NO_REPLY and NOT_ASKED leave both slots null.",
+          "BUYER_REPLY: final_assessment_source=2 and final assessment/policy copy after-reply outputs.",
+          "USER_NO_REPLY after initial CLARIFY: final_assessment_source=1 and final assessment equals initial exactly; final policy is ESCALATED/ESCALATE_REVIEW while initial_policy_output remains unchanged.",
+          "NOT_ASKED: no question, no runtime response and question_wait_state=null; finalize from ASSESSED with source=1 and initial assessment/policy.",
+          "Source=1 identifies the assessment only; final policy is not required to equal initial policy for USER_NO_REPLY.",
+          "Persist final fields atomically once. A completed case is immutable; no third assessment or second question.",
+          "A preserved final candidate CLARIFY after no-reply is historical assessment output; final policy routes to Ops and cannot emit another question.",
+          "Pre-AI bypass is outside the 30 fixtures and keeps Agent assessment slots null."
         ]
       },
       "fact_rescue_interaction": {
@@ -285,7 +331,8 @@
           "At most one response outcome (BUYER_REPLY or USER_NO_REPLY) for the pending question in this two-stage demo.",
           "BUYER_CONTEXT is phase T0 and has question_id=null; do not count it as the reply that triggers assessment 2.",
           "BUYER_REPLY and USER_NO_REPLY bind question_id to the actual existing AI_QUESTION; ignore duplicate event IDs.",
-          "USER_NO_REPLY message_text=null and payload.buyer_reply=null; actor is demo_operator, not buyer."
+          "USER_NO_REPLY message_text=null and payload.buyer_reply=null; actor is demo_operator, not buyer.",
+          "NOT_ASKED is a contact outcome, not an interaction type. It emits no question, reply or no-reply control."
         ]
       }
     },
@@ -337,14 +384,15 @@
       }
     ],
     "constraints": [
-      "One order_rescue per unique failed_event_id; seed mode starts from an existing NEW case.",
-      "The failed event order_id must match its rescue case order_id.",
-      "Only raw sources are seeded. No expected assessment, planned question text, future reply, selected response mode or golden label is seeded.",
-      "Store exactly two possible assessment slots; final is a copy of one slot. No decision-log table or arbitrary round loop is required.",
-      "Buyer history comes from prior fact_order rows joined to fact_delivery_event; current fixtures intentionally have no historical orders.",
-      "Every populated assessment uses the approved seven hypotheses, three confidence levels and eight missing_info codes.",
-      "All source_ref references must resolve to a raw source available at that stage; do not use future replies at stage 1.",
-      "No production logistics execution, real buyer messaging, refund, address/COD modification or contact logs."
+      "One rescue case per unique failed_event_id; existing NEW seed cases are processed without creating duplicates.",
+      "Failed event and rescue case must refer to the same order.",
+      "Seed only raw sources known at T0. Never seed expected assessments, future question/reply text, chosen response mode or golden labels.",
+      "Nine tables and 67 columns. Two possible assessment slots; final is a selected assessment, not a third Agent round.",
+      "Buyer history is derived from prior orders and delivery events with cutoff filtering; [] is valid for this suite.",
+      "New assessment/policy output enums exclude retired HOLD_DISRUPTION although its legacy catalogue row remains.",
+      "Every source_ref resolves to a source available for that case and stage with correct provenance.",
+      "Final policy follows the outcome-specific finalization rule; no-reply review does not overwrite policy 1.",
+      "No real messaging, dispatch, return, refund, address/COD modification or fabricated contact logs."
     ],
     "query_recipes": {
       "open_case": "Read order_rescue by case_id; join fact_order by order_id and fact_delivery_event by failed_event_id; check both refer to the same order.",
@@ -359,11 +407,13 @@
       },
       "runtime_context": "Supply only released RUNTIME interactions for this case in a separate runtime_context envelope; do not overwrite failed_event or put current reply into buyer_history.",
       "source_references": "source_ref_index indexes T0 sources. Runtime interaction_id is its own source_ref; register only when the event is actually released.",
-      "write_initial": "Validate the six-field assessment and four-field policy output, persist initial slots, then emit at most one permitted question and WAIT.",
-      "write_after_reply": "After matching BUYER_REPLY, rebuild input plus released runtime context, run Agent once more and store after_reply slots.",
-      "write_no_reply": "Record USER_NO_REPLY control, leave after_reply slots null, select initial slots without calling Agent again.",
-      "final_write": "Set final_assessment_source, copy selected assessment and four policy fields, mark COMPLETED and finalize question status in one atomic update.",
-      "evaluate": "Only isolated test runner reads the paired test file expected data. Agent/tools have database input views only."
+      "write_initial": "Use write_initial after validation/policy. Persist first, then either open one permitted question or finalize NOT_ASKED.",
+      "write_after_reply": "After a valid matching reply, advance the read cutoff, rebuild raw input plus runtime context, run Agent once, validate and compute policy 2; persist after-reply and final together with finalize_after_contact.",
+      "write_no_reply": "Store a demo_operator USER_NO_REPLY control. Leave after-reply slots null; select initial assessment exactly but compute final ESCALATED/ESCALATE_REVIEW, preserving initial policy.",
+      "final_write": "Use outcome-specific finalization: assessment selector 1/2; no-reply final policy overrides policy 1, otherwise copy policy from selected stage. Finalize atomically once.",
+      "evaluate": "Only isolated test runner reads the paired test file expected data. Agent/tools have database input views only.",
+      "write_not_asked": "No interactions/question state are created. Use finalize_not_asked from ASSESSED with initial assessment and policy.",
+      "question": "Choose one primary buyer-answerable missing_info gap; generate one focused question under one of two broad keys, never a compound request."
     },
     "object_schemas": {
       "assessment": {
@@ -478,7 +528,6 @@
                 "enum": [
                   "CLARIFY",
                   "STANDARD_REATTEMPT",
-                  "HOLD_DISRUPTION",
                   "ESCALATE_REVIEW",
                   "NO_ACTION"
                 ]
@@ -526,7 +575,6 @@
                 "enum": [
                   "CLARIFY",
                   "STANDARD_REATTEMPT",
-                  "HOLD_DISRUPTION",
                   "ESCALATE_REVIEW",
                   "NO_ACTION"
                 ]
@@ -619,6 +667,165 @@
             ]
           }
         }
+      },
+      "agent_assessment_output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence",
+          "hypothesis",
+          "confidence",
+          "missing_info",
+          "question_key",
+          "candidate_action"
+        ],
+        "properties": {
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source_ref",
+                "fact",
+                "verification"
+              ],
+              "properties": {
+                "source_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Reference to a source known at this assessment stage."
+                },
+                "fact": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Sourced observation; distinguish reported claims from confirmed facts."
+                },
+                "verification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "enum": [
+                    "SOURCE_RECORD",
+                    "UNVERIFIED_REPORT",
+                    "DIRECT_BUYER_STATEMENT",
+                    "VERIFIED_OPS_SIGNAL"
+                  ]
+                }
+              }
+            }
+          },
+          "hypothesis": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "AVAILABILITY_ISSUE",
+              "ADDRESS_ISSUE",
+              "CONTACT_ISSUE",
+              "BUYER_INTENT_ISSUE",
+              "PAYMENT_ISSUE",
+              "LOGISTICS_ISSUE",
+              "UNKNOWN_CAUSE"
+            ]
+          },
+          "confidence": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Strength of support for the hypothesis, not delivery-success probability.",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ]
+          },
+          "missing_info": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "enum": [
+                "CURRENT_BUYER_INTENT",
+                "RECEIVING_AVAILABILITY",
+                "ADDRESS_CLARIFICATION",
+                "CONTACT_CLARIFICATION",
+                "COD_READINESS",
+                "DELIVERY_ACCESS",
+                "LOGISTICS_VERIFICATION",
+                "CAUSE_CLARIFICATION"
+              ]
+            },
+            "description": "[] means nothing remains missing; a null assessment means no assessment exists."
+          },
+          "question_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              null,
+              "CONFIRM_INTENT",
+              "CLARIFY_LANDMARK"
+            ],
+            "description": "Planned category at stage 1; category of the question already asked at stage 2/final. Does not authorize a second question."
+          },
+          "candidate_action": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "CLARIFY",
+              "STANDARD_REATTEMPT",
+              "ESCALATE_REVIEW",
+              "NO_ACTION"
+            ]
+          }
+        },
+        "description": "Non-null six-field output required for every actual Agent assessment execution; nullable assessment is only the storage contract."
+      },
+      "policy_engine_output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eligibility",
+          "policy_gate",
+          "final_action",
+          "reason"
+        ],
+        "properties": {
+          "eligibility": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "ELIGIBLE",
+              "INELIGIBLE",
+              "UNKNOWN"
+            ]
+          },
+          "policy_gate": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "PERMITTED",
+              "BLOCKED",
+              "ESCALATED"
+            ]
+          },
+          "final_action": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "CLARIFY",
+              "STANDARD_REATTEMPT",
+              "ESCALATE_REVIEW",
+              "NO_ACTION"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "description": "Non-null four-field output required when a policy evaluation executes."
       }
     },
     "assessment_field_mapping": {
@@ -653,47 +860,117 @@
         "final_path": "order_rescue.final_assessment.candidate_action"
       }
     },
-    "object_schema_dialect": "https://json-schema.org/draft/2020-12/schema"
+    "object_schema_dialect": "https://json-schema.org/draft/2020-12/schema",
+    "sql_recipes": {
+      "load_case": "SELECT\n    c.case_id, c.order_id, c.failed_event_id, c.as_of,\n    c.current_status AS case_status,\n    c.attempts_used, c.return_state, c.deadline_at, c.policy_version,\n    o.buyer_id, o.payment_type, o.current_status AS order_status,\n    o.operational_context,\n    e.order_id AS event_order_id,\n    e.event_time, e.event_type, e.event_status,\n    e.courier_note, e.reported_reason, e.source_actor\nFROM order_rescue AS c\nJOIN fact_order AS o ON o.order_id = c.order_id\nJOIN fact_delivery_event AS e ON e.event_id = c.failed_event_id\nWHERE c.case_id = :case_id;\n",
+      "buyer_history": "SELECT\n    prior.order_id, h.event_id, h.event_time,\n    h.event_type, h.event_status, h.courier_note, h.source_actor\nFROM order_rescue AS c\nJOIN fact_order AS current_order ON current_order.order_id = c.order_id\nJOIN fact_order AS prior ON prior.buyer_id = current_order.buyer_id\nJOIN fact_delivery_event AS h ON h.order_id = prior.order_id\nWHERE c.case_id = :case_id\n  AND prior.order_id <> current_order.order_id\n  AND h.event_time <= :as_of\nORDER BY h.event_time, h.event_id;\n",
+      "t0_context": "SELECT interaction_id, interaction_type, message_text, occurred_at, source_actor\nFROM fact_rescue_interaction\nWHERE case_id = :case_id\n  AND available_phase = 'T0'\n  AND interaction_type = 'BUYER_CONTEXT'\n  AND occurred_at <= :as_of\nORDER BY occurred_at, interaction_id;\n",
+      "runtime_context": "SELECT\n    interaction_id, interaction_type, available_phase,\n    question_id, question_key, message_text,\n    occurred_at, source_actor, payload\nFROM fact_rescue_interaction\nWHERE case_id = :case_id\n  AND available_phase = 'RUNTIME'\n  AND occurred_at <= :as_of\nORDER BY occurred_at, interaction_id;\n",
+      "write_initial": "UPDATE order_rescue\nSET initial_assessment = :initial_assessment,\n    initial_policy_output = :initial_policy_output,\n    current_status = 'ASSESSED',\n    as_of = :as_of,\n    updated_at = :updated_at\nWHERE case_id = :case_id\n  AND current_status = 'NEW'\n  AND initial_assessment IS NULL\n  AND initial_policy_output IS NULL\n  AND final_assessment IS NULL;\n",
+      "insert_interaction": "INSERT INTO fact_rescue_interaction (\n    interaction_id, case_id, interaction_type, available_phase,\n    question_id, question_key, message_text,\n    occurred_at, source_actor, payload\n) VALUES (\n    :interaction_id, :case_id, :interaction_type, :available_phase,\n    :question_id, :question_key, :message_text,\n    :occurred_at, :source_actor, :payload\n);\n",
+      "open_question": "UPDATE order_rescue\nSET question_wait_state = :question_wait_state,\n    current_status = 'WAITING_FOR_BUYER',\n    as_of = :as_of,\n    updated_at = :updated_at\nWHERE case_id = :case_id\n  AND current_status = 'ASSESSED'\n  AND initial_assessment IS NOT NULL\n  AND initial_policy_output IS NOT NULL\n  AND question_wait_state IS NULL\n  AND after_reply_assessment IS NULL\n  AND final_assessment IS NULL;\n",
+      "finalize_not_asked": "UPDATE order_rescue\nSET final_assessment_source = 1,\n    final_assessment = initial_assessment,\n    eligibility = :eligibility,\n    policy_gate = :policy_gate,\n    final_action_id = :final_action_id,\n    reason = :reason,\n    current_status = 'COMPLETED',\n    as_of = :as_of,\n    updated_at = :updated_at\nWHERE case_id = :case_id\n  AND current_status = 'ASSESSED'\n  AND initial_assessment IS NOT NULL\n  AND initial_policy_output IS NOT NULL\n  AND question_wait_state IS NULL\n  AND after_reply_assessment IS NULL\n  AND after_reply_policy_output IS NULL\n  AND final_assessment_source IS NULL\n  AND final_assessment IS NULL;\n",
+      "finalize_after_contact": "UPDATE order_rescue\nSET after_reply_assessment = :after_reply_assessment,\n    after_reply_policy_output = :after_reply_policy_output,\n    final_assessment_source = :final_assessment_source,\n    final_assessment = :final_assessment,\n    eligibility = :eligibility,\n    policy_gate = :policy_gate,\n    final_action_id = :final_action_id,\n    reason = :reason,\n    question_wait_state = :question_wait_state,\n    current_status = 'COMPLETED',\n    as_of = :as_of,\n    updated_at = :updated_at\nWHERE case_id = :case_id\n  AND current_status = 'WAITING_FOR_BUYER'\n  AND initial_assessment IS NOT NULL\n  AND initial_policy_output IS NOT NULL\n  AND after_reply_assessment IS NULL\n  AND after_reply_policy_output IS NULL\n  AND final_assessment_source IS NULL\n  AND final_assessment IS NULL;\n",
+      "show_assessments": "SELECT\n    case_id, current_status,\n    initial_assessment, initial_policy_output,\n    after_reply_assessment, after_reply_policy_output,\n    final_assessment_source, final_assessment,\n    eligibility, policy_gate, final_action_id, reason,\n    question_wait_state\nFROM order_rescue\nWHERE case_id = :case_id;\n"
+    }
   },
   "demo_policy_profile": {
-    "policy_version": "demo-two-assessment-v2",
+    "policy_version": "demo-two-assessment-v2.5",
     "status": "DEMO_CONFIG_NOT_LIVE_CARRIER_POLICY",
     "maximum_attempts": 3,
     "maximum_buyer_questions": 1,
+    "maximum_primary_question_gaps": 1,
     "reply_wait_duration_hours": null,
     "no_reply_trigger": "MANUAL_USER_NO_REPLY",
-    "no_reply_final_selection": 1,
-    "reply_final_selection": 2,
+    "response_modes": [
+      "BUYER_REPLY",
+      "USER_NO_REPLY",
+      "NOT_ASKED"
+    ],
+    "finalization": {
+      "BUYER_REPLY": {
+        "assessment_source": 2,
+        "policy_source": "AFTER_REPLY_POLICY"
+      },
+      "USER_NO_REPLY": {
+        "assessment_source": 1,
+        "policy_source": "NO_REPLY_FINALIZATION",
+        "preserve_initial_policy": true,
+        "policy_gate": "ESCALATED",
+        "final_action": "ESCALATE_REVIEW"
+      },
+      "NOT_ASKED": {
+        "assessment_source": 1,
+        "policy_source": "INITIAL_POLICY",
+        "question_wait_state": null
+      }
+    },
+    "active_action_ids": [
+      "CLARIFY",
+      "STANDARD_REATTEMPT",
+      "ESCALATE_REVIEW",
+      "NO_ACTION"
+    ],
+    "retired_action_ids": [
+      "HOLD_DISRUPTION"
+    ],
+    "assessment_requirements": {
+      "payment_hypothesis": "PAYMENT_ISSUE requires a payment-specific observation or statement. Payment type COD alone, including a vague note merely repeating COD, is not cause evidence; use UNKNOWN_CAUSE when no main cause is supported.",
+      "cod_readiness": "For a COD order, include COD_READINESS while current readiness is not established by available sources, even when the main hypothesis is not PAYMENT_ISSUE. Remove it only after supporting information is available.",
+      "missing_info_scope": "All unresolved information relevant to rescuing this order, including buyer intent/availability when routed to Ops; not just information needed for the next action.",
+      "logistics": "Specific logistics barriers requiring Ops are ESCALATE_REVIEW and NOT_ASKED. Vague traffic/peak notes alone remain UNKNOWN_CAUSE/LOW.",
+      "retired_hold": "HOLD_DISRUPTION is legacy catalogue data only. It is excluded from new assessment/policy output enums and workbook active dropdowns."
+    },
+    "question_contract": {
+      "maximum_questions_per_case": 1,
+      "maximum_primary_information_gaps": 1,
+      "primary_gap_selection": "One most important buyer-answerable unresolved gap that can change the recommendation; do not ask a compound or multi-part question.",
+      "no_followup_after_reply_or_no_reply": true,
+      "key_selection": {
+        "CLARIFY_LANDMARK": "Address/landmark/block/access or an address-related barrier at the registered receiving point.",
+        "CONFIRM_INTENT": "Other buyer-side clarification: intent, availability, contact, COD or cause. Classify by the primary purpose in case context."
+      }
+    },
     "retry_requires": [
       "ELIGIBLE lifecycle",
-      "Direct current buyer intent to receive",
+      "Direct current buyer intent",
       "Receiving availability",
-      "Delivery information sufficient",
-      "COD readiness when payment is relevant",
-      "No unresolved blocking source conflict"
+      "Sufficient delivery information",
+      "Current COD readiness when relevant",
+      "No unresolved blocker or blocking source conflict"
     ],
-    "hold_requires": [
-      "Verified Ops disruption",
-      "Matching route/time scope",
-      "Active signal",
-      "Ops reassessment required; no automatic third Agent round in this demo"
-    ],
-    "safety": [
-      "Courier note is unverified",
-      "Silence is not refusal",
-      "History cannot auto-deny",
-      "High confidence does not override policy",
-      "No real dispatch/return/refund or address/COD change"
-    ],
+    "logistics_policy": {
+      "action": "ESCALATE_REVIEW",
+      "gate": "ESCALATED",
+      "contact_outcome": "NOT_ASKED",
+      "keep_all_relevant_missing_info": true,
+      "buyer_cannot_verify_or_clear_operational_blockers": true
+    },
     "excluded_before_ai": [
       "Malformed input",
       "Unsanitized PII",
-      "Return started/completed",
+      "Return started/completed/unknown",
       "Unknown/expired deadline",
       "No attempts remaining",
       "Duplicate/stale trigger"
     ],
-    "clarify_when_final": "An initial CLARIFY selected after manual no-reply stays CLARIFY; show unresolved information to Ops, do not emit a new question or claim retry permission."
+    "clarify_when_final": "After no-reply, final assessment may retain candidate CLARIFY because it is an unchanged initial copy; final policy is review. Never send another question.",
+    "safety": [
+      "Silence is not refusal",
+      "Confidence does not override policy",
+      "History cannot auto-deny",
+      "Courier note is unverified",
+      "No real logistics execution"
+    ],
+    "simulation_clock": {
+      "mode": "FIXED_FIXTURE_CLOCK",
+      "t0": "2026-10-24T08:00:00Z",
+      "question_at": "2026-10-24T08:01:00Z",
+      "outcome_at": "2026-10-24T08:02:00Z",
+      "logistics_deadline": "2026-10-28T08:00:00Z",
+      "no_real_wait": true,
+      "reply_wait_duration_hours": null
+    }
   },
   "runtime_contract": {
     "initial_agent_core_fields": [
@@ -712,7 +989,7 @@
     "states": [
       {
         "from": "NEW",
-        "event": "VALID_INITIAL_ASSESSMENT",
+        "event": "VALID_INITIAL_ASSESSMENT_AND_POLICY",
         "to": "ASSESSED",
         "write": [
           "initial_assessment",
@@ -721,10 +998,21 @@
       },
       {
         "from": "ASSESSED",
-        "event": "PERMITTED_FIRST_QUESTION",
+        "event": "NOT_ASKED_TERMINAL_DECISION",
+        "to": "COMPLETED",
+        "write": [
+          "final_assessment_source=1",
+          "copy initial assessment",
+          "copy initial policy",
+          "question_wait_state stays null; no runtime interactions"
+        ]
+      },
+      {
+        "from": "ASSESSED",
+        "event": "PERMITTED_FIRST_SINGLE_FOCUS_QUESTION",
         "to": "WAITING_FOR_BUYER",
         "write": [
-          "AI_QUESTION interaction",
+          "one AI_QUESTION interaction",
           "question_wait_state PENDING"
         ]
       },
@@ -736,7 +1024,7 @@
           "BUYER_REPLY interaction",
           "after_reply slots",
           "final_assessment_source=2",
-          "selected final fields",
+          "copy after-reply assessment and policy",
           "question status ANSWERED"
         ]
       },
@@ -745,16 +1033,38 @@
         "event": "MANUAL_USER_NO_REPLY",
         "to": "COMPLETED",
         "write": [
-          "USER_NO_REPLY control",
+          "USER_NO_REPLY control by demo_operator",
+          "after_reply slots stay null",
           "final_assessment_source=1",
-          "selected initial fields",
-          "question status NO_REPLY; after_reply slots stay null"
+          "copy initial assessment",
+          "final policy ESCALATED/ESCALATE_REVIEW; initial policy unchanged",
+          "question status NO_REPLY"
         ]
       }
     ],
-    "time": "All current seed cases are evaluated as of 2026-10-24T15:00:00+07:00 and have a synthetic logistics deadline 2026-10-28T15:00:00+07:00. No fixed reply duration; manual no-reply does not simulate clock expiry.",
+    "time": "Use fixed fixture clock, not host wall clock. JSON ISO timestamps may contain offsets; normalize UTC in DB and compare instants. Advance cutoff before processing released interactions.",
     "database_isolation": "Reset/clone this seed per test run. Agent reads an explicit raw-input projection, never complete order_rescue rows containing prior outputs.",
-    "atomicity": "Question emission is idempotent; reply/skip transition is serialized per case. Final selection is immutable."
+    "atomicity": "Question storage and transition are atomic/idempotent; response outcomes serialized per case; after-reply and final written together; final immutable.",
+    "simulation_clock": {
+      "mode": "FIXED_FIXTURE_CLOCK",
+      "t0": "2026-10-24T08:00:00Z",
+      "question_at": "2026-10-24T08:01:00Z",
+      "outcome_at": "2026-10-24T08:02:00Z",
+      "logistics_deadline": "2026-10-28T08:00:00Z",
+      "no_real_wait": true,
+      "reply_wait_duration_hours": null
+    },
+    "question_limits": {
+      "maximum_questions_per_case": 1,
+      "maximum_primary_information_gaps": 1,
+      "primary_gap_selection": "One most important buyer-answerable unresolved gap that can change the recommendation; do not ask a compound or multi-part question.",
+      "no_followup_after_reply_or_no_reply": true,
+      "key_selection": {
+        "CLARIFY_LANDMARK": "Address/landmark/block/access or an address-related barrier at the registered receiving point.",
+        "CONFIRM_INTENT": "Other buyer-side clarification: intent, availability, contact, COD or cause. Classify by the primary purpose in case context."
+      }
+    },
+    "validation": "Every actual Agent execution requires non-null agent_assessment_output. Validate before policy/persist and before contact. No extra assessment round or follow-up question."
   },
   "seed_data": {
     "dim_buyer": [
@@ -923,7 +1233,7 @@
     "dim_action": [
       {
         "action_id": "CLARIFY",
-        "description": "Ask one buyer question if policy permits"
+        "description": "One focused buyer question if permitted. A preserved final assessment may retain this candidate after no-reply, while final policy routes to review."
       },
       {
         "action_id": "STANDARD_REATTEMPT",
@@ -931,7 +1241,7 @@
       },
       {
         "action_id": "HOLD_DISRUPTION",
-        "description": "Hold for verified disruption and a reassessment point"
+        "description": "RETIRED in MVP v2.5; legacy compatibility only. Route logistics to ESCALATE_REVIEW."
       },
       {
         "action_id": "ESCALATE_REVIEW",
@@ -953,7 +1263,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-001-FAIL",
             "DEMO-001-NOTE"
@@ -971,7 +1281,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-002-FAIL",
             "DEMO-002-NOTE"
@@ -989,7 +1299,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-003-FAIL",
             "DEMO-003-NOTE",
@@ -1008,7 +1318,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-004-FAIL",
             "DEMO-004-NOTE"
@@ -1026,7 +1336,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-005-FAIL",
             "DEMO-005-NOTE"
@@ -1044,7 +1354,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-006-FAIL",
             "DEMO-006-NOTE"
@@ -1062,7 +1372,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-007-FAIL",
             "DEMO-007-NOTE"
@@ -1084,7 +1394,7 @@
             "verification": "VERIFIED"
           },
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-008-FAIL",
             "DEMO-008-NOTE",
@@ -1103,7 +1413,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-009-FAIL",
             "DEMO-009-NOTE"
@@ -1121,7 +1431,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-010-FAIL",
             "DEMO-010-NOTE"
@@ -1139,7 +1449,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-011-FAIL",
             "DEMO-011-NOTE"
@@ -1157,7 +1467,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-012-FAIL",
             "DEMO-012-NOTE"
@@ -1175,7 +1485,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-013-FAIL",
             "DEMO-013-NOTE"
@@ -1193,7 +1503,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-014-FAIL",
             "DEMO-014-NOTE"
@@ -1211,7 +1521,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-015-FAIL",
             "DEMO-015-NOTE"
@@ -1229,7 +1539,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-016-FAIL",
             "DEMO-016-NOTE"
@@ -1247,7 +1557,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-017-FAIL",
             "DEMO-017-NOTE",
@@ -1266,7 +1576,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-018-FAIL",
             "DEMO-018-NOTE"
@@ -1284,7 +1594,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-019-FAIL",
             "DEMO-019-NOTE"
@@ -1302,7 +1612,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-020-FAIL",
             "DEMO-020-NOTE"
@@ -1320,7 +1630,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-021-FAIL",
             "DEMO-021-NOTE",
@@ -1339,7 +1649,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-022-FAIL",
             "DEMO-022-NOTE"
@@ -1365,7 +1675,7 @@
             "reassess_required": true
           },
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-023-FAIL",
             "DEMO-023-NOTE",
@@ -1384,7 +1694,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-024-FAIL",
             "DEMO-024-NOTE"
@@ -1402,7 +1712,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-025-FAIL",
             "DEMO-025-NOTE"
@@ -1428,7 +1738,7 @@
             "reassess_required": true
           },
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-026-FAIL",
             "DEMO-026-NOTE",
@@ -1447,7 +1757,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-027-FAIL",
             "DEMO-027-NOTE"
@@ -1465,7 +1775,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-028-FAIL",
             "DEMO-028-NOTE"
@@ -1483,7 +1793,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-029-FAIL",
             "DEMO-029-NOTE"
@@ -1501,7 +1811,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-030-FAIL",
             "DEMO-030-NOTE"
@@ -2093,7 +2403,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2117,7 +2427,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2141,7 +2451,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2165,7 +2475,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2189,7 +2499,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2213,7 +2523,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2237,7 +2547,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2261,7 +2571,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2285,7 +2595,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2309,7 +2619,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2333,7 +2643,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2357,7 +2667,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2381,7 +2691,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2405,7 +2715,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2429,7 +2739,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2453,7 +2763,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2477,7 +2787,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2501,7 +2811,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2525,7 +2835,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2549,7 +2859,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2573,7 +2883,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2597,7 +2907,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2621,7 +2931,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2645,7 +2955,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2669,7 +2979,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2693,7 +3003,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2717,7 +3027,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2741,7 +3051,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2765,7 +3075,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2789,7 +3099,7 @@
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
         "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -3389,13 +3699,11 @@
     }
   },
   "seed_notes": [
-    "All initial/after-reply/final assessment and policy/result slots start null in all 30 cases.",
-    "T0 BUYER_CONTEXT messages for three cases are real raw synthetic input from the workbook, not future replies. Their presence supports HIGH initial confidence when the cause is directly confirmed.",
-    "The three T0 buyer messages are stored once as interactions. Retrieval projects them into operational_context.buyer_messages_t0 to reproduce workbook input J.",
-    "There are no seeded AI_QUESTION, BUYER_REPLY or USER_NO_REPLY records. Simulator controls and future reply text exist only in the paired test file.",
-    "No historical orders are invented: buyer_history=[] in this suite. Schema and query recipe still support history from earlier orders/events.",
-    "dim_product and dim_carrier remain empty; optional IDs and unavailable buyer attributes stay null. Do not fabricate order_created_at, COD amount or product/carrier data.",
-    "Source references address raw observations. Runtime interaction IDs become source refs only when those records are released and stored.",
-    "No new decision-log table is added. Initial and after-reply assessments are two fixed slots; final is a selected copy."
+    "All 30 seed cases are NEW with every assessment/policy/final/question-state slot null.",
+    "Three T0 BUYER_CONTEXT interactions are raw synthetic input known before the question. They are projected into operational_context.buyer_messages_t0.",
+    "There are no seeded AI_QUESTION, BUYER_REPLY, USER_NO_REPLY or NOT_ASKED records. Future response text and modes are only in the isolated test file.",
+    "No history is invented; buyer_history=[] for the suite. Optional product/carrier/buyer attributes remain unavailable/null.",
+    "source_ref_index covers T0 sources only. Released runtime interaction_id becomes a source_ref at runtime.",
+    "HOLD_DISRUPTION catalogue row is retired compatibility data, excluded from new output enums. No decision-log table is added."
   ]
 }

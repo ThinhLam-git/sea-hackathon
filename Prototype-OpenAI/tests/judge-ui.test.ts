@@ -4,10 +4,11 @@ import {runView} from "../lib/order-rescue-v2/view";
 import {decisionPresentation,submissionUsesLive} from "../features/judge-demo/presentation";
 
 describe("Lucas UI adapter uses backend outcomes",()=>{
- it("shows a real hold while a buyer question is pending",async()=>{
+ it("sends verified logistics directly to Ops",async()=>{
   const sim=new Simulator(),[r]=await sim.start("DEMO-023"),view=runView(sim,r.run_id);
-  expect(view.lifecycle).toBe("WAITING_FOR_BUYER");
-  expect(decisionPresentation(view)).toMatchObject({tone:"hold",title:"Tạm giữ vì gián đoạn vận hành"});
+  expect(view.lifecycle).toBe("COMPLETED");
+  expect(view.question).toMatchObject({no_reply:false});
+  expect(decisionPresentation(view)).toMatchObject({tone:"review",title:"Chuyển Ops xem xét"});
  });
  it("does not label an insufficient buyer reply as a successful retry",async()=>{
   const sim=new Simulator(),[r]=await sim.start("DEMO-030");const view=runView(sim,r.run_id),sample=view.events[0];
@@ -17,7 +18,7 @@ describe("Lucas UI adapter uses backend outcomes",()=>{
  it("shows unresolved human review when no reply retains initial CLARIFY",async()=>{
   const sim=new Simulator(),[r]=await sim.start("DEMO-001");
   sim.noReply(r.run_id,crypto.randomUUID(),r.question_wait_state!.question_id);
-  const view=runView(sim,r.run_id);expect(view.history.at(-1)?.final_action).toBe("CLARIFY");
+  const view=runView(sim,r.run_id);expect(view.history.at(-1)?.final_action).toBe("ESCALATE_REVIEW");
   expect(decisionPresentation(view)).toMatchObject({tone:"review",label:"Giữ đánh giá ban đầu"});
   expect(view.assessment_slots.after_reply).toBeNull();
  });

@@ -1,3 +1,19 @@
+# Hosted Agents API migration (v2.2)
+
+The active v2.2 assessor now calls `/v1/agents/sessions` directly with `OpenAI-Beta: agents=v1`. OpenAI hosts the agent harness; the app retains its fixed stage sequence, policy checks and two-assessment state machine. Each assessment creates an isolated session with the same prompt/schema/model, no execution environment, tools or subagents. Session/turn/agent IDs are appended to decision metadata. The Decisions confidence rubric remains unchanged and also uses native HTTPS.
+
+The backend checks turn completion, retrieves final-answer items for that turn, recovers transient read failures without submitting input again, and cancels unfinished work on timeout. Cancellation acceptance alone is not confirmation; a bounded terminal-status check records confirmed or unconfirmed cleanup. Session creation is not retried after an ambiguous transport error. Such cases go to Ops; the MVP has no durable background job/resume system.
+
+D1 schema, old run JSON and immutable historical audit records are preserved. New model metadata is additive. Existing in-progress v2.2 runs can finish using the new assessor; No reply still selects the saved initial assessment without inference. Reply/no-reply reservations are 120 seconds; provider processing has a 45-second assessment deadline, bounded 8-second cancellation, and 20-second confidence deadline. No new timer or policy deadline is introduced.
+
+Rollback is a redeployment of the previous Site/source version, with no database rollback. The original v0.5 SDK implementation remains for 25-case regression checks; its SDK packages are development-only. Shared DB/runtime utilities are SDK-free, and the active application has no runtime SDK imports.
+
+Verification: `npm test`, `npm run typecheck`, 30-case Replay and 25-case legacy checks, Sites build, bounded live hosted assessment plus Decisions score, and deployed-browser smoke. Draft fixtures are behavioral examples, not measured model accuracy.
+
+---
+
+## Historical v0.5 migration notes
+
 # OpenAI migration record
 
 ## Confirmed baseline

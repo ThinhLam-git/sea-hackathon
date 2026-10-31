@@ -1,4 +1,4 @@
-import type { RuntimeConfig } from "../order-rescue/pipeline";
+import type { RuntimeConfig } from "../server-runtime";
 import { loadCase, caseIds } from "./fixtures";
 import controls from "../../fixtures/v2/controls.json";
 import { policyOnly, type Decision, type RunState, type RawCase, type PipelineState } from "./models";

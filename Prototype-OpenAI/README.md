@@ -16,14 +16,20 @@ Clock values belong to the synthetic scenario. An initial CLARIFY kept after No 
 
 ## Stack and flow
 
-- OpenAI Agents SDK with one structured, tool-free Responses call per assessment (`gpt-5.4-mini`).
-- Decisions API evidence-support scoring (`gpt-6-luna`) after each live assessment.
+- Hosted OpenAI **Agents API** with one isolated, tool-free managed agent session per assessment (`gpt-5.4-mini`). The active backend uses native HTTPS, without an OpenAI client SDK.
+- Direct Decisions API evidence-support scoring (`gpt-6-luna`) after each live assessment.
 - React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
 - The same seven stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`.
 
 At most **two assessments**: initial and after a matching buyer reply. Manual No reply selects initial exactly; there is no third assessment or second question. Concurrent outcomes are serialized before inference and saved with revision checks. Failures go to Ops without silent Replay fallback. Auth remains lightweight; no roles, teams or administration screens.
 
 The nine logical tables from the supplied raw seed are joined into an explicit server-only input projection. Mutable review state uses the existing D1 tables, keeping the MVP small. Future replies, expected outputs and previous assessment/result slots are excluded from AI inputs. Buyer history stays empty where the seed provides none.
+
+The hosted agent owns model execution and turn lifecycle. The application owns the fixed seven stages and deterministic policy gates. Each stage has a `SKILL.md` contract plus TypeScript implementation; Markdown files are documentation, not automatically registered callable tools. The assessor receives no tools, sandbox or subagents. Buyer questions and delivery actions remain staff-controlled.
+
+Session, agent and turn IDs are saved in decision metadata and shown under **Technical details → Hosted agent session**. The backend checks the intended turn's terminal status and reads its durable final answer. Transient observation failures retry reads only; creation/input is never silently resubmitted. A timed-out or unexpectedly tool-requesting turn is cancelled with a bounded confirmation check; an unconfirmed cancellation is recorded and the case goes to Ops. An ambiguous lost creation response fails closed without a new session. No automatic cross-request resume is implemented in this MVP.
+
+The current key needs Agents read/write and Responses write access. The default model was verified with a completed hosted turn; API credits and a ChatGPT subscription alone do not establish these permissions. Agent sessions retain the synthetic assessment input on OpenAI for audit; secrets and draft evaluator labels are never sent. The assessment prompt and six-field contract are unchanged.
 
 ## Data and reference documents
 
@@ -87,7 +93,7 @@ The policy workbook contains broader proposals and public references. Only the s
 - `app/api/`: authenticated case/session, reply and manual no-reply routes.
 - `lib/order-rescue-v2/`: active v2.2 projection, simulator, seven skills, policy, scoring, storage and evaluator.
 - `fixtures/v2/`: versioned synthetic inputs and isolated replay/test data.
-- `lib/order-rescue/`, original `fixtures/`: retained v0.5 rollback path.
+- `lib/order-rescue/`, original `fixtures/`: retained v0.5 rollback path. Its SDK dependencies are development-only and excluded from the active runtime bundle.
 - `db/`, `drizzle/`: existing D1 schema and migration; no new operational-schema migration was needed.
 
 Preserve `.openai/hosting.json` Site identity/public audience and use Sites source/build/publication tools. Never commit env files, credentials, local databases, generated builds or node_modules.

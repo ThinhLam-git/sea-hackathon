@@ -1,4 +1,4 @@
-import type { RuntimeConfig } from "../order-rescue/pipeline";
+import type { RuntimeConfig } from "../server-runtime";
 import type { PipelineState } from "./models";
 import * as load from "./skills/load-case/skill";
 import * as prepare from "./skills/prepare-input/skill";

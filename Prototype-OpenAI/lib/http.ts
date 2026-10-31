@@ -1,5 +1,5 @@
 import { getChatGPTUser } from "@/app/chatgpt-auth";
-import { HttpError } from "./order-rescue/repository";
+import { HttpError } from "./server-runtime";
 export async function owner() {
   const user = await getChatGPTUser();
   if (user) return user.userId;

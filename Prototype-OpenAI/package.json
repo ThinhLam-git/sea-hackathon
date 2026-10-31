@@ -41,9 +41,7 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "3.6.0",
     "vaul": "^1.1.2",
-    "zod": "^4.0.0",
-    "@openai/agents": "^0.21.0",
-    "openai": "^7.46.0"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
@@ -67,7 +65,9 @@
     "vite": "8.0.13",
     "wrangler": "4.92.0",
     "vitest": "^4.1.12",
-    "tsx": "^4.23.15"
+    "tsx": "^4.23.15",
+    "openai": "^7.46.0",
+    "@openai/agents": "^0.21.0"
   },
   "type": "module",
   "overrides": {
@@ -75,5 +75,5 @@
       "sharp": "0.35.4"
     }
   },
-  "description": "Order Rescue v2.2 \u2014 OpenAI Agents SDK, Responses and Decisions; 30 synthetic delivery cases"
+  "description": "Order Rescue v2.2 \u2014 hosted OpenAI Agents API and Decisions; 30 synthetic delivery cases"
 }

@@ -20,7 +20,7 @@ This app recommends; delivery-operations staff decides. Synthetic data, demo pol
 
 Each stage has `skills/<name>/SKILL.md` and `skill.ts`. `name` must match the folder. `policy-gate`, `compose-recommendation`, and `audit-log` run after a halt; AI preparation/assessment/validation are skipped when halted before AI. The model cannot choose or skip stages, and has no tools/handoffs.
 
-LIVE_AI uses one tool-free Agents SDK/Responses turn followed by one Decisions score in the same assessment stage. REPLAY uses a hand-authored draft assessment and never fabricates an API score. Failures/refusals/invalid output go to Ops without fallback. Keys and provider errors never enter responses, state, traces or browser code.
+LIVE_AI uses one tool-free hosted Agents API session/turn (native HTTPS, environment `none`, no subagents) followed by one Decisions score in the same assessment stage. REPLAY uses a hand-authored draft assessment and never fabricates an API score. Failures/refusals/invalid output go to Ops without fallback. Keys and provider errors never enter responses, state, traces or browser code. Keep managed session/agent/turn IDs in audit metadata. Retry observations only, never resubmit ambiguous creation/input; cancel unfinished work on timeout and record whether cancellation was confirmed.
 
 ## Two assessments, one immutable final
 

@@ -1,4 +1,4 @@
-import { database, runtime, HttpError } from "../order-rescue/repository";
+import { database, runtime, HttpError } from "../server-runtime";
 import { Simulator } from "./simulator";
 import type { Decision, RunState } from "./models";
 export { runtime, HttpError };
@@ -21,7 +21,7 @@ export async function persist(sim:Simulator,id:string,owner:string,revision?:num
 
 /** A short reservation serializes reply/no-reply without adding an account or queue system. */
 export async function reserve(id:string,owner:string,revision:number){
- const token=`lock:${Date.now()+90000}:${crypto.randomUUID()}`;
+ const token=`lock:${Date.now()+120000}:${crypto.randomUUID()}`;
  const result=await database().prepare("UPDATE rescue_runs SET write_token = ?, revision = revision + 1 WHERE id = ? AND owner = ? AND revision = ? AND (write_token NOT LIKE 'lock:%' OR CAST(substr(write_token,6,13) AS INTEGER) <= ?)").bind(token,id,owner,revision,Date.now()).run();
  if(result.meta.changes!==1)throw new HttpError(409,"This case is already being reviewed or changed in another tab. Refresh before continuing.");
  return {revision:revision+1,token};

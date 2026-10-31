@@ -1,12 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Runner } from "@openai/agents";
-import { Decisions } from "openai/resources/decisions";
 import { Simulator, TransitionError } from "../lib/order-rescue-v2/simulator";
 import { scenarios } from "../lib/order-rescue-v2/evaluator";
 import { loadCase, caseIds } from "../lib/order-rescue-v2/fixtures";
 import { run as prepare } from "../lib/order-rescue-v2/skills/prepare-input/skill";
 import type { PipelineState } from "../lib/order-rescue-v2/models";
-afterEach(()=>vi.restoreAllMocks());
+afterEach(()=>{vi.restoreAllMocks();vi.unstubAllGlobals();});
 describe("v2.2 two-assessment contract",()=>{
  it.each(scenarios.map(c=>[c.case_id,c] as const))("runs %s against the supplied draft behavior fixture",async(id,c)=>{
   const sim=new Simulator(),[run,initial]=await sim.start(id),before=JSON.stringify(initial);
@@ -30,11 +28,11 @@ describe("v2.2 two-assessment contract",()=>{
  });
  it("selects initial on manual no-reply without inference, a timer, or a synthetic buyer refusal",async()=>{
   const sim=new Simulator(),[run]=await sim.start("DEMO-005"),now=run.now,initial=JSON.stringify(run.initial_assessment);
-  const agent=vi.spyOn(Runner.prototype,"run"),scorer=vi.spyOn(Decisions.prototype,"create"),id=crypto.randomUUID(),q=run.question_wait_state!.question_id;
+  const transport=vi.fn();vi.stubGlobal("fetch",transport);const id=crypto.randomUUID(),q=run.question_wait_state!.question_id;
   sim.noReply(run.run_id,id,q);expect(sim.noReply(run.run_id,id,q)).toBeNull();
   expect(run.now).toBe(now);expect(run.after_reply_assessment).toBeNull();expect(JSON.stringify(run.final_assessment)).toBe(initial);
   expect(run.final_policy_output?.final_action).toBe("CLARIFY");expect(run.question_wait_state?.status).toBe("NO_REPLY");expect(run.applied).toEqual([]);
-  expect(agent).not.toHaveBeenCalled();expect(scorer).not.toHaveBeenCalled();expect(sim.history(run.run_id)).toHaveLength(2);
+  expect(transport).not.toHaveBeenCalled();expect(sim.history(run.run_id)).toHaveLength(2);
   await expect(sim.recordBuyerReply(run.run_id,"Reply",crypto.randomUUID(),q,true)).rejects.toThrow("finalized");
  });
  it("binds one reply to the actual question and rejects conflicting retries",async()=>{
@@ -54,10 +52,10 @@ describe("v2.2 two-assessment contract",()=>{
  });
  it.each(["STARTED","COMPLETED"] as const)("blocks return state %s before any model call",async(value)=>{
   const c=loadCase("DEMO-001");c.input.return_state=value;
-  const agent=vi.spyOn(Runner.prototype,"run"),scorer=vi.spyOn(Decisions.prototype,"create");
+  const transport=vi.fn();vi.stubGlobal("fetch",transport);
   const [run,d]=await new Simulator("LIVE_AI",{apiKey:"test-key"}).start(c.case_id,c);
   expect(d.policy_gate).toBe("BLOCKED");expect(run.current_status).toBe("COMPLETED");expect(run.question_wait_state).toBeNull();
-  expect(agent).not.toHaveBeenCalled();expect(scorer).not.toHaveBeenCalled();
+  expect(transport).not.toHaveBeenCalled();
  });
  it("loads 30 raw seed cases without inventing buyer history",()=>{
   expect(caseIds).toHaveLength(30);for(const id of caseIds){const c=loadCase(id);expect(c.input.buyer_history).toEqual([]);expect(c).not.toHaveProperty("expected");expect(c.sources.every(s=>s.phase==="T0")).toBe(true);}

@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
 import { z } from "zod";
 import type { Assessment, ConfidenceScore, PipelineState } from "./models";
 

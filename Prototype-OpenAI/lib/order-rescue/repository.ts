@@ -1,16 +1,8 @@
-import { env } from "cloudflare:workers";
 import type { Decision, RunState } from "./models";
 import { Simulator } from "./simulator";
-import { MODEL } from "./skills/assess-case/skill";
+import { database, runtime, HttpError } from "../server-runtime";
+export { database, runtime, HttpError };
 
-export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
-export function database() { if (!env.DB) throw new HttpError(503, "Demo storage is unavailable"); return env.DB; }
-export function runtime() {
-  return { apiKey: env.OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-    model: env.ORDER_RESCUE_MODEL || process.env.ORDER_RESCUE_MODEL || MODEL,
-    // Tracing is opt-in; the audit timeline remains available in both modes.
-    tracing: false };
-}
 export async function restore(id: string, owner: string) {
   const row = await database().prepare("SELECT * FROM rescue_runs WHERE id = ? AND owner = ?").bind(id, owner).first<{ id: string; mode: "REPLAY" | "LIVE_AI"; state: string; revision: number }>();
   if (!row) throw new HttpError(404, "Run not found");

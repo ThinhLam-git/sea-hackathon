@@ -6,10 +6,10 @@ export function run(s:PipelineState){
   const source=s.source_index[e.source_ref];
   if(!source){stop(s,"AI:invalid_evidence_reference","AI dẫn nguồn không có trong dữ liệu hiện tại; chuyển Ops.","ELIGIBLE");break;}
   const expected=source.source_type==="COURIER_NOTE"?"UNVERIFIED_REPORT":source.source_type==="FAILED_DELIVERY"?"SOURCE_RECORD":["BUYER_MESSAGE","BUYER_REPLY"].includes(source.source_type)?"DIRECT_BUYER_STATEMENT":source.source_type==="OPS_CONTEXT"?"VERIFIED_OPS_SIGNAL":"UNVERIFIED_REPORT";
-  if(e.verification!==expected){s.issues.push(`verification_corrected:${e.source_ref}`);e.verification=expected;}
+  if(e.verification!==expected){stop(s,"AI:invalid_verification","AI gán mức xác minh không khớp nguồn; chuyển Ops.","ELIGIBLE");break;}
   if(expected==="VERIFIED_OPS_SIGNAL"){
    const c=source.content,verified=c?.address_validation?.verification==="VERIFIED"||c?.disruption?.verification==="VERIFIED";
-   if(!verified){e.verification="UNVERIFIED_REPORT";s.issues.push(`ops_unverified:${e.source_ref}`);}
+   if(!verified){stop(s,"AI:unverified_ops","Nguồn Ops chưa xác minh không thể hỗ trợ claim verified; chuyển Ops.","ELIGIBLE");break;}
   }
   if(/\b(?:guaranteed|guarantee delivery|refund completed|dispatched)\b|đã hoàn tiền|đã điều shipper/i.test(e.fact)){stop(s,"AI:unsupported_execution_claim","Kết quả chứa tuyên bố thực thi không được hỗ trợ; chuyển Ops.","ELIGIBLE");break;}
  }

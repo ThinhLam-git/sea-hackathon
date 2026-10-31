@@ -1,20 +1,21 @@
 {
   "metadata": {
     "name": "Order Rescue — 30 two-stage golden test fixtures",
-    "version": "2.2-two-assessment-demo",
-    "pair_id": "order-rescue-demo-30-v2.2",
+    "version": "2.4-reconciled",
+    "pair_id": "order-rescue-demo-30-v2.4-reconciled",
     "synthetic": true,
     "count": 30,
-    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.1.xlsx",
-    "companion_database_file": "Order_Rescue_Data_Model_30_Cases_v2.2.json",
+    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.4_reconciled.xlsx",
+    "companion_database_file": "seed.json",
     "not_for_agent_input": true,
-    "expected_outputs_approval": "DRAFT_NEEDS_USER_REVIEW",
+    "expected_outputs_approval": "FINAL",
     "hypothesis_vocabulary_status": "USER_APPROVED",
-    "missing_info_vocabulary_status": "USER_APPROVED"
+    "missing_info_vocabulary_status": "USER_APPROVED",
+    "source_workbook_sha256": "3d9f71a3dd9f8f65ab7122c2a5f4c8b94580b2763d1dcf361a4a15e7ab3d8585"
   },
   "shared_contract": {
-    "pair_id": "order-rescue-demo-30-v2.2",
-    "contract_version": "2.2",
+    "pair_id": "order-rescue-demo-30-v2.4-reconciled",
+    "contract_version": "2.4",
     "hypothesis": [
       "AVAILABILITY_ISSUE",
       "ADDRESS_ISSUE",
@@ -57,14 +58,19 @@
       "VERIFIED_OPS_SIGNAL"
     ],
     "hypothesis_status": "USER_APPROVED",
-    "missing_info_status": "USER_APPROVED"
+    "missing_info_status": "USER_APPROVED",
+    "response_mode": [
+      "BUYER_REPLY",
+      "USER_NO_REPLY",
+      "NOT_ASKED"
+    ]
   },
   "runner_contract": {
     "setup": "Load/reset the paired seed, then process the existing NEW case. Do not create another case for the same failed event.",
     "separation": "Only runner/evaluator can read this file. Retrieval reads database raw sources only, never expected or simulation.future events.",
-    "question_release": "Wait for exactly one actual permitted buyer question. Validate its category/meaning, bind the scripted response to the actual question_id, and then release the chosen event.",
+    "question_release": "If NOT_ASKED, assert immediate completion without a question or runtime response. Otherwise bind one scripted outcome to the actual permitted question.",
     "scripted_reply_scope": "Expected final labels apply to the supplied scripted buyer_reply. Arbitrary live text in a demo may produce different valid outputs; do not force it to match a different scripted reply.",
-    "no_reply": "Manual button releases USER_NO_REPLY. buyer_reply and after_reply assessment/policy remain null. Select initial exactly; no timer, no third assessment.",
+    "no_reply": "Manual USER_NO_REPLY retains assessment 1, leaves phase two null and finalizes policy as ESCALATE_REVIEW without inference.",
     "actual_result_paths": {
       "initial_assessment": "order_rescue.initial_assessment",
       "initial_policy_output": "order_rescue.initial_policy_output",
@@ -97,7 +103,7 @@
     "missing_info": "Compare as an unordered set of approved codes, with [] distinct from an absent/null assessment.",
     "evidence": "Validate source availability, factual support and verification; compare semantic facts rather than exact wording, ordering or exact array length. Every source_ref must resolve.",
     "reason": "Check policy meaning and required conditions; not mandatory verbatim text equality.",
-    "question": "Check one actual buyer question and relevant missing information; reference_text is illustrative, not a required string.",
+    "question": "Compare one focused actual question where permitted, zero for NOT_ASKED; reference wording is illustrative.",
     "behavior": [
       "No golden/future-input access",
       "No fabricated call logs",
@@ -134,7 +140,7 @@
       "case_id": "DEMO-001",
       "group": "AVAILABILITY_ISSUE",
       "description": "Đi làm; buyer xác nhận đúng nguyên nhân",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -164,8 +170,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà."
             }
@@ -199,7 +205,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -281,8 +287,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần trước bạn có vắng nhà không, và bạn còn muốn nhận vào lúc nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -291,7 +297,7 @@
       "case_id": "DEMO-002",
       "group": "AVAILABILITY_ISSUE",
       "description": "Ghi là vắng mặt; thực tế thiếu thông tin block",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -321,8 +327,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà."
             }
@@ -357,7 +363,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -439,8 +445,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần giao trước vướng ở đâu, và bạn có thể nhận lại thế nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì tại địa điểm đã đăng ký?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -449,7 +455,7 @@
       "case_id": "DEMO-003",
       "group": "AVAILABILITY_ISSUE",
       "description": "HIGH ban đầu từ tin buyer có trước câu hỏi",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -480,8 +486,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà."
             }
@@ -520,7 +526,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -612,8 +618,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Hiện bạn còn muốn nhận và có người nhận tại địa điểm cũ không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -622,7 +628,7 @@
       "case_id": "DEMO-004",
       "group": "AVAILABILITY_ISSUE",
       "description": "Reply chung chung, chưa đủ availability",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -652,8 +658,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi vẫn muốn nhận."
             }
@@ -687,7 +693,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -773,8 +779,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận và khi nào có người nhận tại địa điểm đã đăng ký?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -783,7 +789,7 @@
       "case_id": "DEMO-005",
       "group": "AVAILABILITY_ISSUE",
       "description": "Vắng mặt; chọn user không reply",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -813,8 +819,8 @@
             "source_actor": "demo_operator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "buyer_reply": null
             }
@@ -848,7 +854,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": null,
         "after_reply_policy_output": null,
@@ -877,12 +883,12 @@
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
         },
         "change_type": "USER_NO_REPLY",
-        "explanation": "Không có assessment 2; final dùng nguyên assessment 1.",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -900,8 +906,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận và khi nào có người nhận tại địa điểm cũ?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -910,7 +916,7 @@
       "case_id": "DEMO-006",
       "group": "ADDRESS_ISSUE",
       "description": "Thiếu landmark; reply làm rõ",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -940,8 +946,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà."
             }
@@ -976,7 +982,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -1058,8 +1064,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CLARIFY_LANDMARK",
-          "reference_text": "Bạn cho biết mốc gần địa điểm đã đăng ký và khi nào có thể nhận lại được không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -1068,7 +1074,7 @@
       "case_id": "DEMO-007",
       "group": "ADDRESS_ISSUE",
       "description": "Nghi địa chỉ; thực tế cổng cơ quan đóng",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -1098,8 +1104,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được."
             }
@@ -1135,7 +1141,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -1217,8 +1223,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CLARIFY_LANDMARK",
-          "reference_text": "Vướng mắc lần trước là địa chỉ hay việc vào điểm nhận; bạn có thể nhận lại thế nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì tại điểm nhận đã đăng ký?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -1227,7 +1233,7 @@
       "case_id": "DEMO-008",
       "group": "ADDRESS_ISSUE",
       "description": "HIGH ban đầu do kiểm tra dữ liệu địa chỉ",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -1258,8 +1264,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà."
             }
@@ -1299,7 +1305,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -1391,8 +1397,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CLARIFY_LANDMARK",
-          "reference_text": "Bạn cho biết mốc trong địa điểm đã đăng ký và khả năng nhận lại được không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -1401,7 +1407,7 @@
       "case_id": "DEMO-009",
       "group": "ADDRESS_ISSUE",
       "description": "Reply muốn đổi địa điểm, chưa làm rõ địa chỉ cũ",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -1431,8 +1437,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Cứ giao qua chỗ khác cho tôi nhé."
             }
@@ -1467,7 +1473,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -1555,8 +1561,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CLARIFY_LANDMARK",
-          "reference_text": "Bạn có thể bổ sung mốc ở địa điểm đã đăng ký và cho biết khả năng nhận lại không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -1565,7 +1571,7 @@
       "case_id": "DEMO-010",
       "group": "ADDRESS_ISSUE",
       "description": "Thiếu địa chỉ; user không reply",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -1595,8 +1601,8 @@
             "source_actor": "demo_operator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "buyer_reply": null
             }
@@ -1631,7 +1637,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": null,
         "after_reply_policy_output": null,
@@ -1661,12 +1667,12 @@
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
         },
         "change_type": "USER_NO_REPLY",
-        "explanation": "Mốc 2 và reply đều null; không tự đoán landmark.",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -1684,8 +1690,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CLARIFY_LANDMARK",
-          "reference_text": "Bạn bổ sung mốc gần điểm nhận và cho biết khi nào nhận được không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -1694,7 +1700,7 @@
       "case_id": "DEMO-011",
       "group": "CONTACT_ISSUE",
       "description": "Không liên hệ được; buyer đang bận họp",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -1724,8 +1730,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà."
             }
@@ -1760,7 +1766,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -1842,8 +1848,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần trước vì sao bạn chưa nhận được liên hệ, và bạn còn muốn nhận khi nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Điều gì khiến bạn chưa nhận được liên hệ ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -1852,7 +1858,7 @@
       "case_id": "DEMO-012",
       "group": "CONTACT_ISSUE",
       "description": "Mất sóng được buyer xác nhận",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -1882,8 +1888,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà."
             }
@@ -1918,7 +1924,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -2000,8 +2006,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Liên hệ lần trước vướng gì, và bạn có thể nhận lại tại địa điểm cũ không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Kênh liên hệ của bạn gặp vấn đề gì ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2010,7 +2016,7 @@
       "case_id": "DEMO-013",
       "group": "CONTACT_ISSUE",
       "description": "Liên hệ thất bại; reply chỉ nói muốn nhận",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2040,8 +2046,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi vẫn muốn nhận."
             }
@@ -2076,7 +2082,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -2164,8 +2170,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận, khi nào nhận được và lần trước việc liên hệ vướng gì?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2174,7 +2180,7 @@
       "case_id": "DEMO-014",
       "group": "CONTACT_ISSUE",
       "description": "Không liên hệ được; user không reply",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2204,8 +2210,8 @@
             "source_actor": "demo_operator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "buyer_reply": null
             }
@@ -2240,7 +2246,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": null,
         "after_reply_policy_output": null,
@@ -2270,12 +2276,12 @@
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
         },
         "change_type": "USER_NO_REPLY",
-        "explanation": "Không reply không biến thành buyer từ chối.",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -2293,8 +2299,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận và khi nào có thể nhận tại địa điểm cũ?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Hiện bạn còn muốn nhận đơn này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2303,7 +2309,7 @@
       "case_id": "DEMO-015",
       "group": "BUYER_INTENT_ISSUE",
       "description": "Nhãn refused được buyer xác nhận",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2333,8 +2339,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa."
             }
@@ -2368,7 +2374,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -2450,8 +2456,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn có từ chối lần giao trước không, và hiện còn muốn nhận đơn này không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Hiện bạn còn muốn nhận đơn này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2460,7 +2466,7 @@
       "case_id": "DEMO-016",
       "group": "BUYER_INTENT_ISSUE",
       "description": "Refused nhưng nguyên nhân thực là thiếu COD",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2490,8 +2496,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận."
             }
@@ -2517,6 +2523,7 @@
           "missing_info": [
             "CURRENT_BUYER_INTENT",
             "RECEIVING_AVAILABILITY",
+            "COD_READINESS",
             "CAUSE_CLARIFICATION"
           ],
           "question_key": "CONFIRM_INTENT",
@@ -2526,7 +2533,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -2608,8 +2615,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần trước bạn chưa nhận vì lý do gì, và hiện có thể nhận lại không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2618,7 +2625,7 @@
       "case_id": "DEMO-017",
       "group": "BUYER_INTENT_ISSUE",
       "description": "Đơn quà: buyer đã xác nhận chưa biết đơn ở T0",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2649,8 +2656,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà."
             }
@@ -2689,7 +2696,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -2781,8 +2788,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Sau khi xác nhận thông tin đơn quà, bạn còn muốn nhận và có thể nhận lúc nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Hiện bạn có đồng ý nhận đơn quà này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2791,7 +2798,7 @@
       "case_id": "DEMO-018",
       "group": "BUYER_INTENT_ISSUE",
       "description": "Ý định chưa rõ; user không reply",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2821,8 +2828,8 @@
             "source_actor": "demo_operator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "buyer_reply": null
             }
@@ -2856,7 +2863,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": null,
         "after_reply_policy_output": null,
@@ -2885,12 +2892,12 @@
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
         },
         "change_type": "USER_NO_REPLY",
-        "explanation": "Giữ assessment ban đầu, không tự gán DECLINES.",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -2908,8 +2915,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận đơn và có thể nhận tại điểm cũ khi nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Hiện bạn còn muốn nhận đơn này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -2918,7 +2925,7 @@
       "case_id": "DEMO-019",
       "group": "PAYMENT_ISSUE",
       "description": "Thiếu tiền COD được xác nhận",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -2948,8 +2955,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà."
             }
@@ -2984,7 +2991,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -3066,17 +3073,17 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần trước có vướng tiền COD không, và bạn có thể nhận lại với COD hiện tại khi nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
     {
       "test_case_id": "TC-DEMO-020",
       "case_id": "DEMO-020",
-      "group": "PAYMENT_ISSUE",
-      "description": "Nghi COD; thực tế nhầm lối vào",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Đơn COD chưa rõ nguyên nhân; reply làm rõ lối vào",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -3106,8 +3113,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà."
             }
@@ -3128,7 +3135,7 @@
               "verification": "UNVERIFIED_REPORT"
             }
           ],
-          "hypothesis": "PAYMENT_ISSUE",
+          "hypothesis": "UNKNOWN_CAUSE",
           "confidence": "LOW",
           "missing_info": [
             "CURRENT_BUYER_INTENT",
@@ -3143,7 +3150,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -3225,8 +3232,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần trước vướng thanh toán hay việc tìm điểm nhận, và bạn có thể nhận lại không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -3235,7 +3242,7 @@
       "case_id": "DEMO-021",
       "group": "PAYMENT_ISSUE",
       "description": "HIGH payment từ tin buyer có sẵn",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -3266,8 +3273,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà."
             }
@@ -3307,7 +3314,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -3399,8 +3406,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Hiện bạn còn muốn nhận với COD trên đơn, đã sẵn sàng tiền và có người nhận chưa?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -3409,7 +3416,7 @@
       "case_id": "DEMO-022",
       "group": "PAYMENT_ISSUE",
       "description": "COD chưa sẵn sàng; user không reply",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -3439,8 +3446,8 @@
             "source_actor": "demo_operator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "buyer_reply": null
             }
@@ -3475,7 +3482,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": null,
         "after_reply_policy_output": null,
@@ -3505,12 +3512,12 @@
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
         },
         "change_type": "USER_NO_REPLY",
-        "explanation": "Không tự suy ra buyer đã có tiền hoặc từ chối.",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -3528,8 +3535,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận với COD hiện tại và khi nào đủ tiền, có người nhận?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -3538,7 +3545,7 @@
       "case_id": "DEMO-023",
       "group": "LOGISTICS_ISSUE",
       "description": "Ngập đã verified; reply không tự gỡ gián đoạn",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -3558,24 +3565,11 @@
         ]
       },
       "simulation": {
-        "response_mode": "BUYER_REPLY",
-        "buyer_reply": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại.",
+        "response_mode": "NOT_ASKED",
+        "buyer_reply": null,
         "wait_duration_hours": null,
         "advance_logistics_clock_on_no_reply": false,
-        "events_after_start": [
-          {
-            "event_id": "DEMO-023-REPLY",
-            "event_type": "BUYER_REPLY",
-            "source_actor": "buyer_simulator",
-            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
-            "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
-            "payload": {
-              "text": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại."
-            }
-          }
-        ]
+        "events_after_start": []
       },
       "expected": {
         "initial_assessment": {
@@ -3599,54 +3593,20 @@
           "hypothesis": "LOGISTICS_ISSUE",
           "confidence": "HIGH",
           "missing_info": [
-            "CURRENT_BUYER_INTENT",
-            "RECEIVING_AVAILABILITY"
+            "LOGISTICS_VERIFICATION"
           ],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "HOLD_DISRUPTION"
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
         },
         "initial_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "HOLD_DISRUPTION",
-          "reason": "Verified disruption còn active; đề xuất HOLD, câu hỏi chỉ bổ sung intent/availability."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
         },
-        "after_reply_assessment": {
-          "evidence": [
-            {
-              "source_ref": "DEMO-023-FAIL",
-              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
-              "verification": "SOURCE_RECORD"
-            },
-            {
-              "source_ref": "DEMO-023-NOTE",
-              "fact": "Courier note: Tuyến tạm dừng do ngập.",
-              "verification": "UNVERIFIED_REPORT"
-            },
-            {
-              "source_ref": "DEMO-023-OPS",
-              "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
-              "verification": "VERIFIED_OPS_SIGNAL"
-            },
-            {
-              "source_ref": "DEMO-023-REPLY",
-              "fact": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại.",
-              "verification": "DIRECT_BUYER_STATEMENT"
-            }
-          ],
-          "hypothesis": "LOGISTICS_ISSUE",
-          "confidence": "HIGH",
-          "missing_info": [],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "HOLD_DISRUPTION"
-        },
-        "after_reply_policy_output": {
-          "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "HOLD_DISRUPTION",
-          "reason": "Buyer xác nhận intent/availability; không có operational event resolved nên vẫn HOLD."
-        },
-        "final_assessment_source": 2,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
         "final_assessment": {
           "evidence": [
             {
@@ -3663,27 +3623,24 @@
               "source_ref": "DEMO-023-OPS",
               "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
               "verification": "VERIFIED_OPS_SIGNAL"
-            },
-            {
-              "source_ref": "DEMO-023-REPLY",
-              "fact": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại.",
-              "verification": "DIRECT_BUYER_STATEMENT"
             }
           ],
           "hypothesis": "LOGISTICS_ISSUE",
           "confidence": "HIGH",
-          "missing_info": [],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "HOLD_DISRUPTION"
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "HOLD_DISRUPTION",
-          "reason": "Buyer xác nhận intent/availability; không có operational event resolved nên vẫn HOLD."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
         },
-        "change_type": "HIGH_REMAINS_HIGH",
-        "explanation": "Buyer xác nhận intent/availability; không có operational event resolved nên vẫn HOLD.",
+        "change_type": "OPS_REVIEW_WITHOUT_BUYER_CONTACT",
+        "explanation": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -3698,20 +3655,20 @@
           "eligibility": "ELIGIBLE"
         },
         "question": {
-          "count": 1,
+          "count": 0,
           "target": "BUYER",
-          "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận khi tuyến hoạt động lại và có thể bố trí người nhận không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "question_key": null,
+          "reference_text": null,
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
     {
       "test_case_id": "TC-DEMO-024",
       "case_id": "DEMO-024",
-      "group": "LOGISTICS_ISSUE",
+      "group": "UNKNOWN_CAUSE",
       "description": "Note kẹt tuyến; buyer xác nhận thực tế không có người nhận",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -3741,8 +3698,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà."
             }
@@ -3763,8 +3720,8 @@
               "verification": "UNVERIFIED_REPORT"
             }
           ],
-          "hypothesis": "LOGISTICS_ISSUE",
-          "confidence": "MEDIUM",
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
           "missing_info": [
             "CURRENT_BUYER_INTENT",
             "RECEIVING_AVAILABILITY",
@@ -3777,7 +3734,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -3859,8 +3816,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Tại lần giao trước có người ở điểm nhận không, và bạn có thể nhận lại khi nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -3869,7 +3826,7 @@
       "case_id": "DEMO-025",
       "group": "LOGISTICS_ISSUE",
       "description": "Tin đồn gián đoạn; reply không xác minh được tuyến",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -3888,24 +3845,11 @@
         ]
       },
       "simulation": {
-        "response_mode": "BUYER_REPLY",
-        "buyer_reply": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không.",
+        "response_mode": "NOT_ASKED",
+        "buyer_reply": null,
         "wait_duration_hours": null,
         "advance_logistics_clock_on_no_reply": false,
-        "events_after_start": [
-          {
-            "event_id": "DEMO-025-REPLY",
-            "event_type": "BUYER_REPLY",
-            "source_actor": "buyer_simulator",
-            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
-            "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
-            "payload": {
-              "text": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không."
-            }
-          }
-        ]
+        "events_after_start": []
       },
       "expected": {
         "initial_assessment": {
@@ -3924,52 +3868,20 @@
           "hypothesis": "LOGISTICS_ISSUE",
           "confidence": "MEDIUM",
           "missing_info": [
-            "CURRENT_BUYER_INTENT",
-            "RECEIVING_AVAILABILITY",
             "LOGISTICS_VERIFICATION"
           ],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "CLARIFY"
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
         },
         "initial_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
-        },
-        "after_reply_assessment": {
-          "evidence": [
-            {
-              "source_ref": "DEMO-025-FAIL",
-              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
-              "verification": "SOURCE_RECORD"
-            },
-            {
-              "source_ref": "DEMO-025-NOTE",
-              "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
-              "verification": "UNVERIFIED_REPORT"
-            },
-            {
-              "source_ref": "DEMO-025-REPLY",
-              "fact": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không.",
-              "verification": "DIRECT_BUYER_STATEMENT"
-            }
-          ],
-          "hypothesis": "LOGISTICS_ISSUE",
-          "confidence": "MEDIUM",
-          "missing_info": [
-            "LOGISTICS_VERIFICATION"
-          ],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "ESCALATE_REVIEW"
-        },
-        "after_reply_policy_output": {
-          "eligibility": "ELIGIBLE",
           "policy_gate": "ESCALATED",
           "final_action": "ESCALATE_REVIEW",
-          "reason": "Reply xác nhận intent/availability nhưng không xác minh logistics; confidence giữ MEDIUM."
+          "reason": "Thông tin tuyến tạm ngừng cần Ops xác minh; buyer không thể giải quyết điều kiện vận hành. Chuyển Ops ngay, không hỏi buyer."
         },
-        "final_assessment_source": 2,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
         "final_assessment": {
           "evidence": [
             {
@@ -3981,11 +3893,6 @@
               "source_ref": "DEMO-025-NOTE",
               "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
               "verification": "UNVERIFIED_REPORT"
-            },
-            {
-              "source_ref": "DEMO-025-REPLY",
-              "fact": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không.",
-              "verification": "DIRECT_BUYER_STATEMENT"
             }
           ],
           "hypothesis": "LOGISTICS_ISSUE",
@@ -3993,17 +3900,17 @@
           "missing_info": [
             "LOGISTICS_VERIFICATION"
           ],
-          "question_key": "CONFIRM_INTENT",
+          "question_key": null,
           "candidate_action": "ESCALATE_REVIEW"
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
           "policy_gate": "ESCALATED",
           "final_action": "ESCALATE_REVIEW",
-          "reason": "Reply xác nhận intent/availability nhưng không xác minh logistics; confidence giữ MEDIUM."
+          "reason": "Thông tin tuyến tạm ngừng cần Ops xác minh; buyer không thể giải quyết điều kiện vận hành. Chuyển Ops ngay, không hỏi buyer."
         },
-        "change_type": "REPLY_INSUFFICIENT",
-        "explanation": "Reply xác nhận intent/availability nhưng không xác minh logistics; confidence giữ MEDIUM.",
+        "change_type": "OPS_REVIEW_WITHOUT_BUYER_CONTACT",
+        "explanation": "Thông tin tuyến tạm ngừng cần Ops xác minh; buyer không thể giải quyết điều kiện vận hành. Chuyển Ops ngay, không hỏi buyer.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -4018,11 +3925,11 @@
           "eligibility": "ELIGIBLE"
         },
         "question": {
-          "count": 1,
+          "count": 0,
           "target": "BUYER",
-          "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận và có thể nhận tại điểm cũ khi tuyến hoạt động không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "question_key": null,
+          "reference_text": null,
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -4031,7 +3938,7 @@
       "case_id": "DEMO-026",
       "group": "LOGISTICS_ISSUE",
       "description": "Quá tải verified; user không reply",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -4051,24 +3958,11 @@
         ]
       },
       "simulation": {
-        "response_mode": "USER_NO_REPLY",
+        "response_mode": "NOT_ASKED",
         "buyer_reply": null,
         "wait_duration_hours": null,
         "advance_logistics_clock_on_no_reply": false,
-        "events_after_start": [
-          {
-            "event_id": "DEMO-026-NO-REPLY",
-            "event_type": "USER_NO_REPLY",
-            "source_actor": "demo_operator",
-            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
-            "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
-            "payload": {
-              "buyer_reply": null
-            }
-          }
-        ]
+        "events_after_start": []
       },
       "expected": {
         "initial_assessment": {
@@ -4092,17 +3986,16 @@
           "hypothesis": "LOGISTICS_ISSUE",
           "confidence": "HIGH",
           "missing_info": [
-            "CURRENT_BUYER_INTENT",
-            "RECEIVING_AVAILABILITY"
+            "LOGISTICS_VERIFICATION"
           ],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "HOLD_DISRUPTION"
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
         },
         "initial_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "HOLD_DISRUPTION",
-          "reason": "Verified disruption còn active; đề xuất HOLD, câu hỏi chỉ bổ sung intent/availability."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
         },
         "after_reply_assessment": null,
         "after_reply_policy_output": null,
@@ -4128,20 +4021,19 @@
           "hypothesis": "LOGISTICS_ISSUE",
           "confidence": "HIGH",
           "missing_info": [
-            "CURRENT_BUYER_INTENT",
-            "RECEIVING_AVAILABILITY"
+            "LOGISTICS_VERIFICATION"
           ],
-          "question_key": "CONFIRM_INTENT",
-          "candidate_action": "HOLD_DISRUPTION"
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
         },
         "final_policy_output": {
           "eligibility": "ELIGIBLE",
-          "policy_gate": "PERMITTED",
-          "final_action": "HOLD_DISRUPTION",
-          "reason": "Verified disruption còn active; đề xuất HOLD, câu hỏi chỉ bổ sung intent/availability."
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
         },
-        "change_type": "USER_NO_REPLY",
-        "explanation": "Không có reply nên giữ nguyên assessment 1; không tự gỡ verified disruption.",
+        "change_type": "OPS_REVIEW_WITHOUT_BUYER_CONTACT",
+        "explanation": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer.",
         "must_not": [
           "Read expected outputs or future reply as initial Agent input",
           "Invent call counts or call logs",
@@ -4156,20 +4048,20 @@
           "eligibility": "ELIGIBLE"
         },
         "question": {
-          "count": 1,
+          "count": 0,
           "target": "BUYER",
-          "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn còn muốn nhận khi tuyến được khôi phục và có thể bố trí người nhận không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "question_key": null,
+          "reference_text": null,
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
     {
       "test_case_id": "TC-DEMO-027",
       "case_id": "DEMO-027",
-      "group": "LOGISTICS_ISSUE",
+      "group": "UNKNOWN_CAUSE",
       "description": "Nghi quá tải; buyer xác nhận vướng COD",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -4199,8 +4091,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận."
             }
@@ -4221,11 +4113,12 @@
               "verification": "UNVERIFIED_REPORT"
             }
           ],
-          "hypothesis": "LOGISTICS_ISSUE",
+          "hypothesis": "UNKNOWN_CAUSE",
           "confidence": "LOW",
           "missing_info": [
             "CURRENT_BUYER_INTENT",
             "RECEIVING_AVAILABILITY",
+            "COD_READINESS",
             "CAUSE_CLARIFICATION"
           ],
           "question_key": "CONFIRM_INTENT",
@@ -4235,7 +4128,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -4317,8 +4210,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần giao trước tại điểm nhận vướng gì, và bạn có thể nhận lại không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -4327,7 +4220,7 @@
       "case_id": "DEMO-028",
       "group": "UNKNOWN_CAUSE",
       "description": "Không rõ nguyên nhân; reply chỉ ra landmark",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -4357,8 +4250,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà."
             }
@@ -4393,7 +4286,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -4475,8 +4368,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Lần giao trước vướng điều gì, và bạn có thể nhận lại tại địa điểm đã đăng ký thế nào?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -4485,7 +4378,7 @@
       "case_id": "DEMO-029",
       "group": "UNKNOWN_CAUSE",
       "description": "Không rõ nguyên nhân; reply xác nhận tắt SIM tạm thời",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -4515,8 +4408,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà."
             }
@@ -4551,7 +4444,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -4633,8 +4526,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Vì sao bạn chưa nhận được ở lần trước, và hiện có thể nhận lại không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     },
@@ -4643,7 +4536,7 @@
       "case_id": "DEMO-030",
       "group": "UNKNOWN_CAUSE",
       "description": "Reply chỉ biểu tượng, nguyên nhân vẫn chưa rõ",
-      "ground_truth_status": "DRAFT_NEEDS_USER_REVIEW",
+      "ground_truth_status": "FINAL",
       "precondition": {
         "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
         "database_case_exists": true,
@@ -4673,8 +4566,8 @@
             "source_actor": "buyer_simulator",
             "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
             "bind_question_id_from_pending_question": true,
-            "occurred_at": null,
-            "timestamp_rule": "Assign runtime read time when released; no fixed delay or elapsed-wait requirement.",
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
             "payload": {
               "text": "👍"
             }
@@ -4709,7 +4602,7 @@
           "eligibility": "ELIGIBLE",
           "policy_gate": "PERMITTED",
           "final_action": "CLARIFY",
-          "reason": "Cho phép một câu hỏi mô phỏng; CLARIFY là nhu cầu làm rõ, không phải lệnh hỏi lần hai khi chốt."
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
         },
         "after_reply_assessment": {
           "evidence": [
@@ -4799,8 +4692,8 @@
           "count": 1,
           "target": "BUYER",
           "question_key": "CONFIRM_INTENT",
-          "reference_text": "Bạn có thể cho biết vướng mắc lần trước và còn muốn nhận khi nào không?",
-          "comparison": "Check requested information and scope; do not require exact wording."
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
         }
       }
     }

@@ -7,7 +7,7 @@ const worker = {
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.
-    if (import.meta.env.DEV && !binding && env.CONNECTORS) {
+    if (import.meta.env?.DEV === true && !binding && env.CONNECTORS) {
       const preview = env.CONNECTORS;
       const expiresAt = Date.now() + 60_000;
       binding = {

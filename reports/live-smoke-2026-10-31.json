@@ -1,0 +1,182 @@
+{
+  "started_at": "2026-10-31T06:32:23.331Z",
+  "request_cap": 10,
+  "requests": 10,
+  "permanent_failure": false,
+  "calls": [
+    {
+      "endpoint": "/v1/responses",
+      "status": 200,
+      "latency_ms": 4153,
+      "usage": {
+        "input_tokens": 1496,
+        "output_tokens": 131,
+        "total_tokens": 1627
+      }
+    },
+    {
+      "endpoint": "/v1/decisions",
+      "status": 200,
+      "latency_ms": 2766,
+      "usage": {
+        "input_tokens": 865,
+        "output_tokens": 0,
+        "total_tokens": 865
+      }
+    },
+    {
+      "endpoint": "/v1/responses",
+      "status": 200,
+      "latency_ms": 3756,
+      "usage": {
+        "input_tokens": 1814,
+        "output_tokens": 185,
+        "total_tokens": 1999
+      }
+    },
+    {
+      "endpoint": "/v1/decisions",
+      "status": 200,
+      "latency_ms": 520,
+      "usage": {
+        "input_tokens": 1238,
+        "output_tokens": 0,
+        "total_tokens": 1238
+      }
+    },
+    {
+      "endpoint": "/v1/responses",
+      "status": 200,
+      "latency_ms": 1549,
+      "usage": {
+        "input_tokens": 1613,
+        "output_tokens": 191,
+        "total_tokens": 1804
+      }
+    },
+    {
+      "endpoint": "/v1/decisions",
+      "status": 200,
+      "latency_ms": 337,
+      "usage": {
+        "input_tokens": 1043,
+        "output_tokens": 0,
+        "total_tokens": 1043
+      }
+    },
+    {
+      "endpoint": "/v1/responses",
+      "status": 200,
+      "latency_ms": 1395,
+      "usage": {
+        "input_tokens": 1508,
+        "output_tokens": 137,
+        "total_tokens": 1645
+      }
+    },
+    {
+      "endpoint": "/v1/decisions",
+      "status": 200,
+      "latency_ms": 425,
+      "usage": {
+        "input_tokens": 884,
+        "output_tokens": 0,
+        "total_tokens": 884
+      }
+    },
+    {
+      "endpoint": "/v1/responses",
+      "status": 200,
+      "latency_ms": 1740,
+      "usage": {
+        "input_tokens": 1484,
+        "output_tokens": 126,
+        "total_tokens": 1610
+      }
+    },
+    {
+      "endpoint": "/v1/decisions",
+      "status": 200,
+      "latency_ms": 398,
+      "usage": {
+        "input_tokens": 848,
+        "output_tokens": 0,
+        "total_tokens": 848
+      }
+    }
+  ],
+  "phases": [
+    {
+      "phase": "001_initial",
+      "action": "CLARIFY",
+      "gate": "PERMITTED",
+      "hypothesis": "AVAILABILITY_ISSUE",
+      "confidence": "MEDIUM",
+      "question_asked": true,
+      "rules": [
+        "ONE_QUESTION"
+      ]
+    },
+    {
+      "phase": "001_reply",
+      "action": "STANDARD_REATTEMPT",
+      "gate": "PERMITTED",
+      "hypothesis": "AVAILABILITY_ISSUE",
+      "confidence": "MEDIUM",
+      "question_asked": false,
+      "rules": [
+        "STANDARD_RETRY"
+      ]
+    },
+    {
+      "phase": "023_initial",
+      "action": "ESCALATE_REVIEW",
+      "gate": "ESCALATED",
+      "hypothesis": "LOGISTICS_ISSUE",
+      "confidence": "HIGH",
+      "question_asked": false,
+      "rules": [
+        "LOGISTICS_TO_OPS"
+      ]
+    },
+    {
+      "phase": "024_initial",
+      "action": "CLARIFY",
+      "gate": "PERMITTED",
+      "hypothesis": "UNKNOWN_CAUSE",
+      "confidence": "LOW",
+      "question_asked": true,
+      "rules": [
+        "ONE_QUESTION"
+      ]
+    },
+    {
+      "phase": "005_initial",
+      "action": "CLARIFY",
+      "gate": "PERMITTED",
+      "hypothesis": "AVAILABILITY_ISSUE",
+      "confidence": "MEDIUM",
+      "question_asked": true,
+      "rules": [
+        "ONE_QUESTION"
+      ]
+    },
+    {
+      "phase": "005_no_reply",
+      "action": "ESCALATE_REVIEW",
+      "gate": "ESCALATED",
+      "hypothesis": "AVAILABILITY_ISSUE",
+      "confidence": "MEDIUM",
+      "question_asked": false,
+      "rules": [
+        "ONE_QUESTION",
+        "NO_REPLY_REVIEW"
+      ]
+    },
+    {
+      "phase": "005_no_reply_network_check",
+      "no_new_requests": true
+    }
+  ],
+  "synthetic_only": true
+}

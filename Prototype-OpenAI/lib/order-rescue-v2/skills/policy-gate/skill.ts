@@ -12,8 +12,8 @@ export function run(s:PipelineState){
  if(facts.declined)return review("Buyer trực tiếp cho biết không muốn nhận; chuyển Ops, không tự hoàn đơn.","BUYER_DECLINED");
  if(facts.afterDeadline)return review("Khả năng nhận được nêu sau hạn xử lý; cần Ops xem xét.","AVAILABILITY_AFTER_DEADLINE");
  if(s.run.input.operational_context.sources_conflict)return review("Có nguồn dữ liệu xung đột chưa được giải quyết; chuyển người duyệt.","SOURCE_CONFLICT");
- if(activeDisruption(s))return decide("HOLD_DISRUPTION","Gián đoạn đã được Ops xác minh còn hoạt động và khớp tuyến/thời điểm; giữ đề xuất HOLD để Ops đánh giá lại. Buyer reply không gỡ gián đoạn.","VERIFIED_DISRUPTION");
- if(a.hypothesis==="LOGISTICS_ISSUE"&&s.stage==="AFTER_REPLY")return review("Chưa có xác minh Ops phù hợp cho nguyên nhân logistics; buyer reply không thay thế được.","LOGISTICS_UNVERIFIED");
+ if(activeDisruption(s))return review("Gián đoạn vận hành đã xác minh còn active; chuyển Ops đánh giá lại, không hỏi buyer vì buyer không thể gỡ điều kiện này.","LOGISTICS_TO_OPS");
+ if(a.hypothesis==="LOGISTICS_ISSUE"||a.missing_info.includes("LOGISTICS_VERIFICATION"))return review("Tình trạng logistics cần Ops xác minh; chuyển Ops ngay, không hỏi buyer xác minh vận hành.","LOGISTICS_UNVERIFIED");
  if(s.stage==="INITIAL"){
   if(a.candidate_action==="CLARIFY"&&a.question_key&&a.missing_info.length)return decide("CLARIFY","Cho phép một câu hỏi mô phỏng để làm rõ thông tin có thể đổi hướng xử lý.","ONE_QUESTION");
   if(a.candidate_action==="HOLD_DISRUPTION")return review("Không có gián đoạn đã xác minh phù hợp để cho phép HOLD.","LOGISTICS_UNVERIFIED");

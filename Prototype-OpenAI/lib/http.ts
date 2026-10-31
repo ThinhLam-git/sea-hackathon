@@ -3,7 +3,7 @@ import { HttpError } from "./order-rescue/repository";
 export async function owner() {
   const user = await getChatGPTUser();
   if (user) return user.userId;
-  if (import.meta.env.DEV) return "local-presenter";
+  if (import.meta.env?.DEV === true) return "local-presenter";
   throw new HttpError(401, "Please sign in with ChatGPT to use this demo.");
 }
 export async function handle(fn: () => Promise<unknown>) {

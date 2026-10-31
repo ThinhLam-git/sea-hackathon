@@ -1,28 +1,34 @@
-# v2.2 source mapping
+# Nguồn dữ liệu v2.4 reconciled
 
-Source: [HACKATHON-CODEX on Google Drive](https://drive.google.com/drive/folders/1QY7Qto0DnRzALgPabY-lTsgzu2DQGGyB), downloaded October 31, 2026. All eight original files and a SHA-256 manifest are retained in the workspace's `reference-docs/HACKATHON-CODEX/` directory. Original documents are not published as site assets.
+## Contract hiện tại
 
-| Source | App use |
-|---|---|
-| Database model/Order_Rescue_Data_Model_30_Cases_v2.2.json | Authoritative synthetic raw seed, six-field assessment vocabulary and two-slot runtime contract; imported as `fixtures/v2/seed.json`. |
-| Test case/Order_Rescue_Test_Cases_30_v2.2.json | Isolated evaluator expectations, hand-authored Replay assessments and manually released demo responses. Labels remain draft. |
-| Test case/Order_Rescue_Minimal_Simulation_30_Cases_v2.1.xlsx | Companion source workbook referenced by the paired v2.2 JSON files. The app consumes the explicit JSON contract, rather than mixing spreadsheet v2.1 labels into it. |
-| Policy gate/policy_rules_simple_v2.xlsx | Boundary/safety guidance and provenance. Its proposed parameters/public references do not silently replace the selected demo policy profile. |
-| Order_Rescue_Product_Vision.docx | Operations audience; evidence-first recommendations and human authority. |
-| Order_Rescue_Software_Architecture_Document.docx | Strict six-field assessment, raw input projection, one question, two assessment slots and one immutable final selection. |
-| IDEA-SUMMARY.pdf | Background reference retained locally. |
-| IDEA-AI-ANALYSIS.pdf | Background reference retained locally. |
+Ngày 31/10/2026, Lucas chốt workbook reconciled và cho phép migration demo. Nguồn: `../../outputs/policy-reconciliation-v2.4/Order_Rescue_Minimal_Simulation_30_Cases_v2.4_reconciled.xlsx`. Giải thích: `../../reports/policy-reconciliation-v2.4-2026-10-31.md`.
 
-## Precedence and compatibility
+Contract mới giữ sáu field assessment và bốn field policy. Policy version: `demo-two-assessment-v2.4-reconciled`. Các nhãn fixture là FINAL theo quyết định review, không phải kết quả kiểm thử model.
 
-The user selected the 30-case v2.2 contract. Its specific manual `USER_NO_REPLY` transition supersedes older four-hour timeout and broad event-reassessment proposals. No-reply copies initial assessment/policy exactly, leaves after-reply null and records final source 1. A matching reply runs the second assessment, then selects source 2. Both outcomes close the case and reject later conflicting transitions.
+- 024/027 initial UNKNOWN_CAUSE/LOW.
+- 023/025/026 NOT_ASKED và chuyển thẳng Ops review.
+- Năm case không reply giữ assessment 1, nhưng final policy ESCALATE_REVIEW; giữ nguyên policy 1 lịch sử.
+- 27 case có tối đa một câu hỏi tập trung.
+- Deadline/timestamps thống nhất theo đồng hồ synthetic, có offset rõ.
 
-The supplied nine-table schema remains the logical input contract in the immutable seed. This MVP reuses D1 session/audit storage for mutable state instead of adding an operational nine-table backend. This keeps the requested lightweight scope while preserving input projection, two slots and atomic final selection.
+## File và trách nhiệm
 
-Older v0.5 code, 25-case fixtures and stored runs remain intact. The v2 API rejects mutation of legacy sessions; the client starts a fresh v2-compatible session. Redeploy saved Site version 4 to roll back the active API/UI without rewriting existing rows.
+| File | Vai trò |
+| --- | --- |
+| `fixtures/v2/seed.json` | Raw inputs; mutable output slots chưa có kết quả |
+| `fixtures/v2/test-cases.json` | Expected evaluator; không đưa vào prompt |
+| `fixtures/v2/replay.json` | Assessment giả lập dùng riêng cho Replay |
+| `fixtures/v2/controls.json` | Câu hỏi/response mô phỏng, chỉ release đúng phase |
+| `fixtures/v2/provenance.json` | Version, nguồn và hash để đối chiếu |
+| `fixtures/v2/archive/v2.2/` | Bản nguồn v2.2 trước migration, giữ nguyên để đối chiếu |
 
-## Integrity and isolation
+`node scripts/import-v2.mjs` validate cặp reconciled rồi regenerate các file dẫn xuất. Argument tùy chọn là thư mục chứa seed.json/test-cases.json đúng contract mới. Không trộn file v2.2 với nhãn workbook mới.
 
-`fixtures/v2/provenance.json` records the paired-source SHA-256 hashes, count, contract, synthetic flag and draft status. `scripts/import-v2.mjs` checks the pairing, 30 unique cases, empty seed output slots and T0-only seed references before generating derived files.
+## Tách dữ liệu và bảo toàn lịch sử
 
-The raw projection module never imports evaluator outputs. Live AI sees only seven core fields, known sources, current question and released interactions. Scoring excludes assessor self-confidence. No private source download URLs, credentials or raw chain of thought are stored in the app.
+Model chỉ nhận raw projection, nguồn hiện có và tương tác đã release. Không nhận expected, future reply, scenario description hoặc kết quả final tương lai. Seed/replay/evaluator là dữ liệu synthetic, không mô tả tích hợp vận hành thật.
+
+Giữ version của run và lịch sử cũ; không viết lại assessment hoặc policy đã lưu. Finalization no-reply mới có final policy riêng. D1 vẫn lưu session/audit; không cần tạo hệ thống operational database mới chỉ để mirror chín bảng logical của seed.
+
+Bộ 30 case chưa bao phủ toàn bộ lifecycle, lỗi model và tình huống adversarial. Các test ranh giới bổ sung và đánh giá live phải được báo riêng với kết quả thực tế.

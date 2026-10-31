@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "001 reply → retry",
+    "duplicate reply → unchanged audit",
+    "conflicting final → 409; persisted history unchanged",
+    "005 no reply → review; initial preserved; no assessment2",
+    "no-reply duplicate and reload → unchanged",
+    "DEMO-023 logistics → review without buyer question",
+    "DEMO-025 logistics → review without buyer question",
+    "DEMO-026 logistics → review without buyer question",
+    "wrong question → rejected without finalization",
+    "unknown case → 404"
+  ],
+  "live_requests": 0
+}

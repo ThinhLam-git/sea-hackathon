@@ -13,9 +13,9 @@ export function runView(sim:Simulator,id:string){
   question:{asked:q?1:0,key:q?.question_key??null,question_id:q?.question_id??null,deadline:null,replied:q?.status==="ANSWERED",timed_out:false,no_reply:q?.status==="NO_REPLY"},
   sources,events:sample?[{source_ref:`${r.case.case_id}-REPLY`,type:"BUYER_REPLY",text:sample,occurred_at:r.now,applied:!!r.after_reply_policy_output,available:r.current_status==="WAITING_FOR_BUYER"}]:[],
   pipeline:PIPELINE.map(([name,,purpose])=>({name,purpose})),history,
-  golden:comparison(r.case.case_id,{...latest,final_assessment_source:r.final_assessment_source}),expected:test.expected,
+  golden:r.contract_version==="2.4"?comparison(r.case.case_id,{...latest,final_assessment_source:r.final_assessment_source}):[],expected:r.contract_version==="2.4"?test.expected:null,
   assessment_slots:{initial:r.initial_assessment,after_reply:r.after_reply_assessment,final:r.final_assessment,selected:r.final_assessment_source},
   policy_slots:{initial:r.initial_policy_output,after_reply:r.after_reply_policy_output,final:r.final_policy_output},
-  ground_truth_status:"DRAFT_NEEDS_USER_REVIEW",final_event:r.final_event};
+  ground_truth_status:r.contract_version==="2.4"?"FINAL":"DRAFT_NEEDS_USER_REVIEW",read_only:r.contract_version!=="2.4",final_event:r.final_event};
 }
 export type RunView=ReturnType<typeof runView>;

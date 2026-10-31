@@ -1,7 +1,7 @@
 {
-  "prompt_version": "assess-v2.2.1",
-  "policy_version": "demo-two-assessment-v2",
-  "source": "hand_authored_draft_fixture",
+  "prompt_version": "assess-v2.4.0",
+  "policy_version": "demo-two-assessment-v2.4-reconciled",
+  "source": "hand_authored_final_fixture",
   "cases": {
     "DEMO-001": {
       "INITIAL": {
@@ -712,6 +712,7 @@
         "missing_info": [
           "CURRENT_BUYER_INTENT",
           "RECEIVING_AVAILABILITY",
+          "COD_READINESS",
           "CAUSE_CLARIFICATION"
         ],
         "question_key": "CONFIRM_INTENT",
@@ -888,7 +889,7 @@
             "verification": "UNVERIFIED_REPORT"
           }
         ],
-        "hypothesis": "PAYMENT_ISSUE",
+        "hypothesis": "UNKNOWN_CAUSE",
         "confidence": "LOW",
         "missing_info": [
           "CURRENT_BUYER_INTENT",
@@ -1031,41 +1032,12 @@
         "hypothesis": "LOGISTICS_ISSUE",
         "confidence": "HIGH",
         "missing_info": [
-          "CURRENT_BUYER_INTENT",
-          "RECEIVING_AVAILABILITY"
+          "LOGISTICS_VERIFICATION"
         ],
-        "question_key": "CONFIRM_INTENT",
-        "candidate_action": "HOLD_DISRUPTION"
+        "question_key": null,
+        "candidate_action": "ESCALATE_REVIEW"
       },
-      "AFTER_REPLY": {
-        "evidence": [
-          {
-            "source_ref": "DEMO-023-FAIL",
-            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
-            "verification": "SOURCE_RECORD"
-          },
-          {
-            "source_ref": "DEMO-023-NOTE",
-            "fact": "Courier note: Tuyến tạm dừng do ngập.",
-            "verification": "UNVERIFIED_REPORT"
-          },
-          {
-            "source_ref": "DEMO-023-OPS",
-            "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
-            "verification": "VERIFIED_OPS_SIGNAL"
-          },
-          {
-            "source_ref": "DEMO-023-REPLY",
-            "fact": "Tôi vẫn muốn nhận tại địa điểm cũ, có người nhận khi tuyến hoạt động lại.",
-            "verification": "DIRECT_BUYER_STATEMENT"
-          }
-        ],
-        "hypothesis": "LOGISTICS_ISSUE",
-        "confidence": "HIGH",
-        "missing_info": [],
-        "question_key": "CONFIRM_INTENT",
-        "candidate_action": "HOLD_DISRUPTION"
-      }
+      "AFTER_REPLY": null
     },
     "DEMO-024": {
       "INITIAL": {
@@ -1081,8 +1053,8 @@
             "verification": "UNVERIFIED_REPORT"
           }
         ],
-        "hypothesis": "LOGISTICS_ISSUE",
-        "confidence": "MEDIUM",
+        "hypothesis": "UNKNOWN_CAUSE",
+        "confidence": "LOW",
         "missing_info": [
           "CURRENT_BUYER_INTENT",
           "RECEIVING_AVAILABILITY",
@@ -1133,39 +1105,12 @@
         "hypothesis": "LOGISTICS_ISSUE",
         "confidence": "MEDIUM",
         "missing_info": [
-          "CURRENT_BUYER_INTENT",
-          "RECEIVING_AVAILABILITY",
           "LOGISTICS_VERIFICATION"
         ],
-        "question_key": "CONFIRM_INTENT",
-        "candidate_action": "CLARIFY"
-      },
-      "AFTER_REPLY": {
-        "evidence": [
-          {
-            "source_ref": "DEMO-025-FAIL",
-            "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
-            "verification": "SOURCE_RECORD"
-          },
-          {
-            "source_ref": "DEMO-025-NOTE",
-            "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
-            "verification": "UNVERIFIED_REPORT"
-          },
-          {
-            "source_ref": "DEMO-025-REPLY",
-            "fact": "Tôi vẫn muốn nhận và mai ở nhà; tôi không biết tuyến có đang ngừng hay không.",
-            "verification": "DIRECT_BUYER_STATEMENT"
-          }
-        ],
-        "hypothesis": "LOGISTICS_ISSUE",
-        "confidence": "MEDIUM",
-        "missing_info": [
-          "LOGISTICS_VERIFICATION"
-        ],
-        "question_key": "CONFIRM_INTENT",
+        "question_key": null,
         "candidate_action": "ESCALATE_REVIEW"
-      }
+      },
+      "AFTER_REPLY": null
     },
     "DEMO-026": {
       "INITIAL": {
@@ -1189,11 +1134,10 @@
         "hypothesis": "LOGISTICS_ISSUE",
         "confidence": "HIGH",
         "missing_info": [
-          "CURRENT_BUYER_INTENT",
-          "RECEIVING_AVAILABILITY"
+          "LOGISTICS_VERIFICATION"
         ],
-        "question_key": "CONFIRM_INTENT",
-        "candidate_action": "HOLD_DISRUPTION"
+        "question_key": null,
+        "candidate_action": "ESCALATE_REVIEW"
       },
       "AFTER_REPLY": null
     },
@@ -1211,11 +1155,12 @@
             "verification": "UNVERIFIED_REPORT"
           }
         ],
-        "hypothesis": "LOGISTICS_ISSUE",
+        "hypothesis": "UNKNOWN_CAUSE",
         "confidence": "LOW",
         "missing_info": [
           "CURRENT_BUYER_INTENT",
           "RECEIVING_AVAILABILITY",
+          "COD_READINESS",
           "CAUSE_CLARIFICATION"
         ],
         "question_key": "CONFIRM_INTENT",

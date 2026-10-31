@@ -1,93 +1,64 @@
-# Order Rescue · OpenAI MVP v2.2
+# Order Rescue — Demo v2.4 reconciled
 
-A delivery-recovery workspace for operations staff. **30 synthetic cases, demo policy, simulated outcomes.** Staff approves every handling decision; no messages or logistics actions are executed.
+30 tình huống synthetic, policy minh họa và đề xuất để Ops/human review. Agent không gửi tin nhắn, dispatch, sửa địa chỉ/COD, hoàn hàng hoặc refund.
 
-[Public demo](https://order-rescue-gpt-phuc.lankybluff1.chatgpt.site) · Teammates can sign in with their own ChatGPT accounts. Runs stay separate; the server uses the owner's API key for Live GPT.
+## Trải nghiệm
 
-## Use the app
+1. Chọn tình huống và đọc dữ kiện giao thất bại.
+2. Xem nhận định và bằng chứng. Logistics ngoài khả năng buyer giải quyết chuyển thẳng Ops review.
+3. Nếu cần, trả lời một câu hỏi tập trung bằng phản hồi mẫu (Replay) hoặc nội dung tự nhập (Live GPT).
+4. Không phản hồi: giữ assessment ban đầu, chốt final policy review, không gọi model thêm.
+5. Xem thay đổi trước/sau, lý do và lịch sử; copy đề xuất cho người review.
 
-1. Choose a demo delivery. The top tracker shows progress.
-2. The blue panel shows delivery facts; the amber panel holds the approved buyer question and response.
-3. Choose **Use sample response → Review response** for a free Replay walkthrough, or type a custom response for Live GPT (API credits).
-4. Choose **No reply** to finalize with the initial assessment without another API call. There is no fixed wait or timer.
-5. Review the recommendation in the green decision desk. Purple identifies AI confidence; Evidence and History remain in this side panel. **Copy recommendation** prepares the handoff to staff.
+Replay là dữ liệu assessment dựng sẵn qua validation/policy; không phải kết quả model thật. Live GPT gọi Responses và Decisions, dùng API credits. Confidence đo mức hỗ trợ cho nguyên nhân, không phải xác suất giao thành công.
 
-Clock values belong to the synthetic scenario. An initial CLARIFY kept after No reply means unresolved information for Ops, not a second question. Demo scenarios/modes and technical fields stay collapsed.
+## Stack và nguồn dữ liệu
 
-## Stack and flow
+React/Vinext/TypeScript, Cloudflare Workers/D1, OpenAI Agents SDK + Responses + Decisions. Runtime hiện tại: `lib/order-rescue-v2/`. Giữ nguyên `lib/order-rescue/` làm regression cho 25 case v0.5.
 
-- OpenAI Agents SDK with one structured, tool-free Responses call per assessment (`gpt-5.4-mini`).
-- Decisions API evidence-support scoring (`gpt-6-luna`) after each live assessment.
-- React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
-- The same seven stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`.
+Nguồn đích là workbook v2.4 reconciled trong `../outputs/policy-reconciliation-v2.4/`. Nhãn FINAL biểu thị expected đã chốt; không chứng minh accuracy. Bộ mới có 22 reply, 5 no-reply, 3 NOT_ASKED; expected final 17 retry và 13 review. Nguồn v2.2 được lưu tại `fixtures/v2/archive/v2.2/`.
 
-At most **two assessments**: initial and after a matching buyer reply. Manual No reply selects initial exactly; there is no third assessment or second question. Concurrent outcomes are serialized before inference and saved with revision checks. Failures go to Ops without silent Replay fallback. Auth remains lightweight; no roles, teams or administration screens.
+Xem [nguồn dữ liệu](docs/DATA-SOURCES.md), [PRD](../docs/PRD.md) và [giải thích policy](../reports/policy-reconciliation-v2.4-2026-10-31.md).
 
-The nine logical tables from the supplied raw seed are joined into an explicit server-only input projection. Mutable review state uses the existing D1 tables, keeping the MVP small. Future replies, expected outputs and previous assessment/result slots are excluded from AI inputs. Buyer history stays empty where the seed provides none.
+## Chạy local
 
-## Data and reference documents
+Node.js 22.13+ và npm:
 
-The user-selected contract is `order-rescue-demo-30-v2.2`, policy `demo-two-assessment-v2`. See [source mapping](docs/DATA-SOURCES.md).
-
-`fixtures/v2/seed.json` and `test-cases.json` preserve the downloaded originals. `replay.json`, `controls.json` and `provenance.json` are generated from them. The supplied expected labels are **DRAFT_NEEDS_USER_REVIEW**; a Replay match demonstrates synthetic behavior, not real model accuracy.
-
-Regenerate from a downloaded reference folder:
-
-```bash
-node scripts/import-v2.mjs /absolute/path/to/HACKATHON-CODEX
-```
-
-Or run without an argument to rebuild generated files from the checked-in pair. Original v0.5 runtime/fixtures remain for rollback and regression checks. Old hosted sessions are preserved in storage; the v2 UI starts a fresh compatible session.
-
-## Run locally
-
-Node.js 22.13+ and npm:
-
-```bash
+```sh
 npm ci
+npm test
+npm run typecheck
+npm run build
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_clear_warstar.sql
+npm run dev
 ```
 
-Create an ignored `.env` in this project:
+Mở URL Local được in ra, thường là `http://127.0.0.1:5173`. Replay không cần API key. Local dùng danh tính presenter; hosted yêu cầu ChatGPT sign-in và phân quyền run theo user.
+
+Nếu dùng Live GPT, cấu hình `.env` ignored, không đưa key vào chat/Git/browser:
 
 ```dotenv
 OPENAI_API_KEY=your-own-key
 ORDER_RESCUE_MODEL=gpt-5.4-mini
 ```
 
-Keep keys out of chat, Git and browser code. Replay needs no key. Build and initialize the local database once:
+Một assessment live có thể dùng hai API request (assessment và scoring). Không tự đổi sang Replay khi live lỗi.
 
-```bash
-npm run build
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_clear_warstar.sql
-npm run dev
-```
+## Kiểm tra và regenerate
 
-Open the printed Local URL, normally `http://127.0.0.1:5173/`. Hosted API keys are separate Sites runtime secrets. Local development has a local presenter identity; hosted API routes require ChatGPT sign-in.
-
-## Verify
-
-```bash
+```sh
 npm test
 npm run typecheck
-npm run demo          # 30 supplied draft v2.2 scenarios
-npm run demo:legacy   # preserved 25-case v0.5 regression path
+npm run demo
+npm run demo:legacy
+npm run build
+node scripts/import-v2.mjs
 ```
 
-Live results can differ from scripted labels. A custom reply is never forced to a canned answer.
+Importer không argument regenerate từ cặp reconciled đang check-in. Nếu truyền thư mục, thư mục phải chứa `seed.json` và `test-cases.json` đúng contract reconciled; không nhập nhầm bộ v2.2 cũ.
 
-## Confidence and boundaries
+## Giới hạn và phát hành
 
-The Decisions rating measures support for the proposed cause. Its weighted LOW/MEDIUM/HIGH score is scaled from 0–2 to 0–100, with demo bands 0–24, 25–74 and 75–100. Source validation caps score and band together. Scorer certainty is separate metadata. This is **not a calibrated delivery-success probability** and never overrides policy. T0 buyer context or verified operational evidence can support strong cause confidence while current intent/availability remain missing.
+Luồng cố định: load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log. Kết quả chỉ được công bố sau persistence. Một câu hỏi, tối đa hai assessments; finalization no-reply là audit decision riêng, không sửa assessment/policy ban đầu.
 
-The policy workbook contains broader proposals and public references. Only the selected versioned demo profile supplies executable parameters; this is not verified live Shopee/SPX policy. No carrier integration, messaging, address/COD edits, refunds, returns or dispatch.
-
-## Code map / publishing
-
-- `app/page.tsx`, `app/globals.css`: colored three-panel workflow board.
-- `app/api/`: authenticated case/session, reply and manual no-reply routes.
-- `lib/order-rescue-v2/`: active v2.2 projection, simulator, seven skills, policy, scoring, storage and evaluator.
-- `fixtures/v2/`: versioned synthetic inputs and isolated replay/test data.
-- `lib/order-rescue/`, original `fixtures/`: retained v0.5 rollback path.
-- `db/`, `drizzle/`: existing D1 schema and migration; no new operational-schema migration was needed.
-
-Preserve `.openai/hosting.json` Site identity/public audience and use Sites source/build/publication tools. Never commit env files, credentials, local databases, generated builds or node_modules.
+Không dùng nhãn FINAL hoặc Replay match làm chỉ số model. Cần kiểm thử live có giới hạn, auth/ownership, lỗi, refresh và rehearsal trước khi tuyên bố sẵn sàng demo. Giữ `.openai/hosting.json`, secrets ở runtime và lịch sử cũ. Publish chỉ khi Lucas cho phép; pull hoặc sửa local không tự cập nhật bản hosted.

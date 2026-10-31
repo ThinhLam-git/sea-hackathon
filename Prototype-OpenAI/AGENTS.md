@@ -1,6 +1,6 @@
-# Order Rescue: active v2.2 MVP
+# Order Rescue: active v2.4 reconciled MVP
 
-The user explicitly selected the downloaded 30-case v2.2 contract on October 31, 2026. The active runtime is `lib/order-rescue-v2/`; `lib/order-rescue/` and the original 25-case fixtures are retained unchanged as the v0.5 rollback/regression path. Do not mix those contracts.
+The user approved the 30-case v2.4 reconciled workbook and its migration on October 31, 2026. The active runtime remains `lib/order-rescue-v2/`; `lib/order-rescue/` and the original 25-case fixtures are retained unchanged as the v0.5 rollback/regression path. Preserve archived v2.2 sources and historical decisions. The reconciled workbook and `../docs/PRD.md` govern new runs.
 
 ## Product boundary
 
@@ -11,8 +11,8 @@ This app recommends; delivery-operations staff decides. Synthetic data, demo pol
 - `fixtures/v2/seed.json`: the supplied nine-table logical seed. Mutable assessment/result slots begin null. Server projection joins only raw input rows into seven fields: `case_id`, `failed_event`, `attempts_used`, `return_state`, `deadline`, `buyer_history`, `operational_context`.
 - `prepare-input` supplies that projection, current raw sources and only released runtime interactions. T0 buyer context is allowed; unreleased replies, expected answers and future controls are forbidden in AI input.
 - The model returns exactly six fields: `evidence`, `hypothesis`, `confidence`, `missing_info`, `question_key`, `candidate_action`. Evidence has `source_ref`, `fact`, `verification`; no invented call logs. The v2 vocabularies are defined in `models.ts`.
-- `fixtures/v2/test-cases.json` is evaluator-only; its labels remain `DRAFT_NEEDS_USER_REVIEW`. Replay assessments and demo reply controls are generated separately by `scripts/import-v2.mjs`. Never force arbitrary live replies to match scripted labels.
-- Policy version `demo-two-assessment-v2` governs the demo. The reference policy workbook contains broader proposals and public references, not verified live-carrier parameters. Where the broad workbook differs, the user-selected v2.2 runtime contract governs this MVP.
+- `fixtures/v2/test-cases.json` is evaluator-only; reconciled fixture labels are FINAL, meaning reviewed expected behavior, not measured model accuracy. Replay assessments and demo reply controls are generated separately by `scripts/import-v2.mjs`. Never force arbitrary live replies to match scripted labels.
+- Policy version `demo-two-assessment-v2.4-reconciled` governs new runs. This remains an illustrative demo policy, not verified live-carrier parameters. Logistics outside buyer control goes directly to Ops review, without a buyer question. Vague traffic/peak-period notes alone imply UNKNOWN_CAUSE/LOW.
 
 ## Fixed seven-stage assessment pipeline
 
@@ -20,13 +20,13 @@ This app recommends; delivery-operations staff decides. Synthetic data, demo pol
 
 Each stage has `skills/<name>/SKILL.md` and `skill.ts`. `name` must match the folder. `policy-gate`, `compose-recommendation`, and `audit-log` run after a halt; AI preparation/assessment/validation are skipped when halted before AI. The model cannot choose or skip stages, and has no tools/handoffs.
 
-LIVE_AI uses one tool-free Agents SDK/Responses turn followed by one Decisions score in the same assessment stage. REPLAY uses a hand-authored draft assessment and never fabricates an API score. Failures/refusals/invalid output go to Ops without fallback. Keys and provider errors never enter responses, state, traces or browser code.
+LIVE_AI uses one tool-free Agents SDK/Responses turn followed by one Decisions score in the same assessment stage. REPLAY uses stored reconciled assessments and never fabricates an API score. Failures/refusals/invalid output go to Ops without fallback. Keys and provider errors never enter responses, state, traces or browser code.
 
 ## Two assessments, one immutable final
 
-1. Run the initial assessment/policy and save initial slots. Emit at most one approved question when policy permits; initial HOLD may still ask for missing intent/availability.
+1. Run the initial assessment/policy and save initial slots. Emit at most one focused approved question when buyer-known information can change the recommendation. Do not combine multiple independent requests. Logistics outside buyer control finalizes review without a question (`NOT_ASKED`).
 2. A matching buyer reply runs one after-reply assessment and policy, then atomically selects slot 2 and completes the case.
-3. Manual `USER_NO_REPLY` selects the initial slots exactly. No clock advance, fixed wait duration, second question, after-reply assessment or third inference. An initial CLARIFY retained as final remains unresolved for Ops; it is not authorization to ask again.
+3. Manual `USER_NO_REPLY` preserves the initial assessment and original policy history, leaves after-reply slots null, and creates a final ESCALATE_REVIEW policy decision. No fixed wait duration, second question, after-reply assessment or third inference. Silence is not refusal. Never overwrite the initial policy to implement finalization.
 4. Final outcome is immutable. Bind events to the actual question id. Duplicate identical event ids are idempotent; conflicting submissions are rejected. A short D1 reservation serializes reply/no-reply before live inference; revision/write-token checks protect persistence.
 5. Existing D1 run storage holds v2 slots and an append-only audit timeline; no heavy account or operational-database expansion is needed. No-reply appends a final-selection audit event, not an assessment. Previous records and legacy rows must not be deleted or rewritten.
 
@@ -41,6 +41,6 @@ LIVE_AI uses one tool-free Agents SDK/Responses turn followed by one Decisions s
 
 ## Verification and publication
 
-`npm test`; `npm run typecheck`; `npm run demo` (30 draft scenarios); `npm run demo:legacy` (25-case rollback path); Sites build helper.
+`npm test`; `npm run typecheck`; `npm run demo` (30 reconciled expected scenarios); `npm run demo:legacy` (25-case rollback path); `npm run build`.
 
 Keep `.openai/hosting.json` identity and public audience. Secrets stay in runtime env. Preserve auth and per-user ownership. Never commit env files, credentials, local databases, generated builds or node_modules. Downloaded original reference documents remain in the parent workspace; deploy only reviewed synthetic inputs and app code.

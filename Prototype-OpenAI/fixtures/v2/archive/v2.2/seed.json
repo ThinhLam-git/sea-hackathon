@@ -1,0 +1,3401 @@
+{
+  "metadata": {
+    "name": "Order Rescue — 30-case MVP database model and raw seed",
+    "version": "2.2-two-assessment-demo",
+    "pair_id": "order-rescue-demo-30-v2.2",
+    "synthetic": true,
+    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.1.xlsx",
+    "companion_test_file": "Order_Rescue_Test_Cases_30_v2.2.json",
+    "status": "Implementation contract with synthetic seed; case labels remain draft in the test file.",
+    "scope": "Nine tables; two assessment slots; one immutable final selection. No golden answers or future replies are seeded.",
+    "row_counts": {
+      "dim_buyer": 30,
+      "dim_product": 0,
+      "dim_carrier": 0,
+      "dim_date": 1,
+      "dim_action": 5,
+      "fact_order": 30,
+      "fact_delivery_event": 30,
+      "order_rescue": 30,
+      "fact_rescue_interaction": 3
+    }
+  },
+  "shared_contract": {
+    "pair_id": "order-rescue-demo-30-v2.2",
+    "contract_version": "2.2",
+    "hypothesis": [
+      "AVAILABILITY_ISSUE",
+      "ADDRESS_ISSUE",
+      "CONTACT_ISSUE",
+      "BUYER_INTENT_ISSUE",
+      "PAYMENT_ISSUE",
+      "LOGISTICS_ISSUE",
+      "UNKNOWN_CAUSE"
+    ],
+    "confidence": [
+      "LOW",
+      "MEDIUM",
+      "HIGH"
+    ],
+    "missing_info": [
+      "CURRENT_BUYER_INTENT",
+      "RECEIVING_AVAILABILITY",
+      "ADDRESS_CLARIFICATION",
+      "CONTACT_CLARIFICATION",
+      "COD_READINESS",
+      "DELIVERY_ACCESS",
+      "LOGISTICS_VERIFICATION",
+      "CAUSE_CLARIFICATION"
+    ],
+    "candidate_action": [
+      "CLARIFY",
+      "STANDARD_REATTEMPT",
+      "HOLD_DISRUPTION",
+      "ESCALATE_REVIEW",
+      "NO_ACTION"
+    ],
+    "question_key": [
+      "CONFIRM_INTENT",
+      "CLARIFY_LANDMARK"
+    ],
+    "evidence_verification": [
+      "SOURCE_RECORD",
+      "UNVERIFIED_REPORT",
+      "DIRECT_BUYER_STATEMENT",
+      "VERIFIED_OPS_SIGNAL"
+    ],
+    "hypothesis_status": "USER_APPROVED",
+    "missing_info_status": "USER_APPROVED"
+  },
+  "schema": {
+    "tables": {
+      "dim_buyer": {
+        "role": "Buyer reference; buyer history is derived, not stored here",
+        "primary_key": [
+          "buyer_id"
+        ],
+        "columns": {
+          "buyer_id": "string, required",
+          "buyer_segment": "string|null, optional",
+          "location_province": "string|null, optional"
+        }
+      },
+      "dim_product": {
+        "role": "Optional dimension, kept to match approved ERD; unavailable in synthetic source",
+        "primary_key": [
+          "product_id"
+        ],
+        "columns": {
+          "product_id": "string, required",
+          "category": "string|null",
+          "brand": "string|null"
+        }
+      },
+      "dim_carrier": {
+        "role": "Optional dimension, kept to match approved ERD; unavailable in synthetic source",
+        "primary_key": [
+          "carrier_id"
+        ],
+        "columns": {
+          "carrier_id": "string, required",
+          "carrier_name": "string|null"
+        }
+      },
+      "dim_date": {
+        "role": "Reference calendar derived from observed event timestamps",
+        "primary_key": [
+          "date_id"
+        ],
+        "columns": {
+          "date_id": "YYYY-MM-DD",
+          "year": "integer",
+          "month": "integer",
+          "day": "integer",
+          "day_of_week": "integer (Mon=1..Sun=7)"
+        }
+      },
+      "dim_action": {
+        "role": "Permitted demo recommendation codes",
+        "primary_key": [
+          "action_id"
+        ],
+        "columns": {
+          "action_id": "string",
+          "description": "string"
+        }
+      },
+      "fact_order": {
+        "role": "Current and past orders; history is obtained by buyer_id and delivery-event join",
+        "primary_key": [
+          "order_id"
+        ],
+        "foreign_keys": {
+          "buyer_id": "dim_buyer.buyer_id",
+          "product_id": "dim_product.product_id (nullable)"
+        },
+        "columns": {
+          "order_id": "string",
+          "buyer_id": "string",
+          "product_id": "string|null",
+          "order_created_at": "ISO datetime|null (unknown in source)",
+          "payment_type": "string|null",
+          "current_status": "string|null",
+          "operational_context": "object|null",
+          "is_rescue_order": "boolean"
+        }
+      },
+      "fact_delivery_event": {
+        "role": "Carrier/delivery raw observations, including historical attempts and results",
+        "primary_key": [
+          "event_id"
+        ],
+        "foreign_keys": {
+          "order_id": "fact_order.order_id",
+          "carrier_id": "dim_carrier.carrier_id (nullable)",
+          "event_date_id": "dim_date.date_id"
+        },
+        "columns": {
+          "event_id": "string",
+          "order_id": "string",
+          "carrier_id": "string|null",
+          "event_date_id": "YYYY-MM-DD",
+          "event_time": "ISO datetime",
+          "event_type": "string",
+          "event_status": "string|null",
+          "attempt_no": "integer|null",
+          "courier_note": "string|null",
+          "reported_reason": "string|null",
+          "source_actor": "string",
+          "raw_payload": "object|string|null"
+        }
+      },
+      "order_rescue": {
+        "role": "One rescue case; at most two stored Agent assessments; final is an immutable selection/copy, not a third Agent assessment.",
+        "primary_key": [
+          "case_id"
+        ],
+        "foreign_keys": {
+          "order_id": "fact_order.order_id",
+          "failed_event_id": "fact_delivery_event.event_id",
+          "final_action_id": "dim_action.action_id (nullable)"
+        },
+        "unique_constraints": [
+          [
+            "failed_event_id"
+          ]
+        ],
+        "columns": {
+          "case_id": "string, required",
+          "order_id": "string, required",
+          "failed_event_id": "string, required, unique",
+          "created_at": "ISO datetime, required",
+          "as_of": "ISO datetime; current allowed read cutoff",
+          "current_status": "NEW|ASSESSED|WAITING_FOR_BUYER|COMPLETED|OPS_REVIEW",
+          "attempts_used": "integer >=0",
+          "return_state": "NOT_STARTED|STARTED|COMPLETED|UNKNOWN",
+          "deadline_at": "ISO datetime|null; logistics deadline, not reply-wait duration",
+          "policy_version": "string, required",
+          "initial_assessment": "object|null; schema.object_schemas.assessment",
+          "initial_policy_output": "object|null; schema.object_schemas.policy_output",
+          "after_reply_assessment": "object|null; schema.object_schemas.assessment",
+          "after_reply_policy_output": "object|null; schema.object_schemas.policy_output",
+          "question_wait_state": "object|null; schema.object_schemas.question_wait_state",
+          "final_assessment_source": "integer 1|2|null",
+          "final_assessment": "object|null; exact copy of selected assessment, not a third assessment",
+          "eligibility": "ELIGIBLE|INELIGIBLE|UNKNOWN|null; selected final policy result",
+          "policy_gate": "PERMITTED|BLOCKED|ESCALATED|null; selected final policy result",
+          "final_action_id": "string|null; selected policy final_action; FK to dim_action.action_id",
+          "reason": "string|null; selected policy reason",
+          "updated_at": "ISO datetime, required"
+        },
+        "column_contracts": {
+          "initial_assessment": {
+            "schema_ref": "#/schema/object_schemas/assessment",
+            "initial_value": null
+          },
+          "after_reply_assessment": {
+            "schema_ref": "#/schema/object_schemas/assessment",
+            "initial_value": null
+          },
+          "final_assessment": {
+            "schema_ref": "#/schema/object_schemas/assessment",
+            "initial_value": null
+          },
+          "initial_policy_output": {
+            "schema_ref": "#/schema/object_schemas/policy_output",
+            "initial_value": null
+          },
+          "after_reply_policy_output": {
+            "schema_ref": "#/schema/object_schemas/policy_output",
+            "initial_value": null
+          },
+          "question_wait_state": {
+            "schema_ref": "#/schema/object_schemas/question_wait_state",
+            "initial_value": null
+          },
+          "final_assessment_source": {
+            "allowed_values": [
+              null,
+              1,
+              2
+            ],
+            "rule": "1 = initial; 2 = after reply; null before final or for a pre-AI bypass outside this suite."
+          }
+        },
+        "cross_field_constraints": [
+          "Persist initial_assessment and initial_policy_output before emitting the first buyer question.",
+          "At most one AI_QUESTION per case; question_key in the stored initial assessment is the planned category.",
+          "after_reply_assessment/policy may be set only after a matching BUYER_REPLY interaction; never create them for USER_NO_REPLY.",
+          "USER_NO_REPLY preserves the initial assessment/policy exactly. It does not advance the logistics clock or imply refusal.",
+          "When final_assessment_source=1, after_reply_assessment and after_reply_policy_output are null in this suite, and final_assessment equals initial_assessment.",
+          "When final_assessment_source=2, both after_reply objects exist and final_assessment equals after_reply_assessment.",
+          "eligibility, policy_gate, final_action_id and reason copy the selected policy output. final_action_id maps from its final_action key.",
+          "Write final selection and selected policy columns atomically; do not overwrite an already COMPLETED case.",
+          "A final candidate CLARIFY is an unresolved-information outcome; it must not issue another question or permit retry.",
+          "If pre-AI validation blocks outside these 30 fixtures, all Agent assessment fields remain null; policy handoff may still be stored."
+        ]
+      },
+      "fact_rescue_interaction": {
+        "role": "Source messages/context and runtime controls; no contact/call tracking. T0 buyer context is distinct from post-question buyer reply.",
+        "primary_key": [
+          "interaction_id"
+        ],
+        "foreign_keys": {
+          "case_id": "order_rescue.case_id"
+        },
+        "columns": {
+          "interaction_id": "string, required; source reference and idempotency key",
+          "case_id": "string, required",
+          "interaction_type": "BUYER_CONTEXT|AI_QUESTION|BUYER_REPLY|USER_NO_REPLY|OPS_REVIEW_UPDATE|DISRUPTION_RESOLVED",
+          "available_phase": "T0|RUNTIME",
+          "question_id": "string|null; runtime response/control must bind to the pending question",
+          "question_key": "CONFIRM_INTENT|CLARIFY_LANDMARK|null",
+          "message_text": "string|null; USER_NO_REPLY has no buyer message",
+          "occurred_at": "ISO datetime, required; runtime assigned when an event is released",
+          "source_actor": "string, required",
+          "payload": "object|null"
+        },
+        "unique_constraints": [
+          [
+            "interaction_id"
+          ]
+        ],
+        "conditional_constraints": [
+          "At most one row with interaction_type=AI_QUESTION for each case_id.",
+          "At most one response outcome (BUYER_REPLY or USER_NO_REPLY) for the pending question in this two-stage demo.",
+          "BUYER_CONTEXT is phase T0 and has question_id=null; do not count it as the reply that triggers assessment 2.",
+          "BUYER_REPLY and USER_NO_REPLY bind question_id to the actual existing AI_QUESTION; ignore duplicate event IDs.",
+          "USER_NO_REPLY message_text=null and payload.buyer_reply=null; actor is demo_operator, not buyer."
+        ]
+      }
+    },
+    "relationships": [
+      {
+        "from": "dim_buyer.buyer_id",
+        "to": "fact_order.buyer_id",
+        "cardinality": "1:N"
+      },
+      {
+        "from": "dim_product.product_id",
+        "to": "fact_order.product_id",
+        "cardinality": "1:N (optional)"
+      },
+      {
+        "from": "fact_order.order_id",
+        "to": "fact_delivery_event.order_id",
+        "cardinality": "1:N"
+      },
+      {
+        "from": "dim_carrier.carrier_id",
+        "to": "fact_delivery_event.carrier_id",
+        "cardinality": "1:N (optional)"
+      },
+      {
+        "from": "dim_date.date_id",
+        "to": "fact_delivery_event.event_date_id",
+        "cardinality": "1:N"
+      },
+      {
+        "from": "fact_order.order_id",
+        "to": "order_rescue.order_id",
+        "cardinality": "1:N (max one per unique failed event)"
+      },
+      {
+        "from": "fact_delivery_event.event_id",
+        "to": "order_rescue.failed_event_id",
+        "cardinality": "1:0..1"
+      },
+      {
+        "from": "order_rescue.case_id",
+        "to": "fact_rescue_interaction.case_id",
+        "cardinality": "1:N"
+      },
+      {
+        "from": "dim_action.action_id",
+        "to": "order_rescue.final_action_id",
+        "cardinality": "1:N (nullable)"
+      }
+    ],
+    "constraints": [
+      "One order_rescue per unique failed_event_id; seed mode starts from an existing NEW case.",
+      "The failed event order_id must match its rescue case order_id.",
+      "Only raw sources are seeded. No expected assessment, planned question text, future reply, selected response mode or golden label is seeded.",
+      "Store exactly two possible assessment slots; final is a copy of one slot. No decision-log table or arbitrary round loop is required.",
+      "Buyer history comes from prior fact_order rows joined to fact_delivery_event; current fixtures intentionally have no historical orders.",
+      "Every populated assessment uses the approved seven hypotheses, three confidence levels and eight missing_info codes.",
+      "All source_ref references must resolve to a raw source available at that stage; do not use future replies at stage 1.",
+      "No production logistics execution, real buyer messaging, refund, address/COD modification or contact logs."
+    ],
+    "query_recipes": {
+      "open_case": "Read order_rescue by case_id; join fact_order by order_id and fact_delivery_event by failed_event_id; check both refer to the same order.",
+      "buyer_history": "Read other orders of the same buyer_id, join delivery events and filter event_time <= as_of; [] is valid and matches this suite.",
+      "initial_agent_input": "Assemble the seven core fields from database rows, excluding all assessment/policy/result fields. Reconstruct operational_context.buyer_messages_t0 from BUYER_CONTEXT T0 interactions when present.",
+      "failed_event_mapping": {
+        "status": "event_status",
+        "time": "event_time",
+        "courier_note": "courier_note",
+        "reported_reason": "reported_reason",
+        "as_of": "order_rescue.as_of"
+      },
+      "runtime_context": "Supply only released RUNTIME interactions for this case in a separate runtime_context envelope; do not overwrite failed_event or put current reply into buyer_history.",
+      "source_references": "source_ref_index indexes T0 sources. Runtime interaction_id is its own source_ref; register only when the event is actually released.",
+      "write_initial": "Validate the six-field assessment and four-field policy output, persist initial slots, then emit at most one permitted question and WAIT.",
+      "write_after_reply": "After matching BUYER_REPLY, rebuild input plus released runtime context, run Agent once more and store after_reply slots.",
+      "write_no_reply": "Record USER_NO_REPLY control, leave after_reply slots null, select initial slots without calling Agent again.",
+      "final_write": "Set final_assessment_source, copy selected assessment and four policy fields, mark COMPLETED and finalize question status in one atomic update.",
+      "evaluate": "Only isolated test runner reads the paired test file expected data. Agent/tools have database input views only."
+    },
+    "object_schemas": {
+      "assessment": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "evidence",
+              "hypothesis",
+              "confidence",
+              "missing_info",
+              "question_key",
+              "candidate_action"
+            ],
+            "properties": {
+              "evidence": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "source_ref",
+                    "fact",
+                    "verification"
+                  ],
+                  "properties": {
+                    "source_ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference to a source known at this assessment stage."
+                    },
+                    "fact": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Sourced observation; distinguish reported claims from confirmed facts."
+                    },
+                    "verification": {
+                      "type": "string",
+                      "minLength": 1,
+                      "enum": [
+                        "SOURCE_RECORD",
+                        "UNVERIFIED_REPORT",
+                        "DIRECT_BUYER_STATEMENT",
+                        "VERIFIED_OPS_SIGNAL"
+                      ]
+                    }
+                  }
+                }
+              },
+              "hypothesis": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "AVAILABILITY_ISSUE",
+                  "ADDRESS_ISSUE",
+                  "CONTACT_ISSUE",
+                  "BUYER_INTENT_ISSUE",
+                  "PAYMENT_ISSUE",
+                  "LOGISTICS_ISSUE",
+                  "UNKNOWN_CAUSE"
+                ]
+              },
+              "confidence": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Strength of support for the hypothesis, not delivery-success probability.",
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH"
+                ]
+              },
+              "missing_info": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "enum": [
+                    "CURRENT_BUYER_INTENT",
+                    "RECEIVING_AVAILABILITY",
+                    "ADDRESS_CLARIFICATION",
+                    "CONTACT_CLARIFICATION",
+                    "COD_READINESS",
+                    "DELIVERY_ACCESS",
+                    "LOGISTICS_VERIFICATION",
+                    "CAUSE_CLARIFICATION"
+                  ]
+                },
+                "description": "[] means nothing remains missing; a null assessment means no assessment exists."
+              },
+              "question_key": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  null,
+                  "CONFIRM_INTENT",
+                  "CLARIFY_LANDMARK"
+                ],
+                "description": "Planned category at stage 1; category of the question already asked at stage 2/final. Does not authorize a second question."
+              },
+              "candidate_action": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "CLARIFY",
+                  "STANDARD_REATTEMPT",
+                  "HOLD_DISRUPTION",
+                  "ESCALATE_REVIEW",
+                  "NO_ACTION"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "policy_output": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "eligibility",
+              "policy_gate",
+              "final_action",
+              "reason"
+            ],
+            "properties": {
+              "eligibility": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "ELIGIBLE",
+                  "INELIGIBLE",
+                  "UNKNOWN"
+                ]
+              },
+              "policy_gate": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "PERMITTED",
+                  "BLOCKED",
+                  "ESCALATED"
+                ]
+              },
+              "final_action": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "CLARIFY",
+                  "STANDARD_REATTEMPT",
+                  "HOLD_DISRUPTION",
+                  "ESCALATE_REVIEW",
+                  "NO_ACTION"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        ]
+      },
+      "question_wait_state": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "question_id",
+              "question_key",
+              "question_text",
+              "status",
+              "asked_at"
+            ],
+            "properties": {
+              "question_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "question_key": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "CONFIRM_INTENT",
+                  "CLARIFY_LANDMARK"
+                ]
+              },
+              "question_text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "minLength": 1,
+                "enum": [
+                  "PENDING",
+                  "ANSWERED",
+                  "NO_REPLY"
+                ]
+              },
+              "asked_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "description": "No reply deadline or fixed duration. NO_REPLY is a manual demo control, not a buyer statement."
+          }
+        ]
+      },
+      "evidence_item": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_ref",
+          "fact",
+          "verification"
+        ],
+        "properties": {
+          "source_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Reference to a source known at this assessment stage."
+          },
+          "fact": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Sourced observation; distinguish reported claims from confirmed facts."
+          },
+          "verification": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "SOURCE_RECORD",
+              "UNVERIFIED_REPORT",
+              "DIRECT_BUYER_STATEMENT",
+              "VERIFIED_OPS_SIGNAL"
+            ]
+          }
+        }
+      }
+    },
+    "assessment_field_mapping": {
+      "evidence": {
+        "initial_path": "order_rescue.initial_assessment.evidence",
+        "after_reply_path": "order_rescue.after_reply_assessment.evidence",
+        "final_path": "order_rescue.final_assessment.evidence"
+      },
+      "hypothesis": {
+        "initial_path": "order_rescue.initial_assessment.hypothesis",
+        "after_reply_path": "order_rescue.after_reply_assessment.hypothesis",
+        "final_path": "order_rescue.final_assessment.hypothesis"
+      },
+      "confidence": {
+        "initial_path": "order_rescue.initial_assessment.confidence",
+        "after_reply_path": "order_rescue.after_reply_assessment.confidence",
+        "final_path": "order_rescue.final_assessment.confidence"
+      },
+      "missing_info": {
+        "initial_path": "order_rescue.initial_assessment.missing_info",
+        "after_reply_path": "order_rescue.after_reply_assessment.missing_info",
+        "final_path": "order_rescue.final_assessment.missing_info"
+      },
+      "question_key": {
+        "initial_path": "order_rescue.initial_assessment.question_key",
+        "after_reply_path": "order_rescue.after_reply_assessment.question_key",
+        "final_path": "order_rescue.final_assessment.question_key"
+      },
+      "candidate_action": {
+        "initial_path": "order_rescue.initial_assessment.candidate_action",
+        "after_reply_path": "order_rescue.after_reply_assessment.candidate_action",
+        "final_path": "order_rescue.final_assessment.candidate_action"
+      }
+    },
+    "object_schema_dialect": "https://json-schema.org/draft/2020-12/schema"
+  },
+  "demo_policy_profile": {
+    "policy_version": "demo-two-assessment-v2",
+    "status": "DEMO_CONFIG_NOT_LIVE_CARRIER_POLICY",
+    "maximum_attempts": 3,
+    "maximum_buyer_questions": 1,
+    "reply_wait_duration_hours": null,
+    "no_reply_trigger": "MANUAL_USER_NO_REPLY",
+    "no_reply_final_selection": 1,
+    "reply_final_selection": 2,
+    "retry_requires": [
+      "ELIGIBLE lifecycle",
+      "Direct current buyer intent to receive",
+      "Receiving availability",
+      "Delivery information sufficient",
+      "COD readiness when payment is relevant",
+      "No unresolved blocking source conflict"
+    ],
+    "hold_requires": [
+      "Verified Ops disruption",
+      "Matching route/time scope",
+      "Active signal",
+      "Ops reassessment required; no automatic third Agent round in this demo"
+    ],
+    "safety": [
+      "Courier note is unverified",
+      "Silence is not refusal",
+      "History cannot auto-deny",
+      "High confidence does not override policy",
+      "No real dispatch/return/refund or address/COD change"
+    ],
+    "excluded_before_ai": [
+      "Malformed input",
+      "Unsanitized PII",
+      "Return started/completed",
+      "Unknown/expired deadline",
+      "No attempts remaining",
+      "Duplicate/stale trigger"
+    ],
+    "clarify_when_final": "An initial CLARIFY selected after manual no-reply stays CLARIFY; show unresolved information to Ops, do not emit a new question or claim retry permission."
+  },
+  "runtime_contract": {
+    "initial_agent_core_fields": [
+      "case_id",
+      "failed_event",
+      "attempts_used",
+      "return_state",
+      "deadline",
+      "buyer_history",
+      "operational_context"
+    ],
+    "agent_input_envelope": {
+      "core_input": "Seven database-derived input fields",
+      "runtime_context": "Only released runtime interactions; empty at stage 1"
+    },
+    "states": [
+      {
+        "from": "NEW",
+        "event": "VALID_INITIAL_ASSESSMENT",
+        "to": "ASSESSED",
+        "write": [
+          "initial_assessment",
+          "initial_policy_output"
+        ]
+      },
+      {
+        "from": "ASSESSED",
+        "event": "PERMITTED_FIRST_QUESTION",
+        "to": "WAITING_FOR_BUYER",
+        "write": [
+          "AI_QUESTION interaction",
+          "question_wait_state PENDING"
+        ]
+      },
+      {
+        "from": "WAITING_FOR_BUYER",
+        "event": "MATCHING_BUYER_REPLY",
+        "to": "COMPLETED",
+        "write": [
+          "BUYER_REPLY interaction",
+          "after_reply slots",
+          "final_assessment_source=2",
+          "selected final fields",
+          "question status ANSWERED"
+        ]
+      },
+      {
+        "from": "WAITING_FOR_BUYER",
+        "event": "MANUAL_USER_NO_REPLY",
+        "to": "COMPLETED",
+        "write": [
+          "USER_NO_REPLY control",
+          "final_assessment_source=1",
+          "selected initial fields",
+          "question status NO_REPLY; after_reply slots stay null"
+        ]
+      }
+    ],
+    "time": "All current seed cases are evaluated as of 2026-10-24T15:00:00+07:00 and have a synthetic logistics deadline 2026-10-28T15:00:00+07:00. No fixed reply duration; manual no-reply does not simulate clock expiry.",
+    "database_isolation": "Reset/clone this seed per test run. Agent reads an explicit raw-input projection, never complete order_rescue rows containing prior outputs.",
+    "atomicity": "Question emission is idempotent; reply/skip transition is serialized per case. Final selection is immutable."
+  },
+  "seed_data": {
+    "dim_buyer": [
+      {
+        "buyer_id": "BUYER-DEMO-001",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-002",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-003",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-004",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-005",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-006",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-007",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-008",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-009",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-010",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-011",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-012",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-013",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-014",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-015",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-016",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-017",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-018",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-019",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-020",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-021",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-022",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-023",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-024",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-025",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-026",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-027",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-028",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-029",
+        "buyer_segment": null,
+        "location_province": null
+      },
+      {
+        "buyer_id": "BUYER-DEMO-030",
+        "buyer_segment": null,
+        "location_province": null
+      }
+    ],
+    "dim_product": [],
+    "dim_carrier": [],
+    "dim_date": [
+      {
+        "date_id": "2026-10-24",
+        "year": 2026,
+        "month": 10,
+        "day": 24,
+        "day_of_week": 6
+      }
+    ],
+    "dim_action": [
+      {
+        "action_id": "CLARIFY",
+        "description": "Ask one buyer question if policy permits"
+      },
+      {
+        "action_id": "STANDARD_REATTEMPT",
+        "description": "Recommendation to attempt delivery again"
+      },
+      {
+        "action_id": "HOLD_DISRUPTION",
+        "description": "Hold for verified disruption and a reassessment point"
+      },
+      {
+        "action_id": "ESCALATE_REVIEW",
+        "description": "Handoff to Operations for authorized review"
+      },
+      {
+        "action_id": "NO_ACTION",
+        "description": "No further action at the current evaluation point"
+      }
+    ],
+    "fact_order": [
+      {
+        "order_id": "ORDER-DEMO-001",
+        "buyer_id": "BUYER-DEMO-001",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "RECIPIENT_UNAVAILABLE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-001-FAIL",
+            "DEMO-001-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-002",
+        "buyer_id": "BUYER-DEMO-002",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "RECIPIENT_UNAVAILABLE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-002-FAIL",
+            "DEMO-002-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-003",
+        "buyer_id": "BUYER-DEMO-003",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "RECIPIENT_UNAVAILABLE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-003-FAIL",
+            "DEMO-003-NOTE",
+            "DEMO-003-BUYER-T0"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-004",
+        "buyer_id": "BUYER-DEMO-004",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "RECIPIENT_UNAVAILABLE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-004-FAIL",
+            "DEMO-004-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-005",
+        "buyer_id": "BUYER-DEMO-005",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "RECIPIENT_UNAVAILABLE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-005-FAIL",
+            "DEMO-005-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-006",
+        "buyer_id": "BUYER-DEMO-006",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "ADDRESS_ISSUE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-006-FAIL",
+            "DEMO-006-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-007",
+        "buyer_id": "BUYER-DEMO-007",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "ADDRESS_ISSUE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-007-FAIL",
+            "DEMO-007-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-008",
+        "buyer_id": "BUYER-DEMO-008",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "ADDRESS_ISSUE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "address_validation": {
+            "landmark_missing": true,
+            "verification": "VERIFIED"
+          },
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-008-FAIL",
+            "DEMO-008-NOTE",
+            "DEMO-008-OPS"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-009",
+        "buyer_id": "BUYER-DEMO-009",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "ADDRESS_ISSUE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-009-FAIL",
+            "DEMO-009-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-010",
+        "buyer_id": "BUYER-DEMO-010",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "ADDRESS_ISSUE",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-010-FAIL",
+            "DEMO-010-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-011",
+        "buyer_id": "BUYER-DEMO-011",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "CONTACT_FAILED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-011-FAIL",
+            "DEMO-011-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-012",
+        "buyer_id": "BUYER-DEMO-012",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "CONTACT_FAILED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-012-FAIL",
+            "DEMO-012-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-013",
+        "buyer_id": "BUYER-DEMO-013",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "CONTACT_FAILED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-013-FAIL",
+            "DEMO-013-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-014",
+        "buyer_id": "BUYER-DEMO-014",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "CONTACT_FAILED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-014-FAIL",
+            "DEMO-014-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-015",
+        "buyer_id": "BUYER-DEMO-015",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "REFUSED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-015-FAIL",
+            "DEMO-015-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-016",
+        "buyer_id": "BUYER-DEMO-016",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "COD",
+        "current_status": "REFUSED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "COD",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-016-FAIL",
+            "DEMO-016-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-017",
+        "buyer_id": "BUYER-DEMO-017",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "REFUSED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-017-FAIL",
+            "DEMO-017-NOTE",
+            "DEMO-017-BUYER-T0"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-018",
+        "buyer_id": "BUYER-DEMO-018",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "REFUSED",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-018-FAIL",
+            "DEMO-018-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-019",
+        "buyer_id": "BUYER-DEMO-019",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "COD",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "COD",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-019-FAIL",
+            "DEMO-019-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-020",
+        "buyer_id": "BUYER-DEMO-020",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "COD",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "COD",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-020-FAIL",
+            "DEMO-020-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-021",
+        "buyer_id": "BUYER-DEMO-021",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "COD",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "COD",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-021-FAIL",
+            "DEMO-021-NOTE",
+            "DEMO-021-BUYER-T0"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-022",
+        "buyer_id": "BUYER-DEMO-022",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "COD",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "COD",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-022-FAIL",
+            "DEMO-022-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-023",
+        "buyer_id": "BUYER-DEMO-023",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "disruption": {
+            "kind": "FLOOD",
+            "status": "ACTIVE",
+            "verification": "VERIFIED",
+            "route_match": true,
+            "time_match": true,
+            "reassess_required": true
+          },
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-023-FAIL",
+            "DEMO-023-NOTE",
+            "DEMO-023-OPS"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-024",
+        "buyer_id": "BUYER-DEMO-024",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-024-FAIL",
+            "DEMO-024-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-025",
+        "buyer_id": "BUYER-DEMO-025",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-025-FAIL",
+            "DEMO-025-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-026",
+        "buyer_id": "BUYER-DEMO-026",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "disruption": {
+            "kind": "CAPACITY_PAUSE",
+            "status": "ACTIVE",
+            "verification": "VERIFIED",
+            "route_match": true,
+            "time_match": true,
+            "reassess_required": true
+          },
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-026-FAIL",
+            "DEMO-026-NOTE",
+            "DEMO-026-OPS"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-027",
+        "buyer_id": "BUYER-DEMO-027",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "COD",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "COD",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-027-FAIL",
+            "DEMO-027-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-028",
+        "buyer_id": "BUYER-DEMO-028",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-028-FAIL",
+            "DEMO-028-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-029",
+        "buyer_id": "BUYER-DEMO-029",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-029-FAIL",
+            "DEMO-029-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      },
+      {
+        "order_id": "ORDER-DEMO-030",
+        "buyer_id": "BUYER-DEMO-030",
+        "product_id": null,
+        "order_created_at": null,
+        "payment_type": "PREPAID",
+        "current_status": "DELIVERY_FAILED_OTHER",
+        "operational_context": {
+          "route": "SYN-ROUTE-01",
+          "payment": "PREPAID",
+          "policy_version": "demo-two-assessment-v2",
+          "source_refs": [
+            "DEMO-030-FAIL",
+            "DEMO-030-NOTE"
+          ]
+        },
+        "is_rescue_order": true
+      }
+    ],
+    "fact_delivery_event": [
+      {
+        "event_id": "DEMO-001-FAIL",
+        "order_id": "ORDER-DEMO-001",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "RECIPIENT_UNAVAILABLE",
+        "attempt_no": 1,
+        "courier_note": "Người nhà nói buyer đang đi làm, chưa có người nhận.",
+        "reported_reason": "RECIPIENT_UNAVAILABLE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "RECIPIENT_UNAVAILABLE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "RECIPIENT_UNAVAILABLE"
+        }
+      },
+      {
+        "event_id": "DEMO-002-FAIL",
+        "order_id": "ORDER-DEMO-002",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "RECIPIENT_UNAVAILABLE",
+        "attempt_no": 1,
+        "courier_note": "Không bàn giao được; có thể khách không có nhà.",
+        "reported_reason": "RECIPIENT_UNAVAILABLE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "RECIPIENT_UNAVAILABLE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "RECIPIENT_UNAVAILABLE"
+        }
+      },
+      {
+        "event_id": "DEMO-003-FAIL",
+        "order_id": "ORDER-DEMO-003",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "RECIPIENT_UNAVAILABLE",
+        "attempt_no": 1,
+        "courier_note": "Không có người bàn giao ở thời điểm giao.",
+        "reported_reason": "RECIPIENT_UNAVAILABLE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "RECIPIENT_UNAVAILABLE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "RECIPIENT_UNAVAILABLE"
+        }
+      },
+      {
+        "event_id": "DEMO-004-FAIL",
+        "order_id": "ORDER-DEMO-004",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "RECIPIENT_UNAVAILABLE",
+        "attempt_no": 1,
+        "courier_note": "Buyer được ghi nhận đi vắng; chưa có xác nhận trực tiếp.",
+        "reported_reason": "RECIPIENT_UNAVAILABLE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "RECIPIENT_UNAVAILABLE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "RECIPIENT_UNAVAILABLE"
+        }
+      },
+      {
+        "event_id": "DEMO-005-FAIL",
+        "order_id": "ORDER-DEMO-005",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "RECIPIENT_UNAVAILABLE",
+        "attempt_no": 1,
+        "courier_note": "Shipper ghi người nhận đi làm.",
+        "reported_reason": "RECIPIENT_UNAVAILABLE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "RECIPIENT_UNAVAILABLE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "RECIPIENT_UNAVAILABLE"
+        }
+      },
+      {
+        "event_id": "DEMO-006-FAIL",
+        "order_id": "ORDER-DEMO-006",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "ADDRESS_ISSUE",
+        "attempt_no": 1,
+        "courier_note": "Hẻm nhiều ngã rẽ, thiếu mốc vào địa điểm nhận.",
+        "reported_reason": "ADDRESS_ISSUE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "ADDRESS_ISSUE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "ADDRESS_ISSUE"
+        }
+      },
+      {
+        "event_id": "DEMO-007-FAIL",
+        "order_id": "ORDER-DEMO-007",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "ADDRESS_ISSUE",
+        "attempt_no": 1,
+        "courier_note": "Đến khu văn phòng nhưng chưa xác định được nơi bàn giao.",
+        "reported_reason": "ADDRESS_ISSUE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "ADDRESS_ISSUE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "ADDRESS_ISSUE"
+        }
+      },
+      {
+        "event_id": "DEMO-008-FAIL",
+        "order_id": "ORDER-DEMO-008",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "ADDRESS_ISSUE",
+        "attempt_no": 1,
+        "courier_note": "Đơn thiếu mốc của khu nhận hàng.",
+        "reported_reason": "ADDRESS_ISSUE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "ADDRESS_ISSUE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "ADDRESS_ISSUE"
+        }
+      },
+      {
+        "event_id": "DEMO-009-FAIL",
+        "order_id": "ORDER-DEMO-009",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "ADDRESS_ISSUE",
+        "attempt_no": 1,
+        "courier_note": "Không tìm được lối vào địa điểm trên đơn.",
+        "reported_reason": "ADDRESS_ISSUE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "ADDRESS_ISSUE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "ADDRESS_ISSUE"
+        }
+      },
+      {
+        "event_id": "DEMO-010-FAIL",
+        "order_id": "ORDER-DEMO-010",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "ADDRESS_ISSUE",
+        "attempt_no": 1,
+        "courier_note": "Chỉ thấy tên khu, không có mốc nhận.",
+        "reported_reason": "ADDRESS_ISSUE",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "ADDRESS_ISSUE",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "ADDRESS_ISSUE"
+        }
+      },
+      {
+        "event_id": "DEMO-011-FAIL",
+        "order_id": "ORDER-DEMO-011",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "CONTACT_FAILED",
+        "attempt_no": 1,
+        "courier_note": "Hệ thống ghi CONTACT_FAILED; note không có nguyên nhân cụ thể.",
+        "reported_reason": "CONTACT_FAILED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "CONTACT_FAILED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "CONTACT_FAILED"
+        }
+      },
+      {
+        "event_id": "DEMO-012-FAIL",
+        "order_id": "ORDER-DEMO-012",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "CONTACT_FAILED",
+        "attempt_no": 1,
+        "courier_note": "Shipper ghi liên hệ chưa thành công, nghi do mất sóng.",
+        "reported_reason": "CONTACT_FAILED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "CONTACT_FAILED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "CONTACT_FAILED"
+        }
+      },
+      {
+        "event_id": "DEMO-013-FAIL",
+        "order_id": "ORDER-DEMO-013",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "CONTACT_FAILED",
+        "attempt_no": 1,
+        "courier_note": "Không có xác nhận buyer; không có contact logs.",
+        "reported_reason": "CONTACT_FAILED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "CONTACT_FAILED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "CONTACT_FAILED"
+        }
+      },
+      {
+        "event_id": "DEMO-014-FAIL",
+        "order_id": "ORDER-DEMO-014",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "CONTACT_FAILED",
+        "attempt_no": 1,
+        "courier_note": "CONTACT_FAILED; không có thông tin nguyên nhân.",
+        "reported_reason": "CONTACT_FAILED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "CONTACT_FAILED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "CONTACT_FAILED"
+        }
+      },
+      {
+        "event_id": "DEMO-015-FAIL",
+        "order_id": "ORDER-DEMO-015",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "REFUSED",
+        "attempt_no": 1,
+        "courier_note": "Status REFUSED, chưa có buyer confirmation.",
+        "reported_reason": "REFUSED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "REFUSED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "REFUSED"
+        }
+      },
+      {
+        "event_id": "DEMO-016-FAIL",
+        "order_id": "ORDER-DEMO-016",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "REFUSED",
+        "attempt_no": 1,
+        "courier_note": "Shipper ghi buyer chưa đồng ý nhận.",
+        "reported_reason": "REFUSED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "REFUSED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "REFUSED"
+        }
+      },
+      {
+        "event_id": "DEMO-017-FAIL",
+        "order_id": "ORDER-DEMO-017",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "REFUSED",
+        "attempt_no": 1,
+        "courier_note": "Người nhận nói không biết đơn quà.",
+        "reported_reason": "REFUSED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "REFUSED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "REFUSED"
+        }
+      },
+      {
+        "event_id": "DEMO-018-FAIL",
+        "order_id": "ORDER-DEMO-018",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "REFUSED",
+        "attempt_no": 1,
+        "courier_note": "Note ghi buyer phân vân có nhận hay không.",
+        "reported_reason": "REFUSED",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "REFUSED",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "REFUSED"
+        }
+      },
+      {
+        "event_id": "DEMO-019-FAIL",
+        "order_id": "ORDER-DEMO-019",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Note cho biết chưa chuẩn bị đủ tiền mặt COD.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-020-FAIL",
+        "order_id": "ORDER-DEMO-020",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Note mơ hồ: chưa bàn giao được đơn COD, chưa rõ vì sao.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-021-FAIL",
+        "order_id": "ORDER-DEMO-021",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Buyer chưa thanh toán COD ở lần giao.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-022-FAIL",
+        "order_id": "ORDER-DEMO-022",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Shipper ghi chưa chuẩn bị tiền COD.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-023-FAIL",
+        "order_id": "ORDER-DEMO-023",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Tuyến tạm dừng do ngập.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-024-FAIL",
+        "order_id": "ORDER-DEMO-024",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Chưa bàn giao được; shipper ghi đường đông, chưa xác định trở ngại tại điểm nhận.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-025-FAIL",
+        "order_id": "ORDER-DEMO-025",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-026-FAIL",
+        "order_id": "ORDER-DEMO-026",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Ops xác nhận tuyến tạm dừng nhận giao vì quá tải.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-027-FAIL",
+        "order_id": "ORDER-DEMO-027",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Note chung chung: cao điểm, chưa hoàn tất bàn giao.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-028-FAIL",
+        "order_id": "ORDER-DEMO-028",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Chỉ ghi giao không thành công, không có chi tiết.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-029-FAIL",
+        "order_id": "ORDER-DEMO-029",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Giao thất bại; chưa biết do vắng mặt hay liên hệ.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      },
+      {
+        "event_id": "DEMO-030-FAIL",
+        "order_id": "ORDER-DEMO-030",
+        "carrier_id": null,
+        "event_date_id": "2026-10-24",
+        "event_time": "2026-10-24T14:30:00+07:00",
+        "event_type": "FAILED_DELIVERY",
+        "event_status": "DELIVERY_FAILED_OTHER",
+        "attempt_no": 1,
+        "courier_note": "Giao thất bại, không có ghi chú giải thích.",
+        "reported_reason": "DELIVERY_FAILED_OTHER",
+        "source_actor": "delivery_system",
+        "raw_payload": {
+          "status": "DELIVERY_FAILED_OTHER",
+          "time": "2026-10-24T14:30:00+07:00",
+          "as_of": "2026-10-24T15:00:00+07:00",
+          "reported_reason": "DELIVERY_FAILED_OTHER"
+        }
+      }
+    ],
+    "order_rescue": [
+      {
+        "case_id": "DEMO-001",
+        "order_id": "ORDER-DEMO-001",
+        "failed_event_id": "DEMO-001-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-002",
+        "order_id": "ORDER-DEMO-002",
+        "failed_event_id": "DEMO-002-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-003",
+        "order_id": "ORDER-DEMO-003",
+        "failed_event_id": "DEMO-003-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-004",
+        "order_id": "ORDER-DEMO-004",
+        "failed_event_id": "DEMO-004-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-005",
+        "order_id": "ORDER-DEMO-005",
+        "failed_event_id": "DEMO-005-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-006",
+        "order_id": "ORDER-DEMO-006",
+        "failed_event_id": "DEMO-006-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-007",
+        "order_id": "ORDER-DEMO-007",
+        "failed_event_id": "DEMO-007-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-008",
+        "order_id": "ORDER-DEMO-008",
+        "failed_event_id": "DEMO-008-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-009",
+        "order_id": "ORDER-DEMO-009",
+        "failed_event_id": "DEMO-009-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-010",
+        "order_id": "ORDER-DEMO-010",
+        "failed_event_id": "DEMO-010-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-011",
+        "order_id": "ORDER-DEMO-011",
+        "failed_event_id": "DEMO-011-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-012",
+        "order_id": "ORDER-DEMO-012",
+        "failed_event_id": "DEMO-012-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-013",
+        "order_id": "ORDER-DEMO-013",
+        "failed_event_id": "DEMO-013-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-014",
+        "order_id": "ORDER-DEMO-014",
+        "failed_event_id": "DEMO-014-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-015",
+        "order_id": "ORDER-DEMO-015",
+        "failed_event_id": "DEMO-015-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-016",
+        "order_id": "ORDER-DEMO-016",
+        "failed_event_id": "DEMO-016-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-017",
+        "order_id": "ORDER-DEMO-017",
+        "failed_event_id": "DEMO-017-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-018",
+        "order_id": "ORDER-DEMO-018",
+        "failed_event_id": "DEMO-018-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-019",
+        "order_id": "ORDER-DEMO-019",
+        "failed_event_id": "DEMO-019-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-020",
+        "order_id": "ORDER-DEMO-020",
+        "failed_event_id": "DEMO-020-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-021",
+        "order_id": "ORDER-DEMO-021",
+        "failed_event_id": "DEMO-021-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-022",
+        "order_id": "ORDER-DEMO-022",
+        "failed_event_id": "DEMO-022-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-023",
+        "order_id": "ORDER-DEMO-023",
+        "failed_event_id": "DEMO-023-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-024",
+        "order_id": "ORDER-DEMO-024",
+        "failed_event_id": "DEMO-024-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-025",
+        "order_id": "ORDER-DEMO-025",
+        "failed_event_id": "DEMO-025-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-026",
+        "order_id": "ORDER-DEMO-026",
+        "failed_event_id": "DEMO-026-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-027",
+        "order_id": "ORDER-DEMO-027",
+        "failed_event_id": "DEMO-027-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-028",
+        "order_id": "ORDER-DEMO-028",
+        "failed_event_id": "DEMO-028-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-029",
+        "order_id": "ORDER-DEMO-029",
+        "failed_event_id": "DEMO-029-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      },
+      {
+        "case_id": "DEMO-030",
+        "order_id": "ORDER-DEMO-030",
+        "failed_event_id": "DEMO-030-FAIL",
+        "created_at": "2026-10-24T15:00:00+07:00",
+        "as_of": "2026-10-24T15:00:00+07:00",
+        "current_status": "NEW",
+        "attempts_used": 1,
+        "return_state": "NOT_STARTED",
+        "deadline_at": "2026-10-28T15:00:00+07:00",
+        "policy_version": "demo-two-assessment-v2",
+        "initial_assessment": null,
+        "initial_policy_output": null,
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "question_wait_state": null,
+        "final_assessment_source": null,
+        "final_assessment": null,
+        "eligibility": null,
+        "policy_gate": null,
+        "final_action_id": null,
+        "reason": null,
+        "updated_at": "2026-10-24T15:00:00+07:00"
+      }
+    ],
+    "fact_rescue_interaction": [
+      {
+        "interaction_id": "DEMO-003-BUYER-T0",
+        "case_id": "DEMO-003",
+        "interaction_type": "BUYER_CONTEXT",
+        "available_phase": "T0",
+        "question_id": null,
+        "question_key": null,
+        "message_text": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
+        "occurred_at": "2026-10-24T14:50:00+07:00",
+        "source_actor": "buyer_simulator",
+        "payload": {
+          "text": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận."
+        }
+      },
+      {
+        "interaction_id": "DEMO-017-BUYER-T0",
+        "case_id": "DEMO-017",
+        "interaction_type": "BUYER_CONTEXT",
+        "available_phase": "T0",
+        "question_id": null,
+        "question_key": null,
+        "message_text": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
+        "occurred_at": "2026-10-24T14:50:00+07:00",
+        "source_actor": "buyer_simulator",
+        "payload": {
+          "text": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận."
+        }
+      },
+      {
+        "interaction_id": "DEMO-021-BUYER-T0",
+        "case_id": "DEMO-021",
+        "interaction_type": "BUYER_CONTEXT",
+        "available_phase": "T0",
+        "question_id": null,
+        "question_key": null,
+        "message_text": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
+        "occurred_at": "2026-10-24T14:50:00+07:00",
+        "source_actor": "buyer_simulator",
+        "payload": {
+          "text": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được."
+        }
+      }
+    ]
+  },
+  "source_ref_index": {
+    "DEMO-001-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-001-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-001-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-001-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-002-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-002-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-002-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-002-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-003-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-003-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-003-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-003-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-003-BUYER-T0": {
+      "table": "fact_rescue_interaction",
+      "pk": "DEMO-003-BUYER-T0",
+      "path": "$.message_text",
+      "source_type": "BUYER_MESSAGE",
+      "source_actor": "buyer_simulator",
+      "available_phase": "T0"
+    },
+    "DEMO-004-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-004-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-004-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-004-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-005-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-005-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-005-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-005-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-006-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-006-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-006-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-006-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-007-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-007-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-007-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-007-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-008-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-008-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-008-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-008-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-008-OPS": {
+      "table": "fact_order",
+      "pk": "ORDER-DEMO-008",
+      "path": "$.operational_context",
+      "keys": [
+        "address_validation"
+      ],
+      "source_type": "OPS_CONTEXT",
+      "source_actor": "ops_simulator",
+      "available_phase": "T0"
+    },
+    "DEMO-009-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-009-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-009-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-009-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-010-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-010-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-010-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-010-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-011-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-011-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-011-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-011-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-012-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-012-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-012-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-012-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-013-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-013-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-013-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-013-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-014-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-014-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-014-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-014-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-015-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-015-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-015-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-015-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-016-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-016-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-016-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-016-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-017-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-017-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-017-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-017-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-017-BUYER-T0": {
+      "table": "fact_rescue_interaction",
+      "pk": "DEMO-017-BUYER-T0",
+      "path": "$.message_text",
+      "source_type": "BUYER_MESSAGE",
+      "source_actor": "buyer_simulator",
+      "available_phase": "T0"
+    },
+    "DEMO-018-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-018-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-018-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-018-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-019-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-019-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-019-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-019-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-020-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-020-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-020-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-020-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-021-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-021-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-021-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-021-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-021-BUYER-T0": {
+      "table": "fact_rescue_interaction",
+      "pk": "DEMO-021-BUYER-T0",
+      "path": "$.message_text",
+      "source_type": "BUYER_MESSAGE",
+      "source_actor": "buyer_simulator",
+      "available_phase": "T0"
+    },
+    "DEMO-022-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-022-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-022-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-022-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-023-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-023-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-023-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-023-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-023-OPS": {
+      "table": "fact_order",
+      "pk": "ORDER-DEMO-023",
+      "path": "$.operational_context",
+      "keys": [
+        "disruption"
+      ],
+      "source_type": "OPS_CONTEXT",
+      "source_actor": "ops_simulator",
+      "available_phase": "T0"
+    },
+    "DEMO-024-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-024-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-024-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-024-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-025-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-025-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-025-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-025-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-026-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-026-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-026-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-026-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-026-OPS": {
+      "table": "fact_order",
+      "pk": "ORDER-DEMO-026",
+      "path": "$.operational_context",
+      "keys": [
+        "disruption"
+      ],
+      "source_type": "OPS_CONTEXT",
+      "source_actor": "ops_simulator",
+      "available_phase": "T0"
+    },
+    "DEMO-027-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-027-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-027-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-027-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-028-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-028-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-028-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-028-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-029-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-029-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-029-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-029-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    },
+    "DEMO-030-FAIL": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-030-FAIL",
+      "path": "$",
+      "source_type": "FAILED_DELIVERY",
+      "source_actor": "delivery_system",
+      "available_phase": "T0"
+    },
+    "DEMO-030-NOTE": {
+      "table": "fact_delivery_event",
+      "pk": "DEMO-030-FAIL",
+      "path": "$.courier_note",
+      "source_type": "COURIER_NOTE",
+      "source_actor": "courier",
+      "available_phase": "T0"
+    }
+  },
+  "seed_notes": [
+    "All initial/after-reply/final assessment and policy/result slots start null in all 30 cases.",
+    "T0 BUYER_CONTEXT messages for three cases are real raw synthetic input from the workbook, not future replies. Their presence supports HIGH initial confidence when the cause is directly confirmed.",
+    "The three T0 buyer messages are stored once as interactions. Retrieval projects them into operational_context.buyer_messages_t0 to reproduce workbook input J.",
+    "There are no seeded AI_QUESTION, BUYER_REPLY or USER_NO_REPLY records. Simulator controls and future reply text exist only in the paired test file.",
+    "No historical orders are invented: buyer_history=[] in this suite. Schema and query recipe still support history from earlier orders/events.",
+    "dim_product and dim_carrier remain empty; optional IDs and unavailable buyer attributes stay null. Do not fabricate order_created_at, COD amount or product/carrier data.",
+    "Source references address raw observations. Runtime interaction IDs become source refs only when those records are released and stored.",
+    "No new decision-log table is added. Initial and after-reply assessments are two fixed slots; final is a selected copy."
+  ]
+}

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { AgentInput, ConfidenceScore, Source } from "../order-rescue/models";
 export type { AgentInput, ConfidenceScore, Source };
-export const CONTRACT_VERSION="2.2";
-export const POLICY_VERSION="demo-two-assessment-v2";
+export const CONTRACT_VERSION="2.4";
+export const POLICY_VERSION="demo-two-assessment-v2.4-reconciled";
 export const HYPOTHESES=["AVAILABILITY_ISSUE","ADDRESS_ISSUE","CONTACT_ISSUE","BUYER_INTENT_ISSUE","PAYMENT_ISSUE","LOGISTICS_ISSUE","UNKNOWN_CAUSE"] as const;
 export const MISSING=["CURRENT_BUYER_INTENT","RECEIVING_AVAILABILITY","ADDRESS_CLARIFICATION","CONTACT_CLARIFICATION","COD_READINESS","DELIVERY_ACCESS","LOGISTICS_VERIFICATION","CAUSE_CLARIFICATION"] as const;
 export const Assessment=z.object({
@@ -23,7 +23,7 @@ export interface Decision extends PolicyOutput {
  workflow_execution_id:string;reassess_at:null;labels:string[];
 }
 export interface RunState {
- contract_version:"2.2";run_id:string;case:RawCase;input:AgentInput;now:string;applied:Source[];
+ contract_version:"2.2"|"2.4";run_id:string;case:RawCase;input:AgentInput;now:string;applied:Source[];
  current_status:"NEW"|"WAITING_FOR_BUYER"|"COMPLETED";question_wait_state:Question|null;
  initial_assessment:Assessment|null;initial_policy_output:PolicyOutput|null;
  after_reply_assessment:Assessment|null;after_reply_policy_output:PolicyOutput|null;
@@ -43,6 +43,16 @@ export function stop(s:PipelineState,rule:string,reason:string,eligibility:Polic
  s.halted=true;s.rules.push(rule);s.result={eligibility,policy_gate:gate,final_action:"ESCALATE_REVIEW",reason};
 }
 export const QUESTIONS={
- CONFIRM_INTENT:"Bạn còn muốn nhận đơn tại địa điểm đã đăng ký không, và khi nào có người có thể nhận? Nếu có trở ngại về liên hệ hoặc COD, bạn vui lòng làm rõ.",
- CLARIFY_LANDMARK:"Bạn có thể bổ sung mốc dễ tìm trong địa điểm đã đăng ký, xác nhận còn muốn nhận và khi nào có người nhận không?",
+ CONFIRM_INTENT:"Hiện bạn còn muốn nhận đơn này không?",
+ CLARIFY_LANDMARK:"Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
 };
+/** Select one focus from current gaps, never from scenario IDs or expected replies. */
+export function focusedQuestion(a:Assessment):string {
+ if(a.question_key==="CLARIFY_LANDMARK")return QUESTIONS.CLARIFY_LANDMARK;
+ if(a.missing_info.includes("CAUSE_CLARIFICATION"))return "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?";
+ if(a.missing_info.includes("CONTACT_CLARIFICATION"))return "Kênh liên hệ của bạn gặp vấn đề gì ở lần giao trước?";
+ if(a.hypothesis==="PAYMENT_ISSUE"&&a.missing_info.includes("COD_READINESS"))return "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?";
+ if(a.missing_info.includes("RECEIVING_AVAILABILITY"))return "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?";
+ if(a.missing_info.includes("COD_READINESS"))return "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?";
+ return QUESTIONS.CONFIRM_INTENT;
+}

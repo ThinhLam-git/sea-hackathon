@@ -1,13 +1,14 @@
 import { database, runtime, HttpError } from "../order-rescue/repository";
 import { Simulator } from "./simulator";
-import type { Decision, RunState } from "./models";
+import { CONTRACT_VERSION, type Decision, type RunState } from "./models";
 export { runtime, HttpError };
 export async function restore(id:string,owner:string,forMutation=false){
  const row=await database().prepare("SELECT * FROM rescue_runs WHERE id = ? AND owner = ?").bind(id,owner).first<{mode:"REPLAY"|"LIVE_AI";state:string;revision:number;write_token:string}>();
  if(!row)throw new HttpError(404,"Review session not found.");
  if(forMutation&&row.write_token.startsWith("lock:")&&Number(row.write_token.split(":")[1])>Date.now())throw new HttpError(409,"This case is already being assessed. Wait for the current review to finish.");
  const state=JSON.parse(row.state) as RunState;
- if(state.contract_version!=="2.2")throw new HttpError(409,"This session uses the older demo. Start a new v2.2 review; the old record is preserved.");
+ if(!["2.2",CONTRACT_VERSION].includes(state.contract_version))throw new HttpError(409,"This session uses an older demo. Start a new review; the old record is preserved.");
+ if(forMutation&&state.contract_version!==CONTRACT_VERSION)throw new HttpError(409,"This historical v2.2 review is read-only. Start a new v2.4 review to use the reconciled policy.");
  const sim=new Simulator(row.mode,runtime());sim.runs.set(id,state);
  const rows=await database().prepare("SELECT payload FROM rescue_decisions WHERE run_id = ? ORDER BY sequence").bind(id).all<{payload:string}>();
  sim.decisions.set(id,rows.results.map(r=>JSON.parse(r.payload) as Decision));return {sim,revision:row.revision};

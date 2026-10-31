@@ -1,37 +1,22 @@
-# Sea × OpenAI Codex Hackathon
+# Sea × OpenAI Codex Hackathon — Order Rescue
 
-Workspace for our Sea × OpenAI Codex Hackathon team.
+Order Rescue hỗ trợ Ops review giao thất bại bằng bằng chứng, một câu hỏi tập trung khi cần và đề xuất qua policy gate. Dữ liệu synthetic, policy minh họa, không thực hiện hành động logistics thật.
 
-## Current stage
+Ứng dụng hiện tại ở [Prototype-OpenAI](Prototype-OpenAI/README.md), dùng React/Vinext, OpenAI Agents SDK/Responses/Decisions và Cloudflare D1. Bản local đang được đồng bộ với policy v2.4 reconciled đã chốt ngày 31/10/2026; không đồng nghĩa bản hosted đã được cập nhật.
 
-The team has selected one pre-build product direction:
+- [PRD và tiêu chí nghiệm thu](docs/PRD.md)
+- [Giải thích cập nhật policy](reports/policy-reconciliation-v2.4-2026-10-31.md)
+- [Nguồn dữ liệu và version](Prototype-OpenAI/docs/DATA-SOURCES.md)
 
-- **Order Rescue Agent** — a policy-gated AI decision layer for failed last-mile deliveries.
-
-Project research, meeting briefs, and source materials are in [`process/context/ideas/`](process/context/ideas/).
-
-## Team
-
-Lucas, Hải, Kha, and Phúc.
-
-## Working principle
-
-Prototype only what we can demonstrate truthfully. Any unavailable integrations, live data, or business outcomes must be clearly labelled **SIMULATED** or **FUTURE**.
-
-## OpenAI prototype (`phuc-dev`)
-
-The working prototype is in [`Prototype-OpenAI/`](Prototype-OpenAI/README.md). It uses OpenAI Agents SDK + Responses API + Decisions API, a colored three-panel staff workspace with a progress tracker and confidence/evidence side panel, the same seven-step assessment pipeline, and all 30 supplied v2.2 synthetic cases. Manual No reply selects the initial assessment; a matching reply selects the second. The original 25-case version remains available for regression checks and rollback.
-
-```bash
+```sh
 cd Prototype-OpenAI
 npm ci
 npm test
 npm run typecheck
+npm run demo
 npm run build
 ```
 
-See the project README for local database setup, secure API-key configuration, and the public Sites preview. API keys and local run data are excluded from Git.
+Xem README ứng dụng để tạo local database và chạy dev server. Replay không cần key. Live GPT dùng API credits; secrets chỉ cấu hình server-side.
 
-Public preview: [Order Rescue · GPT Operations](https://order-rescue-gpt-phuc.lankybluff1.chatgpt.site). Teammates can sign in with their own ChatGPT accounts to use the demo.
-
-The v2.2 source mapping and draft-label distinction are documented in [`Prototype-OpenAI/docs/DATA-SOURCES.md`](Prototype-OpenAI/docs/DATA-SOURCES.md). Original Drive documents remain downloaded locally; reviewed synthetic seed/test data is included in the app.
+Team: Lucas, Hải, Kha, Phúc. Nguyên tắc: chỉ trình diễn điều đã làm thật; phân biệt Replay, Live GPT và khả năng chưa xác minh. Không đưa ra claim accuracy, tiết kiệm hoặc giảm hoàn từ dữ liệu mô phỏng.

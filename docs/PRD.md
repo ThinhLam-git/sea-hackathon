@@ -2,9 +2,11 @@
 
 Ngày cập nhật: 31/10/2026. Baseline trước triển khai: `phuc-dev`, commit `f10439f`; trạng thái dưới đây bao gồm thay đổi local chưa phát hành, repo `ThinhLam-git/sea-hackathon`.
 
-Trạng thái: PRD cập nhật theo code hiện tại và quyết định sản phẩm đã chốt. Runtime local đã triển khai contract v2.4 reconciled. Đã kiểm tra 133 tests/9 files và 30/30 Replay; Live smoke đã chạy đúng 10 request (5 Responses + 5 Decisions, đều HTTP 200); production build, API/D1 local và các browser journey chính đã PASS; typecheck PASS; hosted chưa nghiệm thu.
+Trạng thái: đã đồng bộ contract v2.5 theo workbook mới nhất đã được team xác nhận. Nguồn chuẩn: `Prototype-OpenAI/fixtures/source/Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx`. Kiểm tra v2.5: 143 tests/10 files PASS, 30/30 Replay khớp, đối chiếu workbook PASS, typecheck và build PASS. Các kết quả 133 tests/9 files và 10 request Live bên dưới thuộc baseline v2.4; không coi đó là xác minh Live v2.5. Không gọi thêm Live trong đợt này.
 
 ## 1. Sản phẩm và mục tiêu demo
+
+Business rules chuẩn bổ sung: `Prototype-OpenAI/docs/Order_Rescue_Agent_Business_Rules_v2.5.md`. Đợt đồng bộ bổ sung đạt 145 tests/10 files và typecheck. Policy dùng được xác nhận buyer có nguồn tại T0, không bắt hỏi khi đã đủ facts; retry trái điều kiện bắt buộc bị BLOCKED và chuyển review. SQL chín bảng là model tham chiếu, chưa thay thế storage run/audit D1 của demo.
 
 Order Rescue giúp nhân viên Ops tổng hợp bằng chứng của một lần giao thất bại, xác định điều còn thiếu và nhận đề xuất có kiểm soát để quyết định bước xử lý. Agent chỉ đề xuất; Ops/human quyết định và thực hiện.
 
@@ -36,7 +38,7 @@ Dữ liệu giả lập, luật minh họa, kết quả mô phỏng phải luôn
 | AI assessment | OpenAI Agents SDK, một Responses turn không tools/handoffs; mặc định `gpt-5.4-mini` |
 | Confidence | Decisions scoring sau assessment live; model mặc định theo cấu hình là `gpt-6-luna` |
 | Replay | Đọc assessment dựng sẵn, vẫn đi qua validation và policy; không giả tạo điểm API |
-| Dữ liệu | Bộ 30 case v2.4 reconciled ở `fixtures/v2`; bản gốc v2.2 lưu riêng trong `fixtures/v2/archive/v2.2`; bộ 25 case v0.5 giữ làm regression |
+| Dữ liệu | Bộ 30 case v2.5 ở `fixtures/v2`; bản gốc v2.2 lưu riêng trong `fixtures/v2/archive/v2.2`; bộ 25 case v0.5 giữ làm regression |
 | Workflow | Bảy stage do code điều khiển; tối đa initial và after-reply assessment |
 | Tương tác | Một câu hỏi; sample reply, custom reply qua Live GPT, hoặc manual no-reply |
 | Handoff | Copy question, copy recommendation; không tự gửi hoặc thực hiện hành động |
@@ -64,9 +66,13 @@ Xác minh local do nhóm triển khai chạy: 133 tests thuộc 9 files PASS; Re
 
 Gửi tin buyer; dispatch courier; sửa địa chỉ hoặc COD; refund, return, cancel, penalty; dữ liệu thật; tích hợp carrier; vận hành tự động; quản trị team/roles; dashboard KPI hiệu quả kinh doanh chưa đo.
 
-## 5. Policy v2.4 đã triển khai local
+## 5. Policy v2.5
 
-Contract `2.4`, policy `demo-two-assessment-v2.4-reconciled`, prompt `assess-v2.4.0`. Quyết định sản phẩm mới thay chính sách v2.2 cho run mới; run lịch sử được nhận diện phiên bản và chỉ đọc, không đổi ý nghĩa hoặc audit cũ.
+Contract `2.5`, policy `demo-two-assessment-v2.5`, prompt `assess-v2.5.0`. Run v2.2/v2.4 được nhận diện phiên bản và chỉ đọc, không đổi ý nghĩa hoặc audit cũ. Không dùng golden v2.5 để chấm ngược run lịch sử.
+
+Workbook v2.5 thay thế các đề xuất review trước chưa được đồng bộ. Case 008 vẫn HIGH trước/sau reply theo file đã xác nhận, khác kết luận MEDIUM ở chat trước. Case 006 cũng giữ nhãn trong file. Không tự thêm dữ kiện hoặc sửa nhãn theo đề xuất audit cũ.
+
+missing_info liệt kê toàn bộ khoảng trống liên quan cứu đơn, kể cả khi final là review. 023/025/026 giữ CURRENT_BUYER_INTENT, RECEIVING_AVAILABILITY và LOGISTICS_VERIFICATION. Mã logistics bao gồm reassessment/xác nhận sự cố đã kết thúc. HOLD_DISRUPTION bị loại khỏi schema assessment mới, chỉ giữ kiểu tương thích để hiển thị lịch sử. Hai question_key là nhóm mục đích rộng, không phải hai câu hỏi cố định.
 
 | ID | Yêu cầu | Trạng thái local |
 | --- | --- | --- |
@@ -79,7 +85,7 @@ Contract `2.4`, policy `demo-two-assessment-v2.4-reconciled`, prompt `assess-v2.
 | P-07 | Thời gian synthetic nhất quán | Dùng `as_of` có offset; test cutoff nguồn và deadline; khác biệt thời điểm tương tác mô tả dưới đây |
 | P-08 | Validate → policy → persist → công bố | Runtime/API giữ thứ tự; API/D1 local và browser refresh đã kiểm tra, hosted persistence chưa xác minh |
 
-Câu hỏi runtime không lấy đáp án expected hoặc câu tham chiếu theo case ID làm input model. Sáu case 007/013/014/015/017/018 có trọng tâm câu hỏi runtime khác câu tham chiếu workbook; chưa thấy làm thay đổi expected outcome trong Replay. Đây còn là điểm review semantic với Hải/Kha: xác nhận câu hỏi hữu ích, chỉ một trọng tâm, thay vì yêu cầu khớp từng chữ. Replay trả lời dựng sẵn không chứng minh buyer thật sẽ trả lời đủ thông tin cho câu hỏi runtime.
+Câu hỏi runtime không lấy đáp án expected hoặc câu tham chiếu theo case ID làm input model. 007 ưu tiên làm rõ trở ngại khi nguyên nhân địa chỉ chưa rõ; 017/018 ưu tiên current intent khi buyer còn phân vân/chưa nhận biết đơn. Các câu hỏi đều một trọng tâm; không bắt buộc khớp từng chữ với câu tham chiếu. Replay trả lời dựng sẵn không chứng minh buyer thật sẽ trả lời đủ thông tin cho câu hỏi runtime.
 
 Workbook dùng T0 15:00, câu hỏi 15:01 và reply/no-reply 15:02 ngày 24/10/2026 (+07:00). Simulator local hiện ghi question/reply tại đồng hồ run T0 15:00; nguồn ban đầu đều khả dụng tại `as_of`. Các mốc này là thời gian mô phỏng, không phải SLA hay latency thực. Cần đồng bộ thời gian tương tác nếu demo trình bày elapsed time.
 
@@ -136,7 +142,7 @@ UI showcase đã được cập nhật local để giải thích “Agent đã g
 | Ưu tiên | Việc | Owner | Trạng thái và việc còn lại |
 | --- | --- | --- | --- |
 | P0-1 | Baseline local | Phúc/kỹ thuật | 133 tests/9 files PASS, Replay 30/30, production build PASS; npm ci hoàn tất (722 packages), typecheck PASS |
-| P0-2 | Contract v2.4 reconciled | Hải + Phúc | Đã triển khai seed/test/replay/controls/provenance, version và archive v2.2; review semantic câu hỏi còn mở |
+| P0-2 | Contract v2.5 | Hải + Phúc | Đã triển khai seed/test/replay/controls/provenance, version và archive v2.2; review semantic câu hỏi còn mở |
 | P0-3 | Gate, simulator, prompt, no-reply | Phúc + Kha | Đã triển khai và kiểm tra local; thêm regression cho nguồn future/khác case và prerequisites chỉ từ reply cited |
 | P0-4 | UI showcase | Lucas + kỹ thuật | Browser 001/005/023 và desktop/mobile đã kiểm tra; polish dropdown Việt/JSON summary/source quotes collapsed hoàn tất; console không error |
 | P0-5 | Kiểm thử tích hợp/an toàn | Phúc + Hải | Unit/regression và 10 API/D1 checks PASS; browser refresh PASS; auth/ownership trên hosted chưa xác minh |
@@ -165,7 +171,7 @@ Không cần làm lại UI từ đầu hoặc thêm integration thật trước 
 | AC-13 | Live mode và confidence | Phân biệt gọi API thật với Replay; điểm confidence không mô tả xác suất giao thành công |
 | AC-14 | Workbook mới và dữ liệu lịch sử | Phiên bản phân biệt rõ; không sửa audit hoặc gán nhãn mới ngược vào run cũ |
 
-`tests/v2-contract.test.ts` đã chuyển sang contract v2.4 cùng migration dữ liệu/policy; `tests/v24-safety.test.ts` bổ sung regression an toàn. 133 tests PASS không tự chứng minh các AC browser, hosted, Live GPT hoặc rehearsal đã hoàn tất.
+`tests/v2-contract.test.ts` đã chuyển sang contract v2.5 cùng migration dữ liệu/policy; `tests/v24-safety.test.ts` bổ sung regression an toàn. 133 tests PASS không tự chứng minh các AC browser, hosted, Live GPT hoặc rehearsal đã hoàn tất.
 
 ## 11. Kịch bản showcase đề xuất
 
@@ -179,10 +185,10 @@ Dùng Replay để kể câu chuyện có thể lặp lại. Live GPT là phần
 
 ## 12. Tài liệu liên quan và giới hạn
 
-- Workbook reconciled: `outputs/policy-reconciliation-v2.4/Order_Rescue_Minimal_Simulation_30_Cases_v2.4_reconciled.xlsx`.
+- Workbook chuẩn: `Prototype-OpenAI/fixtures/source/Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx`.
 - Giải thích thay đổi: `reports/policy-reconciliation-v2.4-2026-10-31.md`.
 - Runtime hiện tại: `Prototype-OpenAI/README.md`, `AGENTS.md`, `docs/DATA-SOURCES.md`.
 
-Cặp JSON v2.4 reconciled đã đồng bộ vào runtime local và có provenance; bản gốc v2.2 được lưu riêng để đối chiếu. Nhãn FINAL chỉ xác nhận bộ đáp án synthetic được chốt, không chứng minh độ chính xác model hoặc operational readiness.
+Cặp JSON v2.5 đã đồng bộ vào runtime local và có provenance; bản gốc v2.2 được lưu riêng để đối chiếu. Nhãn FINAL chỉ xác nhận bộ đáp án synthetic được chốt, không chứng minh độ chính xác model hoặc operational readiness.
 
-Các câu hỏi confidence ở case 004/008/016 từ audit vẫn cần Hải/Phúc kiểm tra khi đánh giá semantic. Bộ 30 fixture chưa thay thế các test ranh giới và thực nghiệm với Ops. Live API smoke đã được xác minh trong phạm vi nhỏ nêu trên; browser đã xác minh các journey chính; polish cuối đã được kiểm tra browser và build lại PASS; typecheck PASS; hosted và vận hành thực chưa được nghiệm thu.
+Các nhãn nghiệp vụ hiện theo v2.5 đã được team xác nhận. Bộ 30 fixture chưa thay thế các test ranh giới và thực nghiệm với Ops. Live API smoke trước đây thuộc v2.4; prompt/rubric v2.5 chưa được đánh giá Live. Hosted và vận hành thực chưa được nghiệm thu.

@@ -12,5 +12,5 @@ for(const fixture of scenarios){
  const expected=fixture.expected,ok=JSON.stringify(r.final_assessment)===JSON.stringify(expected.final_assessment)&&r.final_policy_output?.final_action===expected.final_policy_output.final_action&&r.final_assessment_source===expected.final_assessment_source;
  if(ok)passed++;console.log(`${ok?'✓':'✗'} ${fixture.case_id} · ${r.final_policy_output?.final_action} · selected ${r.final_assessment_source}`);
 }
-console.log(`${passed}/30 FINAL v2.4 reconciled scenarios match. This checks synthetic behavior, not model accuracy.`);
+console.log(`${passed}/30 FINAL v2.5 scenarios match. This checks synthetic behavior, not model accuracy.`);
 if(passed!==30)process.exitCode=1;

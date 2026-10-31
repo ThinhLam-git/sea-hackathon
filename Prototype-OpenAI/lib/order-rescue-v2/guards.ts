@@ -25,7 +25,7 @@ export function activeDisruption(s:PipelineState){const d=s.run.input.operationa
 /** Conservative source checks supplement model findings; they never authorize logistics execution. */
 export function buyerFacts(s:PipelineState){
  const cited=new Set(s.assessment?.evidence.filter(e=>e.verification==="DIRECT_BUYER_STATEMENT").map(e=>e.source_ref));
- const text=normalize(s.run.applied.filter(x=>x.source_type==="BUYER_REPLY"&&x.source_ref.startsWith(`${s.run.case.case_id}-`)&&cited.has(x.source_ref)&&!!s.source_index[x.source_ref]&&ms(x.occurred_at)<=ms(s.run.now)).map(sourceText).join(" "));
+ const text=normalize([...s.run.case.sources,...s.run.applied].filter(x=>(x.source_type==="BUYER_REPLY"||x.source_type==="BUYER_MESSAGE")&&x.source_ref.startsWith(`${s.run.case.case_id}-`)&&cited.has(x.source_ref)&&!!s.source_index[x.source_ref]&&ms(x.occurred_at)<=ms(s.run.now)).map(sourceText).join(" "));
  const availabilityClauses=text.split(/[.!?;]/).filter(clause=>/(?:ngay )?mai|ngay lam viec toi|hom nay|tomorrow|next working day/.test(clause));
  const uncertainAvailability=availabilityClauses.some(clause=>/neu |\bif\b|khong|chua chac|chua biet|\bnot\b|cannot|can't|may |might /.test(clause));
  const uncertainCod=/(?:mai|tomorrow|hien|now).{0,25}(?:chua|khong|not).{0,15}(?:du|enough|ready)|(?:chua|khong).{0,10}san sang|neu .*?(?:tien|cod)|if .*?(?:money|cash|cod)/.test(text);

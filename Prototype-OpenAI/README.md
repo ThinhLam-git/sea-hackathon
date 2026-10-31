@@ -1,4 +1,4 @@
-# Order Rescue — Demo v2.4 reconciled
+# Order Rescue — Demo v2.5
 
 30 tình huống synthetic, policy minh họa và đề xuất để Ops/human review. Agent không gửi tin nhắn, dispatch, sửa địa chỉ/COD, hoàn hàng hoặc refund.
 
@@ -16,7 +16,7 @@ Replay là dữ liệu assessment dựng sẵn qua validation/policy; không ph�
 
 React/Vinext/TypeScript, Cloudflare Workers/D1, OpenAI Agents SDK + Responses + Decisions. Runtime hiện tại: `lib/order-rescue-v2/`. Giữ nguyên `lib/order-rescue/` làm regression cho 25 case v0.5.
 
-Nguồn đích là workbook v2.4 reconciled trong `../outputs/policy-reconciliation-v2.4/`. Nhãn FINAL biểu thị expected đã chốt; không chứng minh accuracy. Bộ mới có 22 reply, 5 no-reply, 3 NOT_ASKED; expected final 17 retry và 13 review. Nguồn v2.2 được lưu tại `fixtures/v2/archive/v2.2/`.
+Nguồn chuẩn là workbook team-confirmed v2.5 tại `fixtures/source/Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx`. Nhãn FINAL biểu thị expected đã chốt; không chứng minh accuracy. Bộ mới có 22 reply, 5 no-reply, 3 NOT_ASKED; expected final 17 retry và 13 review. Nguồn v2.2/v2.4 được giữ trong `fixtures/v2/archive/`; run cũ chỉ đọc.
 
 Xem [nguồn dữ liệu](docs/DATA-SOURCES.md), [PRD](../docs/PRD.md) và [giải thích policy](../reports/policy-reconciliation-v2.4-2026-10-31.md).
 
@@ -55,7 +55,7 @@ npm run build
 node scripts/import-v2.mjs
 ```
 
-Importer không argument regenerate từ cặp reconciled đang check-in. Nếu truyền thư mục, thư mục phải chứa `seed.json` và `test-cases.json` đúng contract reconciled; không nhập nhầm bộ v2.2 cũ.
+Để nhập lại workbook chuẩn, chạy `python scripts/import-workbook-v25.py fixtures/source/Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx`, sau đó `node scripts/import-v2.mjs`. Thêm `--check` vào lệnh Python để đối chiếu toàn bộ 30 hàng mà không ghi file. Importer Node regenerate từ cặp v2.5 đang check-in; không nhập nhầm dữ liệu phiên bản cũ.
 
 ## Giới hạn và phát hành
 

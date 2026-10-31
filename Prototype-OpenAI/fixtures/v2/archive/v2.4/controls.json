@@ -1,0 +1,212 @@
+[
+  {
+    "case_id": "DEMO-001",
+    "group": "AVAILABILITY_ISSUE",
+    "buyer_reply": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?"
+  },
+  {
+    "case_id": "DEMO-002",
+    "group": "AVAILABILITY_ISSUE",
+    "buyer_reply": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Lần giao trước bạn gặp trở ngại gì tại địa điểm đã đăng ký?"
+  },
+  {
+    "case_id": "DEMO-003",
+    "group": "AVAILABILITY_ISSUE",
+    "buyer_reply": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?"
+  },
+  {
+    "case_id": "DEMO-004",
+    "group": "AVAILABILITY_ISSUE",
+    "buyer_reply": "Tôi vẫn muốn nhận.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?"
+  },
+  {
+    "case_id": "DEMO-005",
+    "group": "AVAILABILITY_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "USER_NO_REPLY",
+    "question_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?"
+  },
+  {
+    "case_id": "DEMO-006",
+    "group": "ADDRESS_ISSUE",
+    "buyer_reply": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?"
+  },
+  {
+    "case_id": "DEMO-007",
+    "group": "ADDRESS_ISSUE",
+    "buyer_reply": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Lần giao trước bạn gặp trở ngại gì tại điểm nhận đã đăng ký?"
+  },
+  {
+    "case_id": "DEMO-008",
+    "group": "ADDRESS_ISSUE",
+    "buyer_reply": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?"
+  },
+  {
+    "case_id": "DEMO-009",
+    "group": "ADDRESS_ISSUE",
+    "buyer_reply": "Cứ giao qua chỗ khác cho tôi nhé.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?"
+  },
+  {
+    "case_id": "DEMO-010",
+    "group": "ADDRESS_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "USER_NO_REPLY",
+    "question_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?"
+  },
+  {
+    "case_id": "DEMO-011",
+    "group": "CONTACT_ISSUE",
+    "buyer_reply": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Điều gì khiến bạn chưa nhận được liên hệ ở lần giao trước?"
+  },
+  {
+    "case_id": "DEMO-012",
+    "group": "CONTACT_ISSUE",
+    "buyer_reply": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Kênh liên hệ của bạn gặp vấn đề gì ở lần giao trước?"
+  },
+  {
+    "case_id": "DEMO-013",
+    "group": "CONTACT_ISSUE",
+    "buyer_reply": "Tôi vẫn muốn nhận.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?"
+  },
+  {
+    "case_id": "DEMO-014",
+    "group": "CONTACT_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "USER_NO_REPLY",
+    "question_text": "Hiện bạn còn muốn nhận đơn này không?"
+  },
+  {
+    "case_id": "DEMO-015",
+    "group": "BUYER_INTENT_ISSUE",
+    "buyer_reply": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Hiện bạn còn muốn nhận đơn này không?"
+  },
+  {
+    "case_id": "DEMO-016",
+    "group": "BUYER_INTENT_ISSUE",
+    "buyer_reply": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?"
+  },
+  {
+    "case_id": "DEMO-017",
+    "group": "BUYER_INTENT_ISSUE",
+    "buyer_reply": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Hiện bạn có đồng ý nhận đơn quà này không?"
+  },
+  {
+    "case_id": "DEMO-018",
+    "group": "BUYER_INTENT_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "USER_NO_REPLY",
+    "question_text": "Hiện bạn còn muốn nhận đơn này không?"
+  },
+  {
+    "case_id": "DEMO-019",
+    "group": "PAYMENT_ISSUE",
+    "buyer_reply": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?"
+  },
+  {
+    "case_id": "DEMO-020",
+    "group": "UNKNOWN_CAUSE",
+    "buyer_reply": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?"
+  },
+  {
+    "case_id": "DEMO-021",
+    "group": "PAYMENT_ISSUE",
+    "buyer_reply": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?"
+  },
+  {
+    "case_id": "DEMO-022",
+    "group": "PAYMENT_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "USER_NO_REPLY",
+    "question_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?"
+  },
+  {
+    "case_id": "DEMO-023",
+    "group": "LOGISTICS_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "NOT_ASKED",
+    "question_text": null
+  },
+  {
+    "case_id": "DEMO-024",
+    "group": "UNKNOWN_CAUSE",
+    "buyer_reply": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?"
+  },
+  {
+    "case_id": "DEMO-025",
+    "group": "LOGISTICS_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "NOT_ASKED",
+    "question_text": null
+  },
+  {
+    "case_id": "DEMO-026",
+    "group": "LOGISTICS_ISSUE",
+    "buyer_reply": null,
+    "response_mode": "NOT_ASKED",
+    "question_text": null
+  },
+  {
+    "case_id": "DEMO-027",
+    "group": "UNKNOWN_CAUSE",
+    "buyer_reply": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?"
+  },
+  {
+    "case_id": "DEMO-028",
+    "group": "UNKNOWN_CAUSE",
+    "buyer_reply": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?"
+  },
+  {
+    "case_id": "DEMO-029",
+    "group": "UNKNOWN_CAUSE",
+    "buyer_reply": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà.",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?"
+  },
+  {
+    "case_id": "DEMO-030",
+    "group": "UNKNOWN_CAUSE",
+    "buyer_reply": "👍",
+    "response_mode": "BUYER_REPLY",
+    "question_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?"
+  }
+]

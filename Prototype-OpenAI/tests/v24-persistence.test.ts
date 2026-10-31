@@ -37,11 +37,11 @@ describe("v2.4 durable finalization and ownership",()=>{
   expect(sqlite.prepare("SELECT COUNT(*) AS n FROM rescue_decisions").get()).toMatchObject({n:1});
   await release(r.run_id,"alice",lease);await expect(restore(r.run_id,"alice",true)).resolves.toBeDefined();
  });
- it("allows historical v2.2 reads but rejects mutation and preserves rows",async()=>{
-  const sim=new Simulator(),[r]=await sim.start("DEMO-001");r.contract_version="2.2";await persist(sim,r.run_id,"owner");
+ it.each(["2.2","2.4"] as const)("allows historical v%s reads but rejects mutation and preserves rows",async version=>{
+  const sim=new Simulator(),[r]=await sim.start("DEMO-001");r.contract_version=version;await persist(sim,r.run_id,"owner");
   await expect(restore(r.run_id,"owner")).resolves.toBeDefined();
   await expect(restore(r.run_id,"owner",true)).rejects.toMatchObject({status:409});
-  expect(JSON.parse(sqlite.prepare("SELECT state FROM rescue_runs WHERE id=?").get(r.run_id)!.state as string).contract_version).toBe("2.2");
+  expect(JSON.parse(sqlite.prepare("SELECT state FROM rescue_runs WHERE id=?").get(r.run_id)!.state as string).contract_version).toBe(version);
  });
  it("surfaces a failed storage write instead of returning a durable success",async()=>{
   const sim=new Simulator(),[r]=await sim.start("DEMO-001");sqlite.exec("DROP TABLE rescue_decisions");

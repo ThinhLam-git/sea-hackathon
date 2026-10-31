@@ -1,12 +1,12 @@
 {
   "metadata": {
     "name": "Order Rescue — 30-case MVP database model and raw seed",
-    "version": "2.4-reconciled",
-    "pair_id": "order-rescue-demo-30-v2.4-reconciled",
+    "version": "2.5",
+    "pair_id": "order-rescue-demo-30-v2.5",
     "synthetic": true,
-    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.4_reconciled.xlsx",
+    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx",
     "companion_test_file": "test-cases.json",
-    "status": "Reconciled synthetic contract; fixture labels FINAL by product review, not live-model acceptance.",
+    "status": "Team-confirmed v2.5 synthetic fixture labels FINAL; not model accuracy.",
     "scope": "Nine tables; two assessment slots; one immutable final selection. No golden answers or future replies are seeded.",
     "row_counts": {
       "dim_buyer": 30,
@@ -21,8 +21,8 @@
     }
   },
   "shared_contract": {
-    "pair_id": "order-rescue-demo-30-v2.4-reconciled",
-    "contract_version": "2.4",
+    "pair_id": "order-rescue-demo-30-v2.5",
+    "contract_version": "2.5",
     "hypothesis": [
       "AVAILABILITY_ISSUE",
       "ADDRESS_ISSUE",
@@ -50,7 +50,6 @@
     "candidate_action": [
       "CLARIFY",
       "STANDARD_REATTEMPT",
-      "HOLD_DISRUPTION",
       "ESCALATE_REVIEW",
       "NO_ACTION"
     ],
@@ -483,7 +482,6 @@
                 "enum": [
                   "CLARIFY",
                   "STANDARD_REATTEMPT",
-                  "HOLD_DISRUPTION",
                   "ESCALATE_REVIEW",
                   "NO_ACTION"
                 ]
@@ -531,7 +529,6 @@
                 "enum": [
                   "CLARIFY",
                   "STANDARD_REATTEMPT",
-                  "HOLD_DISRUPTION",
                   "ESCALATE_REVIEW",
                   "NO_ACTION"
                 ]
@@ -661,7 +658,7 @@
     "object_schema_dialect": "https://json-schema.org/draft/2020-12/schema"
   },
   "demo_policy_profile": {
-    "policy_version": "demo-two-assessment-v2.4-reconciled",
+    "policy_version": "demo-two-assessment-v2.5",
     "status": "DEMO_CONFIG_NOT_LIVE_CARRIER_POLICY",
     "maximum_attempts": 3,
     "maximum_buyer_questions": 1,
@@ -932,10 +929,6 @@
         "description": "Recommendation to attempt delivery again"
       },
       {
-        "action_id": "HOLD_DISRUPTION",
-        "description": "Hold for verified disruption and a reassessment point"
-      },
-      {
         "action_id": "ESCALATE_REVIEW",
         "description": "Handoff to Operations for authorized review"
       },
@@ -955,7 +948,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-001-FAIL",
             "DEMO-001-NOTE"
@@ -973,7 +966,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-002-FAIL",
             "DEMO-002-NOTE"
@@ -991,7 +984,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-003-FAIL",
             "DEMO-003-NOTE",
@@ -1016,7 +1009,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-004-FAIL",
             "DEMO-004-NOTE"
@@ -1034,7 +1027,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-005-FAIL",
             "DEMO-005-NOTE"
@@ -1052,7 +1045,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-006-FAIL",
             "DEMO-006-NOTE"
@@ -1070,7 +1063,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-007-FAIL",
             "DEMO-007-NOTE"
@@ -1092,7 +1085,7 @@
             "verification": "VERIFIED"
           },
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-008-FAIL",
             "DEMO-008-NOTE",
@@ -1111,7 +1104,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-009-FAIL",
             "DEMO-009-NOTE"
@@ -1129,7 +1122,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-010-FAIL",
             "DEMO-010-NOTE"
@@ -1147,7 +1140,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-011-FAIL",
             "DEMO-011-NOTE"
@@ -1165,7 +1158,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-012-FAIL",
             "DEMO-012-NOTE"
@@ -1183,7 +1176,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-013-FAIL",
             "DEMO-013-NOTE"
@@ -1201,7 +1194,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-014-FAIL",
             "DEMO-014-NOTE"
@@ -1219,7 +1212,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-015-FAIL",
             "DEMO-015-NOTE"
@@ -1237,7 +1230,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-016-FAIL",
             "DEMO-016-NOTE"
@@ -1255,7 +1248,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-017-FAIL",
             "DEMO-017-NOTE",
@@ -1280,7 +1273,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-018-FAIL",
             "DEMO-018-NOTE"
@@ -1298,7 +1291,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-019-FAIL",
             "DEMO-019-NOTE"
@@ -1316,7 +1309,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-020-FAIL",
             "DEMO-020-NOTE"
@@ -1334,7 +1327,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-021-FAIL",
             "DEMO-021-NOTE",
@@ -1359,7 +1352,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-022-FAIL",
             "DEMO-022-NOTE"
@@ -1385,7 +1378,7 @@
             "reassess_required": true
           },
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-023-FAIL",
             "DEMO-023-NOTE",
@@ -1404,7 +1397,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-024-FAIL",
             "DEMO-024-NOTE"
@@ -1422,7 +1415,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-025-FAIL",
             "DEMO-025-NOTE"
@@ -1448,7 +1441,7 @@
             "reassess_required": true
           },
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-026-FAIL",
             "DEMO-026-NOTE",
@@ -1467,7 +1460,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "COD",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-027-FAIL",
             "DEMO-027-NOTE"
@@ -1485,7 +1478,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-028-FAIL",
             "DEMO-028-NOTE"
@@ -1503,7 +1496,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-029-FAIL",
             "DEMO-029-NOTE"
@@ -1521,7 +1514,7 @@
         "operational_context": {
           "route": "SYN-ROUTE-01",
           "payment": "PREPAID",
-          "policy_version": "demo-two-assessment-v2.4-reconciled",
+          "policy_version": "demo-two-assessment-v2.5",
           "source_refs": [
             "DEMO-030-FAIL",
             "DEMO-030-NOTE"
@@ -2112,8 +2105,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2136,8 +2129,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2160,8 +2153,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2184,8 +2177,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2208,8 +2201,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2232,8 +2225,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2256,8 +2249,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2280,8 +2273,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2304,8 +2297,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2328,8 +2321,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2352,8 +2345,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2376,8 +2369,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2400,8 +2393,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2424,8 +2417,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2448,8 +2441,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2472,8 +2465,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2496,8 +2489,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2520,8 +2513,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2544,8 +2537,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2568,8 +2561,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2592,8 +2585,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2616,8 +2609,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2640,8 +2633,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2664,8 +2657,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2688,8 +2681,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2712,8 +2705,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2736,8 +2729,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2760,8 +2753,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2784,8 +2777,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2808,8 +2801,8 @@
         "current_status": "NEW",
         "attempts_used": 1,
         "return_state": "NOT_STARTED",
-        "deadline_at": "2026-10-28T15:00:00+07:00",
-        "policy_version": "demo-two-assessment-v2.4-reconciled",
+        "deadline_at": "2026-10-28T08:00:00.000Z",
+        "policy_version": "demo-two-assessment-v2.5",
         "initial_assessment": null,
         "initial_policy_output": null,
         "after_reply_assessment": null,
@@ -2833,7 +2826,7 @@
         "question_id": null,
         "question_key": null,
         "message_text": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
-        "occurred_at": "2026-10-24T14:50:00+07:00",
+        "occurred_at": "2026-10-24T15:00:00+07:00",
         "source_actor": "buyer_simulator",
         "payload": {
           "text": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận."
@@ -2847,7 +2840,7 @@
         "question_id": null,
         "question_key": null,
         "message_text": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
-        "occurred_at": "2026-10-24T14:50:00+07:00",
+        "occurred_at": "2026-10-24T15:00:00+07:00",
         "source_actor": "buyer_simulator",
         "payload": {
           "text": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận."
@@ -2861,7 +2854,7 @@
         "question_id": null,
         "question_key": null,
         "message_text": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
-        "occurred_at": "2026-10-24T14:50:00+07:00",
+        "occurred_at": "2026-10-24T15:00:00+07:00",
         "source_actor": "buyer_simulator",
         "payload": {
           "text": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được."

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { AgentInput, ConfidenceScore, Source } from "../order-rescue/models";
 export type { AgentInput, ConfidenceScore, Source };
-export const CONTRACT_VERSION="2.4";
-export const POLICY_VERSION="demo-two-assessment-v2.4-reconciled";
+export const CONTRACT_VERSION="2.5";
+export const POLICY_VERSION="demo-two-assessment-v2.5";
 export const HYPOTHESES=["AVAILABILITY_ISSUE","ADDRESS_ISSUE","CONTACT_ISSUE","BUYER_INTENT_ISSUE","PAYMENT_ISSUE","LOGISTICS_ISSUE","UNKNOWN_CAUSE"] as const;
 export const MISSING=["CURRENT_BUYER_INTENT","RECEIVING_AVAILABILITY","ADDRESS_CLARIFICATION","CONTACT_CLARIFICATION","COD_READINESS","DELIVERY_ACCESS","LOGISTICS_VERIFICATION","CAUSE_CLARIFICATION"] as const;
 export const Assessment=z.object({
@@ -10,10 +10,10 @@ export const Assessment=z.object({
  hypothesis:z.enum(HYPOTHESES),confidence:z.enum(["LOW","MEDIUM","HIGH"]),
  missing_info:z.array(z.enum(MISSING)).refine(a=>new Set(a).size===a.length,"Duplicate missing-info codes"),
  question_key:z.enum(["CONFIRM_INTENT","CLARIFY_LANDMARK"]).nullable(),
- candidate_action:z.enum(["CLARIFY","STANDARD_REATTEMPT","HOLD_DISRUPTION","ESCALATE_REVIEW","NO_ACTION"]),
+ candidate_action:z.enum(["CLARIFY","STANDARD_REATTEMPT","ESCALATE_REVIEW","NO_ACTION"]),
 }).strict();
 export type Assessment=z.infer<typeof Assessment>;
-export interface PolicyOutput {eligibility:"ELIGIBLE"|"INELIGIBLE"|"UNKNOWN";policy_gate:"PERMITTED"|"BLOCKED"|"ESCALATED";final_action:Assessment["candidate_action"];reason:string}
+export interface PolicyOutput {eligibility:"ELIGIBLE"|"INELIGIBLE"|"UNKNOWN";policy_gate:"PERMITTED"|"BLOCKED"|"ESCALATED";final_action:Assessment["candidate_action"]|"HOLD_DISRUPTION";reason:string}
 export interface RawCase {case_id:string;input:AgentInput;sources:Source[]}
 export interface Question {question_id:string;question_key:NonNullable<Assessment["question_key"]>;question_text:string;status:"PENDING"|"ANSWERED"|"NO_REPLY";asked_at:string}
 export interface Decision extends PolicyOutput {
@@ -23,7 +23,7 @@ export interface Decision extends PolicyOutput {
  workflow_execution_id:string;reassess_at:null;labels:string[];
 }
 export interface RunState {
- contract_version:"2.2"|"2.4";run_id:string;case:RawCase;input:AgentInput;now:string;applied:Source[];
+ contract_version:"2.2"|"2.4"|"2.5";run_id:string;case:RawCase;input:AgentInput;now:string;applied:Source[];
  current_status:"NEW"|"WAITING_FOR_BUYER"|"COMPLETED";question_wait_state:Question|null;
  initial_assessment:Assessment|null;initial_policy_output:PolicyOutput|null;
  after_reply_assessment:Assessment|null;after_reply_policy_output:PolicyOutput|null;
@@ -48,8 +48,9 @@ export const QUESTIONS={
 };
 /** Select one focus from current gaps, never from scenario IDs or expected replies. */
 export function focusedQuestion(a:Assessment):string {
+ if(a.missing_info.includes("CAUSE_CLARIFICATION"))return a.question_key==="CLARIFY_LANDMARK"?"Lần giao trước bạn gặp trở ngại gì tại điểm nhận đã đăng ký?":"Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?";
  if(a.question_key==="CLARIFY_LANDMARK")return QUESTIONS.CLARIFY_LANDMARK;
- if(a.missing_info.includes("CAUSE_CLARIFICATION"))return "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?";
+ if(a.hypothesis==="BUYER_INTENT_ISSUE"&&a.missing_info.includes("CURRENT_BUYER_INTENT"))return QUESTIONS.CONFIRM_INTENT;
  if(a.missing_info.includes("CONTACT_CLARIFICATION"))return "Kênh liên hệ của bạn gặp vấn đề gì ở lần giao trước?";
  if(a.hypothesis==="PAYMENT_ISSUE"&&a.missing_info.includes("COD_READINESS"))return "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?";
  if(a.missing_info.includes("RECEIVING_AVAILABILITY"))return "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?";

@@ -1,0 +1,4701 @@
+{
+  "metadata": {
+    "name": "Order Rescue — 30 two-stage golden test fixtures",
+    "version": "2.4-reconciled",
+    "pair_id": "order-rescue-demo-30-v2.4-reconciled",
+    "synthetic": true,
+    "count": 30,
+    "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.4_reconciled.xlsx",
+    "companion_database_file": "seed.json",
+    "not_for_agent_input": true,
+    "expected_outputs_approval": "FINAL",
+    "hypothesis_vocabulary_status": "USER_APPROVED",
+    "missing_info_vocabulary_status": "USER_APPROVED",
+    "source_workbook_sha256": "3d9f71a3dd9f8f65ab7122c2a5f4c8b94580b2763d1dcf361a4a15e7ab3d8585"
+  },
+  "shared_contract": {
+    "pair_id": "order-rescue-demo-30-v2.4-reconciled",
+    "contract_version": "2.4",
+    "hypothesis": [
+      "AVAILABILITY_ISSUE",
+      "ADDRESS_ISSUE",
+      "CONTACT_ISSUE",
+      "BUYER_INTENT_ISSUE",
+      "PAYMENT_ISSUE",
+      "LOGISTICS_ISSUE",
+      "UNKNOWN_CAUSE"
+    ],
+    "confidence": [
+      "LOW",
+      "MEDIUM",
+      "HIGH"
+    ],
+    "missing_info": [
+      "CURRENT_BUYER_INTENT",
+      "RECEIVING_AVAILABILITY",
+      "ADDRESS_CLARIFICATION",
+      "CONTACT_CLARIFICATION",
+      "COD_READINESS",
+      "DELIVERY_ACCESS",
+      "LOGISTICS_VERIFICATION",
+      "CAUSE_CLARIFICATION"
+    ],
+    "candidate_action": [
+      "CLARIFY",
+      "STANDARD_REATTEMPT",
+      "HOLD_DISRUPTION",
+      "ESCALATE_REVIEW",
+      "NO_ACTION"
+    ],
+    "question_key": [
+      "CONFIRM_INTENT",
+      "CLARIFY_LANDMARK"
+    ],
+    "evidence_verification": [
+      "SOURCE_RECORD",
+      "UNVERIFIED_REPORT",
+      "DIRECT_BUYER_STATEMENT",
+      "VERIFIED_OPS_SIGNAL"
+    ],
+    "hypothesis_status": "USER_APPROVED",
+    "missing_info_status": "USER_APPROVED",
+    "response_mode": [
+      "BUYER_REPLY",
+      "USER_NO_REPLY",
+      "NOT_ASKED"
+    ]
+  },
+  "runner_contract": {
+    "setup": "Load/reset the paired seed, then process the existing NEW case. Do not create another case for the same failed event.",
+    "separation": "Only runner/evaluator can read this file. Retrieval reads database raw sources only, never expected or simulation.future events.",
+    "question_release": "If NOT_ASKED, assert immediate completion without a question or runtime response. Otherwise bind one scripted outcome to the actual permitted question.",
+    "scripted_reply_scope": "Expected final labels apply to the supplied scripted buyer_reply. Arbitrary live text in a demo may produce different valid outputs; do not force it to match a different scripted reply.",
+    "no_reply": "Manual USER_NO_REPLY retains assessment 1, leaves phase two null and finalizes policy as ESCALATE_REVIEW without inference.",
+    "actual_result_paths": {
+      "initial_assessment": "order_rescue.initial_assessment",
+      "initial_policy_output": "order_rescue.initial_policy_output",
+      "after_reply_assessment": "order_rescue.after_reply_assessment",
+      "after_reply_policy_output": "order_rescue.after_reply_policy_output",
+      "final_assessment_source": "order_rescue.final_assessment_source",
+      "final_assessment": "order_rescue.final_assessment",
+      "final_policy_output": {
+        "eligibility": "order_rescue.eligibility",
+        "policy_gate": "order_rescue.policy_gate",
+        "final_action": "order_rescue.final_action_id",
+        "reason": "order_rescue.reason"
+      },
+      "case_run_status": "order_rescue.current_status"
+    }
+  },
+  "evaluation_rules": {
+    "exact": [
+      "case_id",
+      "case_run_status",
+      "hypothesis",
+      "confidence",
+      "candidate_action",
+      "question_key",
+      "eligibility",
+      "policy_gate",
+      "final_action",
+      "final_assessment_source"
+    ],
+    "missing_info": "Compare as an unordered set of approved codes, with [] distinct from an absent/null assessment.",
+    "evidence": "Validate source availability, factual support and verification; compare semantic facts rather than exact wording, ordering or exact array length. Every source_ref must resolve.",
+    "reason": "Check policy meaning and required conditions; not mandatory verbatim text equality.",
+    "question": "Compare one focused actual question where permitted, zero for NOT_ASKED; reference wording is illustrative.",
+    "behavior": [
+      "No golden/future-input access",
+      "No fabricated call logs",
+      "No second question or third Agent round on no-reply",
+      "No forced confidence increase from intent alone",
+      "No real logistics execution"
+    ],
+    "not_measured": "No claim of model accuracy on real shipments, actual cost savings or delivery success. These are synthetic scenario-behavior labels."
+  },
+  "coverage": {
+    "change_type": {
+      "CONFIDENCE_INCREASED": 5,
+      "HYPOTHESIS_CHANGED": 9,
+      "HIGH_REMAINS_HIGH": 5,
+      "REPLY_INSUFFICIENT": 5,
+      "USER_NO_REPLY": 6
+    },
+    "initial_confidence": {
+      "MEDIUM": 12,
+      "LOW": 12,
+      "HIGH": 6
+    },
+    "final_confidence": {
+      "HIGH": 20,
+      "MEDIUM": 6,
+      "LOW": 4
+    },
+    "with_after_reply_assessment": 24,
+    "manual_no_reply": 6
+  },
+  "test_cases": [
+    {
+      "test_case_id": "TC-DEMO-001",
+      "case_id": "DEMO-001",
+      "group": "AVAILABILITY_ISSUE",
+      "description": "Đi làm; buyer xác nhận đúng nguyên nhân",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-001",
+        "buyer_id": "BUYER-DEMO-001",
+        "failed_event_id": "DEMO-001-FAIL",
+        "raw_source_refs": [
+          "DEMO-001-FAIL",
+          "DEMO-001-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-001-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-001-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-001-NOTE",
+              "fact": "Courier note: Người nhà nói buyer đang đi làm, chưa có người nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-001-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-001-NOTE",
+              "fact": "Courier note: Người nhà nói buyer đang đi làm, chưa có người nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-001-REPLY",
+              "fact": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer trực tiếp xác nhận nguyên nhân vắng mặt, intent và availability."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-001-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-001-NOTE",
+              "fact": "Courier note: Người nhà nói buyer đang đi làm, chưa có người nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-001-REPLY",
+              "fact": "Đúng, lúc đó tôi đang đi làm. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer trực tiếp xác nhận nguyên nhân vắng mặt, intent và availability."
+        },
+        "change_type": "CONFIDENCE_INCREASED",
+        "explanation": "Buyer trực tiếp xác nhận nguyên nhân vắng mặt, intent và availability.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-002",
+      "case_id": "DEMO-002",
+      "group": "AVAILABILITY_ISSUE",
+      "description": "Ghi là vắng mặt; thực tế thiếu thông tin block",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-002",
+        "buyer_id": "BUYER-DEMO-002",
+        "failed_event_id": "DEMO-002-FAIL",
+        "raw_source_refs": [
+          "DEMO-002-FAIL",
+          "DEMO-002-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-002-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-002-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-002-NOTE",
+              "fact": "Courier note: Không bàn giao được; có thể khách không có nhà.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-002-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-002-NOTE",
+              "fact": "Courier note: Không bàn giao được; có thể khách không có nhà.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-002-REPLY",
+              "fact": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply chỉ ra rào cản địa chỉ, không phải vắng mặt; landmark không đổi địa chỉ."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-002-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-002-NOTE",
+              "fact": "Courier note: Không bàn giao được; có thể khách không có nhà.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-002-REPLY",
+              "fact": "Tôi ở nhà nhưng đơn thiếu block nên shipper không tìm ra. Mốc cổng block B của dự án đã đăng ký; tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply chỉ ra rào cản địa chỉ, không phải vắng mặt; landmark không đổi địa chỉ."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply chỉ ra rào cản địa chỉ, không phải vắng mặt; landmark không đổi địa chỉ.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì tại địa điểm đã đăng ký?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-003",
+      "case_id": "DEMO-003",
+      "group": "AVAILABILITY_ISSUE",
+      "description": "HIGH ban đầu từ tin buyer có trước câu hỏi",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-003",
+        "buyer_id": "BUYER-DEMO-003",
+        "failed_event_id": "DEMO-003-FAIL",
+        "raw_source_refs": [
+          "DEMO-003-FAIL",
+          "DEMO-003-NOTE",
+          "DEMO-003-BUYER-T0"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-003-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-003-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-003-NOTE",
+              "fact": "Courier note: Không có người bàn giao ở thời điểm giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-003-BUYER-T0",
+              "fact": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-003-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-003-NOTE",
+              "fact": "Courier note: Không có người bàn giao ở thời điểm giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-003-BUYER-T0",
+              "fact": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            },
+            {
+              "source_ref": "DEMO-003-REPLY",
+              "fact": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "T0 đã có buyer trực tiếp giải thích nguyên nhân; reply bổ sung intent/availability, không cần tăng confidence."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-003-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-003-NOTE",
+              "fact": "Courier note: Không có người bàn giao ở thời điểm giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-003-BUYER-T0",
+              "fact": "Đúng lúc giao tôi đang ở cơ quan nên không có ai nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            },
+            {
+              "source_ref": "DEMO-003-REPLY",
+              "fact": "Có, tôi vẫn muốn nhận tại địa điểm cũ; ngày mai tôi ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "T0 đã có buyer trực tiếp giải thích nguyên nhân; reply bổ sung intent/availability, không cần tăng confidence."
+        },
+        "change_type": "HIGH_REMAINS_HIGH",
+        "explanation": "T0 đã có buyer trực tiếp giải thích nguyên nhân; reply bổ sung intent/availability, không cần tăng confidence.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-004",
+      "case_id": "DEMO-004",
+      "group": "AVAILABILITY_ISSUE",
+      "description": "Reply chung chung, chưa đủ availability",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-004",
+        "buyer_id": "BUYER-DEMO-004",
+        "failed_event_id": "DEMO-004-FAIL",
+        "raw_source_refs": [
+          "DEMO-004-FAIL",
+          "DEMO-004-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi vẫn muốn nhận.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-004-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi vẫn muốn nhận."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-004-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-004-NOTE",
+              "fact": "Courier note: Buyer được ghi nhận đi vắng; chưa có xác nhận trực tiếp.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-004-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-004-NOTE",
+              "fact": "Courier note: Buyer được ghi nhận đi vắng; chưa có xác nhận trực tiếp.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-004-REPLY",
+              "fact": "Tôi vẫn muốn nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Reply chỉ xác nhận intent, không xác nhận nguyên nhân hay availability; confidence giữ MEDIUM."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-004-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-004-NOTE",
+              "fact": "Courier note: Buyer được ghi nhận đi vắng; chưa có xác nhận trực tiếp.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-004-REPLY",
+              "fact": "Tôi vẫn muốn nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Reply chỉ xác nhận intent, không xác nhận nguyên nhân hay availability; confidence giữ MEDIUM."
+        },
+        "change_type": "REPLY_INSUFFICIENT",
+        "explanation": "Reply chỉ xác nhận intent, không xác nhận nguyên nhân hay availability; confidence giữ MEDIUM.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-005",
+      "case_id": "DEMO-005",
+      "group": "AVAILABILITY_ISSUE",
+      "description": "Vắng mặt; chọn user không reply",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-005",
+        "buyer_id": "BUYER-DEMO-005",
+        "failed_event_id": "DEMO-005-FAIL",
+        "raw_source_refs": [
+          "DEMO-005-FAIL",
+          "DEMO-005-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "USER_NO_REPLY",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-005-NO-REPLY",
+            "event_type": "USER_NO_REPLY",
+            "source_actor": "demo_operator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "buyer_reply": null
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-005-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-005-NOTE",
+              "fact": "Courier note: Shipper ghi người nhận đi làm.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-005-FAIL",
+              "fact": "Raw status=RECIPIENT_UNAVAILABLE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-005-NOTE",
+              "fact": "Courier note: Shipper ghi người nhận đi làm.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
+        },
+        "change_type": "USER_NO_REPLY",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-006",
+      "case_id": "DEMO-006",
+      "group": "ADDRESS_ISSUE",
+      "description": "Thiếu landmark; reply làm rõ",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-006",
+        "buyer_id": "BUYER-DEMO-006",
+        "failed_event_id": "DEMO-006-FAIL",
+        "raw_source_refs": [
+          "DEMO-006-FAIL",
+          "DEMO-006-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-006-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-006-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-006-NOTE",
+              "fact": "Courier note: Hẻm nhiều ngã rẽ, thiếu mốc vào địa điểm nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-006-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-006-NOTE",
+              "fact": "Courier note: Hẻm nhiều ngã rẽ, thiếu mốc vào địa điểm nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-006-REPLY",
+              "fact": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer xác nhận thiếu landmark và cung cấp mốc, intent, availability."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-006-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-006-NOTE",
+              "fact": "Courier note: Hẻm nhiều ngã rẽ, thiếu mốc vào địa điểm nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-006-REPLY",
+              "fact": "Đơn đúng địa điểm nhưng thiếu mốc: cổng cạnh tiệm tạp hóa đầu hẻm. Tôi vẫn muốn nhận và mai có người ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer xác nhận thiếu landmark và cung cấp mốc, intent, availability."
+        },
+        "change_type": "CONFIDENCE_INCREASED",
+        "explanation": "Buyer xác nhận thiếu landmark và cung cấp mốc, intent, availability.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CLARIFY_LANDMARK",
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-007",
+      "case_id": "DEMO-007",
+      "group": "ADDRESS_ISSUE",
+      "description": "Nghi địa chỉ; thực tế cổng cơ quan đóng",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-007",
+        "buyer_id": "BUYER-DEMO-007",
+        "failed_event_id": "DEMO-007-FAIL",
+        "raw_source_refs": [
+          "DEMO-007-FAIL",
+          "DEMO-007-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-007-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-007-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-007-NOTE",
+              "fact": "Courier note: Đến khu văn phòng nhưng chưa xác định được nơi bàn giao.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-007-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-007-NOTE",
+              "fact": "Courier note: Đến khu văn phòng nhưng chưa xác định được nơi bàn giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-007-REPLY",
+              "fact": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer xác nhận địa điểm đúng, nguyên nhân là đóng cửa tạm thời."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-007-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-007-NOTE",
+              "fact": "Courier note: Đến khu văn phòng nhưng chưa xác định được nơi bàn giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-007-REPLY",
+              "fact": "Địa chỉ đúng và biển cơ quan rõ; hôm đó cơ quan đóng cửa. Tôi vẫn muốn nhận, ngày làm việc tới tôi xuống cổng nhận được.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer xác nhận địa điểm đúng, nguyên nhân là đóng cửa tạm thời."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Buyer xác nhận địa điểm đúng, nguyên nhân là đóng cửa tạm thời.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CLARIFY_LANDMARK",
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì tại điểm nhận đã đăng ký?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-008",
+      "case_id": "DEMO-008",
+      "group": "ADDRESS_ISSUE",
+      "description": "HIGH ban đầu do kiểm tra dữ liệu địa chỉ",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-008",
+        "buyer_id": "BUYER-DEMO-008",
+        "failed_event_id": "DEMO-008-FAIL",
+        "raw_source_refs": [
+          "DEMO-008-FAIL",
+          "DEMO-008-NOTE",
+          "DEMO-008-OPS"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-008-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-008-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-008-NOTE",
+              "fact": "Courier note: Đơn thiếu mốc của khu nhận hàng.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-008-OPS",
+              "fact": "{\"address_validation\": {\"landmark_missing\": true, \"verification\": \"VERIFIED\"}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-008-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-008-NOTE",
+              "fact": "Courier note: Đơn thiếu mốc của khu nhận hàng.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-008-OPS",
+              "fact": "{\"address_validation\": {\"landmark_missing\": true, \"verification\": \"VERIFIED\"}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            },
+            {
+              "source_ref": "DEMO-008-REPLY",
+              "fact": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Kiểm tra dữ liệu đã xác nhận thiếu landmark; reply bổ sung thông tin để retry."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-008-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-008-NOTE",
+              "fact": "Courier note: Đơn thiếu mốc của khu nhận hàng.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-008-OPS",
+              "fact": "{\"address_validation\": {\"landmark_missing\": true, \"verification\": \"VERIFIED\"}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            },
+            {
+              "source_ref": "DEMO-008-REPLY",
+              "fact": "Mốc là cổng block C trong cùng khu đã đăng ký. Tôi vẫn muốn nhận, ngày mai có người ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Kiểm tra dữ liệu đã xác nhận thiếu landmark; reply bổ sung thông tin để retry."
+        },
+        "change_type": "HIGH_REMAINS_HIGH",
+        "explanation": "Kiểm tra dữ liệu đã xác nhận thiếu landmark; reply bổ sung thông tin để retry.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CLARIFY_LANDMARK",
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-009",
+      "case_id": "DEMO-009",
+      "group": "ADDRESS_ISSUE",
+      "description": "Reply muốn đổi địa điểm, chưa làm rõ địa chỉ cũ",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-009",
+        "buyer_id": "BUYER-DEMO-009",
+        "failed_event_id": "DEMO-009-FAIL",
+        "raw_source_refs": [
+          "DEMO-009-FAIL",
+          "DEMO-009-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Cứ giao qua chỗ khác cho tôi nhé.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-009-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Cứ giao qua chỗ khác cho tôi nhé."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-009-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-009-NOTE",
+              "fact": "Courier note: Không tìm được lối vào địa điểm trên đơn.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-009-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-009-NOTE",
+              "fact": "Courier note: Không tìm được lối vào địa điểm trên đơn.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-009-REPLY",
+              "fact": "Cứ giao qua chỗ khác cho tôi nhé.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Yêu cầu đổi địa chỉ ngoài MVP; không coi đây là xác nhận nguyên nhân địa chỉ cũ."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-009-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-009-NOTE",
+              "fact": "Courier note: Không tìm được lối vào địa điểm trên đơn.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-009-REPLY",
+              "fact": "Cứ giao qua chỗ khác cho tôi nhé.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Yêu cầu đổi địa chỉ ngoài MVP; không coi đây là xác nhận nguyên nhân địa chỉ cũ."
+        },
+        "change_type": "REPLY_INSUFFICIENT",
+        "explanation": "Yêu cầu đổi địa chỉ ngoài MVP; không coi đây là xác nhận nguyên nhân địa chỉ cũ.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CLARIFY_LANDMARK",
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-010",
+      "case_id": "DEMO-010",
+      "group": "ADDRESS_ISSUE",
+      "description": "Thiếu địa chỉ; user không reply",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-010",
+        "buyer_id": "BUYER-DEMO-010",
+        "failed_event_id": "DEMO-010-FAIL",
+        "raw_source_refs": [
+          "DEMO-010-FAIL",
+          "DEMO-010-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "USER_NO_REPLY",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-010-NO-REPLY",
+            "event_type": "USER_NO_REPLY",
+            "source_actor": "demo_operator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "buyer_reply": null
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-010-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-010-NOTE",
+              "fact": "Courier note: Chỉ thấy tên khu, không có mốc nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-010-FAIL",
+              "fact": "Raw status=ADDRESS_ISSUE; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-010-NOTE",
+              "fact": "Courier note: Chỉ thấy tên khu, không có mốc nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "ADDRESS_CLARIFICATION"
+          ],
+          "question_key": "CLARIFY_LANDMARK",
+          "candidate_action": "CLARIFY"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
+        },
+        "change_type": "USER_NO_REPLY",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CLARIFY_LANDMARK",
+          "reference_text": "Bạn có thể bổ sung một mốc dễ tìm tại địa điểm đã đăng ký không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-011",
+      "case_id": "DEMO-011",
+      "group": "CONTACT_ISSUE",
+      "description": "Không liên hệ được; buyer đang bận họp",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-011",
+        "buyer_id": "BUYER-DEMO-011",
+        "failed_event_id": "DEMO-011-FAIL",
+        "raw_source_refs": [
+          "DEMO-011-FAIL",
+          "DEMO-011-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-011-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-011-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-011-NOTE",
+              "fact": "Courier note: Hệ thống ghi CONTACT_FAILED; note không có nguyên nhân cụ thể.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-011-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-011-NOTE",
+              "fact": "Courier note: Hệ thống ghi CONTACT_FAILED; note không có nguyên nhân cụ thể.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-011-REPLY",
+              "fact": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply trực tiếp chỉ ra xung đột khả năng nhận do bận họp, thay cho contact cause chưa rõ."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-011-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-011-NOTE",
+              "fact": "Courier note: Hệ thống ghi CONTACT_FAILED; note không có nguyên nhân cụ thể.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-011-REPLY",
+              "fact": "Tôi đang họp nên không thể nghe máy và cũng không có người ở nhà. Vẫn muốn nhận; ngày mai tôi ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply trực tiếp chỉ ra xung đột khả năng nhận do bận họp, thay cho contact cause chưa rõ."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply trực tiếp chỉ ra xung đột khả năng nhận do bận họp, thay cho contact cause chưa rõ.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Điều gì khiến bạn chưa nhận được liên hệ ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-012",
+      "case_id": "DEMO-012",
+      "group": "CONTACT_ISSUE",
+      "description": "Mất sóng được buyer xác nhận",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-012",
+        "buyer_id": "BUYER-DEMO-012",
+        "failed_event_id": "DEMO-012-FAIL",
+        "raw_source_refs": [
+          "DEMO-012-FAIL",
+          "DEMO-012-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-012-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-012-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-012-NOTE",
+              "fact": "Courier note: Shipper ghi liên hệ chưa thành công, nghi do mất sóng.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CONTACT_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-012-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-012-NOTE",
+              "fact": "Courier note: Shipper ghi liên hệ chưa thành công, nghi do mất sóng.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-012-REPLY",
+              "fact": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer xác nhận nguyên nhân kênh liên hệ, intent và availability."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-012-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-012-NOTE",
+              "fact": "Courier note: Shipper ghi liên hệ chưa thành công, nghi do mất sóng.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-012-REPLY",
+              "fact": "Đúng là điện thoại tôi mất sóng lúc đó. Nay dùng được, tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer xác nhận nguyên nhân kênh liên hệ, intent và availability."
+        },
+        "change_type": "CONFIDENCE_INCREASED",
+        "explanation": "Buyer xác nhận nguyên nhân kênh liên hệ, intent và availability.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Kênh liên hệ của bạn gặp vấn đề gì ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-013",
+      "case_id": "DEMO-013",
+      "group": "CONTACT_ISSUE",
+      "description": "Liên hệ thất bại; reply chỉ nói muốn nhận",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-013",
+        "buyer_id": "BUYER-DEMO-013",
+        "failed_event_id": "DEMO-013-FAIL",
+        "raw_source_refs": [
+          "DEMO-013-FAIL",
+          "DEMO-013-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi vẫn muốn nhận.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-013-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi vẫn muốn nhận."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-013-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-013-NOTE",
+              "fact": "Courier note: Không có xác nhận buyer; không có contact logs.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-013-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-013-NOTE",
+              "fact": "Courier note: Không có xác nhận buyer; không có contact logs.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-013-REPLY",
+              "fact": "Tôi vẫn muốn nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Intent đã rõ nhưng nguyên nhân/availability chưa rõ; confidence không tăng vô cớ."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-013-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-013-NOTE",
+              "fact": "Courier note: Không có xác nhận buyer; không có contact logs.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-013-REPLY",
+              "fact": "Tôi vẫn muốn nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Intent đã rõ nhưng nguyên nhân/availability chưa rõ; confidence không tăng vô cớ."
+        },
+        "change_type": "REPLY_INSUFFICIENT",
+        "explanation": "Intent đã rõ nhưng nguyên nhân/availability chưa rõ; confidence không tăng vô cớ.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn có thể bố trí người nhận tại địa điểm đã đăng ký vào thời điểm nào?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-014",
+      "case_id": "DEMO-014",
+      "group": "CONTACT_ISSUE",
+      "description": "Không liên hệ được; user không reply",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-014",
+        "buyer_id": "BUYER-DEMO-014",
+        "failed_event_id": "DEMO-014-FAIL",
+        "raw_source_refs": [
+          "DEMO-014-FAIL",
+          "DEMO-014-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "USER_NO_REPLY",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-014-NO-REPLY",
+            "event_type": "USER_NO_REPLY",
+            "source_actor": "demo_operator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "buyer_reply": null
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-014-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-014-NOTE",
+              "fact": "Courier note: CONTACT_FAILED; không có thông tin nguyên nhân.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-014-FAIL",
+              "fact": "Raw status=CONTACT_FAILED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-014-NOTE",
+              "fact": "Courier note: CONTACT_FAILED; không có thông tin nguyên nhân.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
+        },
+        "change_type": "USER_NO_REPLY",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Hiện bạn còn muốn nhận đơn này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-015",
+      "case_id": "DEMO-015",
+      "group": "BUYER_INTENT_ISSUE",
+      "description": "Nhãn refused được buyer xác nhận",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-015",
+        "buyer_id": "BUYER-DEMO-015",
+        "failed_event_id": "DEMO-015-FAIL",
+        "raw_source_refs": [
+          "DEMO-015-FAIL",
+          "DEMO-015-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-015-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-015-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-015-NOTE",
+              "fact": "Courier note: Status REFUSED, chưa có buyer confirmation.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-015-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-015-NOTE",
+              "fact": "Courier note: Status REFUSED, chưa có buyer confirmation.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-015-REPLY",
+              "fact": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Buyer trực tiếp xác nhận từ chối; chuyển Ops, không tự hoàn."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-015-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-015-NOTE",
+              "fact": "Courier note: Status REFUSED, chưa có buyer confirmation.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-015-REPLY",
+              "fact": "Đúng, tôi đã từ chối vì không còn nhu cầu và hiện cũng không muốn nhận nữa.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Buyer trực tiếp xác nhận từ chối; chuyển Ops, không tự hoàn."
+        },
+        "change_type": "CONFIDENCE_INCREASED",
+        "explanation": "Buyer trực tiếp xác nhận từ chối; chuyển Ops, không tự hoàn.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Hiện bạn còn muốn nhận đơn này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-016",
+      "case_id": "DEMO-016",
+      "group": "BUYER_INTENT_ISSUE",
+      "description": "Refused nhưng nguyên nhân thực là thiếu COD",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-016",
+        "buyer_id": "BUYER-DEMO-016",
+        "failed_event_id": "DEMO-016-FAIL",
+        "raw_source_refs": [
+          "DEMO-016-FAIL",
+          "DEMO-016-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-016-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-016-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-016-NOTE",
+              "fact": "Courier note: Shipper ghi buyer chưa đồng ý nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-016-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-016-NOTE",
+              "fact": "Courier note: Shipper ghi buyer chưa đồng ý nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-016-REPLY",
+              "fact": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer giải thích trở ngại thanh toán, không phải hết nhu cầu nhận."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-016-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-016-NOTE",
+              "fact": "Courier note: Shipper ghi buyer chưa đồng ý nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-016-REPLY",
+              "fact": "Tôi muốn nhận nhưng lúc đó thiếu tiền COD nên xin lùi. Mai đủ tiền và tôi ở nhà nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Buyer giải thích trở ngại thanh toán, không phải hết nhu cầu nhận."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Buyer giải thích trở ngại thanh toán, không phải hết nhu cầu nhận.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-017",
+      "case_id": "DEMO-017",
+      "group": "BUYER_INTENT_ISSUE",
+      "description": "Đơn quà: buyer đã xác nhận chưa biết đơn ở T0",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-017",
+        "buyer_id": "BUYER-DEMO-017",
+        "failed_event_id": "DEMO-017-FAIL",
+        "raw_source_refs": [
+          "DEMO-017-FAIL",
+          "DEMO-017-NOTE",
+          "DEMO-017-BUYER-T0"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-017-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-017-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-017-NOTE",
+              "fact": "Courier note: Người nhận nói không biết đơn quà.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-017-BUYER-T0",
+              "fact": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-017-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-017-NOTE",
+              "fact": "Courier note: Người nhận nói không biết đơn quà.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-017-BUYER-T0",
+              "fact": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            },
+            {
+              "source_ref": "DEMO-017-REPLY",
+              "fact": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "T0 có chứng cứ trực tiếp về chưa nhận biết đơn; reply giải quyết intent/availability."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-017-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-017-NOTE",
+              "fact": "Courier note: Người nhận nói không biết đơn quà.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-017-BUYER-T0",
+              "fact": "Tôi chưa biết có người gửi quà nên lần trước chưa đồng ý nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            },
+            {
+              "source_ref": "DEMO-017-REPLY",
+              "fact": "Tôi đã xác nhận đúng đơn quà gửi cho mình. Tôi đồng ý nhận và ngày mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "T0 có chứng cứ trực tiếp về chưa nhận biết đơn; reply giải quyết intent/availability."
+        },
+        "change_type": "HIGH_REMAINS_HIGH",
+        "explanation": "T0 có chứng cứ trực tiếp về chưa nhận biết đơn; reply giải quyết intent/availability.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Hiện bạn có đồng ý nhận đơn quà này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-018",
+      "case_id": "DEMO-018",
+      "group": "BUYER_INTENT_ISSUE",
+      "description": "Ý định chưa rõ; user không reply",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-018",
+        "buyer_id": "BUYER-DEMO-018",
+        "failed_event_id": "DEMO-018-FAIL",
+        "raw_source_refs": [
+          "DEMO-018-FAIL",
+          "DEMO-018-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "USER_NO_REPLY",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-018-NO-REPLY",
+            "event_type": "USER_NO_REPLY",
+            "source_actor": "demo_operator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "buyer_reply": null
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-018-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-018-NOTE",
+              "fact": "Courier note: Note ghi buyer phân vân có nhận hay không.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-018-FAIL",
+              "fact": "Raw status=REFUSED; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-018-NOTE",
+              "fact": "Courier note: Note ghi buyer phân vân có nhận hay không.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "BUYER_INTENT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
+        },
+        "change_type": "USER_NO_REPLY",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Hiện bạn còn muốn nhận đơn này không?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-019",
+      "case_id": "DEMO-019",
+      "group": "PAYMENT_ISSUE",
+      "description": "Thiếu tiền COD được xác nhận",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-019",
+        "buyer_id": "BUYER-DEMO-019",
+        "failed_event_id": "DEMO-019-FAIL",
+        "raw_source_refs": [
+          "DEMO-019-FAIL",
+          "DEMO-019-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-019-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-019-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-019-NOTE",
+              "fact": "Courier note: Note cho biết chưa chuẩn bị đủ tiền mặt COD.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-019-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-019-NOTE",
+              "fact": "Courier note: Note cho biết chưa chuẩn bị đủ tiền mặt COD.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-019-REPLY",
+              "fact": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply xác nhận nguyên nhân, không sửa COD, đủ intent/availability/readiness."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-019-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-019-NOTE",
+              "fact": "Courier note: Note cho biết chưa chuẩn bị đủ tiền mặt COD.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-019-REPLY",
+              "fact": "Đúng, lúc đó chưa đủ tiền. Tôi vẫn muốn nhận, mai đủ COD hiện tại và có ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply xác nhận nguyên nhân, không sửa COD, đủ intent/availability/readiness."
+        },
+        "change_type": "CONFIDENCE_INCREASED",
+        "explanation": "Reply xác nhận nguyên nhân, không sửa COD, đủ intent/availability/readiness.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-020",
+      "case_id": "DEMO-020",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Đơn COD chưa rõ nguyên nhân; reply làm rõ lối vào",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-020",
+        "buyer_id": "BUYER-DEMO-020",
+        "failed_event_id": "DEMO-020-FAIL",
+        "raw_source_refs": [
+          "DEMO-020-FAIL",
+          "DEMO-020-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-020-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-020-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-020-NOTE",
+              "fact": "Courier note: Note mơ hồ: chưa bàn giao được đơn COD, chưa rõ vì sao.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-020-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-020-NOTE",
+              "fact": "Courier note: Note mơ hồ: chưa bàn giao được đơn COD, chưa rõ vì sao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-020-REPLY",
+              "fact": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply chỉ rõ rào cản landmark và xác nhận COD/intent/availability."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-020-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-020-NOTE",
+              "fact": "Courier note: Note mơ hồ: chưa bàn giao được đơn COD, chưa rõ vì sao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-020-REPLY",
+              "fact": "Tiền COD tôi đã chuẩn bị; shipper vào nhầm cổng khu. Mốc là cổng block A cùng khu trên đơn, tôi muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply chỉ rõ rào cản landmark và xác nhận COD/intent/availability."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply chỉ rõ rào cản landmark và xác nhận COD/intent/availability.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-021",
+      "case_id": "DEMO-021",
+      "group": "PAYMENT_ISSUE",
+      "description": "HIGH payment từ tin buyer có sẵn",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-021",
+        "buyer_id": "BUYER-DEMO-021",
+        "failed_event_id": "DEMO-021-FAIL",
+        "raw_source_refs": [
+          "DEMO-021-FAIL",
+          "DEMO-021-NOTE",
+          "DEMO-021-BUYER-T0"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-021-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-021-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-021-NOTE",
+              "fact": "Courier note: Buyer chưa thanh toán COD ở lần giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-021-BUYER-T0",
+              "fact": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-021-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-021-NOTE",
+              "fact": "Courier note: Buyer chưa thanh toán COD ở lần giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-021-BUYER-T0",
+              "fact": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            },
+            {
+              "source_ref": "DEMO-021-REPLY",
+              "fact": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Nguyên nhân payment được xác nhận trước hỏi; reply giải quyết khả năng nhận hiện tại."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-021-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-021-NOTE",
+              "fact": "Courier note: Buyer chưa thanh toán COD ở lần giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-021-BUYER-T0",
+              "fact": "Lần trước tôi chưa đủ tiền COD nên chưa nhận được.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            },
+            {
+              "source_ref": "DEMO-021-REPLY",
+              "fact": "Tôi vẫn muốn nhận, đã đủ COD trên đơn và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Nguyên nhân payment được xác nhận trước hỏi; reply giải quyết khả năng nhận hiện tại."
+        },
+        "change_type": "HIGH_REMAINS_HIGH",
+        "explanation": "Nguyên nhân payment được xác nhận trước hỏi; reply giải quyết khả năng nhận hiện tại.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-022",
+      "case_id": "DEMO-022",
+      "group": "PAYMENT_ISSUE",
+      "description": "COD chưa sẵn sàng; user không reply",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-022",
+        "buyer_id": "BUYER-DEMO-022",
+        "failed_event_id": "DEMO-022-FAIL",
+        "raw_source_refs": [
+          "DEMO-022-FAIL",
+          "DEMO-022-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "USER_NO_REPLY",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-022-NO-REPLY",
+            "event_type": "USER_NO_REPLY",
+            "source_actor": "demo_operator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "buyer_reply": null
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-022-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-022-NOTE",
+              "fact": "Courier note: Shipper ghi chưa chuẩn bị tiền COD.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-022-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-022-NOTE",
+              "fact": "Courier note: Shipper ghi chưa chuẩn bị tiền COD.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối."
+        },
+        "change_type": "USER_NO_REPLY",
+        "explanation": "Đã dùng một câu hỏi nhưng không có phản hồi; giữ assessment 1, chuyển Ops xem xét. Không hỏi lại và không coi im lặng là từ chối.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Bạn đã sẵn sàng thanh toán đúng số tiền COD trên đơn khi nhận lại chưa?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-023",
+      "case_id": "DEMO-023",
+      "group": "LOGISTICS_ISSUE",
+      "description": "Ngập đã verified; reply không tự gỡ gián đoạn",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-023",
+        "buyer_id": "BUYER-DEMO-023",
+        "failed_event_id": "DEMO-023-FAIL",
+        "raw_source_refs": [
+          "DEMO-023-FAIL",
+          "DEMO-023-NOTE",
+          "DEMO-023-OPS"
+        ]
+      },
+      "simulation": {
+        "response_mode": "NOT_ASKED",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": []
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-023-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-023-NOTE",
+              "fact": "Courier note: Tuyến tạm dừng do ngập.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-023-OPS",
+              "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            }
+          ],
+          "hypothesis": "LOGISTICS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-023-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-023-NOTE",
+              "fact": "Courier note: Tuyến tạm dừng do ngập.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-023-OPS",
+              "fact": "{\"disruption\": {\"kind\": \"FLOOD\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            }
+          ],
+          "hypothesis": "LOGISTICS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
+        },
+        "change_type": "OPS_REVIEW_WITHOUT_BUYER_CONTACT",
+        "explanation": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 0,
+          "target": "BUYER",
+          "question_key": null,
+          "reference_text": null,
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-024",
+      "case_id": "DEMO-024",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Note kẹt tuyến; buyer xác nhận thực tế không có người nhận",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-024",
+        "buyer_id": "BUYER-DEMO-024",
+        "failed_event_id": "DEMO-024-FAIL",
+        "raw_source_refs": [
+          "DEMO-024-FAIL",
+          "DEMO-024-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-024-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-024-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-024-NOTE",
+              "fact": "Courier note: Chưa bàn giao được; shipper ghi đường đông, chưa xác định trở ngại tại điểm nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-024-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-024-NOTE",
+              "fact": "Courier note: Chưa bàn giao được; shipper ghi đường đông, chưa xác định trở ngại tại điểm nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-024-REPLY",
+              "fact": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply xác nhận nguyên nhân tại điểm nhận; không có verified disruption đang active."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-024-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-024-NOTE",
+              "fact": "Courier note: Chưa bàn giao được; shipper ghi đường đông, chưa xác định trở ngại tại điểm nhận.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-024-REPLY",
+              "fact": "Lúc đó cả nhà đi vắng nên không có người nhận. Tôi vẫn muốn nhận, mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "AVAILABILITY_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply xác nhận nguyên nhân tại điểm nhận; không có verified disruption đang active."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply xác nhận nguyên nhân tại điểm nhận; không có verified disruption đang active.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-025",
+      "case_id": "DEMO-025",
+      "group": "LOGISTICS_ISSUE",
+      "description": "Tin đồn gián đoạn; reply không xác minh được tuyến",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-025",
+        "buyer_id": "BUYER-DEMO-025",
+        "failed_event_id": "DEMO-025-FAIL",
+        "raw_source_refs": [
+          "DEMO-025-FAIL",
+          "DEMO-025-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "NOT_ASKED",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": []
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-025-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-025-NOTE",
+              "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "LOGISTICS_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Thông tin tuyến tạm ngừng cần Ops xác minh; buyer không thể giải quyết điều kiện vận hành. Chuyển Ops ngay, không hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-025-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-025-NOTE",
+              "fact": "Courier note: Note nói tuyến tạm ngừng; chưa có nguồn Ops xác minh.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "LOGISTICS_ISSUE",
+          "confidence": "MEDIUM",
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Thông tin tuyến tạm ngừng cần Ops xác minh; buyer không thể giải quyết điều kiện vận hành. Chuyển Ops ngay, không hỏi buyer."
+        },
+        "change_type": "OPS_REVIEW_WITHOUT_BUYER_CONTACT",
+        "explanation": "Thông tin tuyến tạm ngừng cần Ops xác minh; buyer không thể giải quyết điều kiện vận hành. Chuyển Ops ngay, không hỏi buyer.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 0,
+          "target": "BUYER",
+          "question_key": null,
+          "reference_text": null,
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-026",
+      "case_id": "DEMO-026",
+      "group": "LOGISTICS_ISSUE",
+      "description": "Quá tải verified; user không reply",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-026",
+        "buyer_id": "BUYER-DEMO-026",
+        "failed_event_id": "DEMO-026-FAIL",
+        "raw_source_refs": [
+          "DEMO-026-FAIL",
+          "DEMO-026-NOTE",
+          "DEMO-026-OPS"
+        ]
+      },
+      "simulation": {
+        "response_mode": "NOT_ASKED",
+        "buyer_reply": null,
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": []
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-026-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-026-NOTE",
+              "fact": "Courier note: Ops xác nhận tuyến tạm dừng nhận giao vì quá tải.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-026-OPS",
+              "fact": "{\"disruption\": {\"kind\": \"CAPACITY_PAUSE\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            }
+          ],
+          "hypothesis": "LOGISTICS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
+        },
+        "after_reply_assessment": null,
+        "after_reply_policy_output": null,
+        "final_assessment_source": 1,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-026-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-026-NOTE",
+              "fact": "Courier note: Ops xác nhận tuyến tạm dừng nhận giao vì quá tải.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-026-OPS",
+              "fact": "{\"disruption\": {\"kind\": \"CAPACITY_PAUSE\", \"status\": \"ACTIVE\", \"verification\": \"VERIFIED\", \"route_match\": true, \"time_match\": true, \"reassess_required\": true}}",
+              "verification": "VERIFIED_OPS_SIGNAL"
+            }
+          ],
+          "hypothesis": "LOGISTICS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [
+            "LOGISTICS_VERIFICATION"
+          ],
+          "question_key": null,
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer."
+        },
+        "change_type": "OPS_REVIEW_WITHOUT_BUYER_CONTACT",
+        "explanation": "Gián đoạn vận hành đã xác minh còn active; buyer không thể gỡ điều kiện này. Chuyển Ops xác minh trạng thái và quyết định bước tiếp theo, không hỏi buyer.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 0,
+          "target": "BUYER",
+          "question_key": null,
+          "reference_text": null,
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-027",
+      "case_id": "DEMO-027",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Nghi quá tải; buyer xác nhận vướng COD",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-027",
+        "buyer_id": "BUYER-DEMO-027",
+        "failed_event_id": "DEMO-027-FAIL",
+        "raw_source_refs": [
+          "DEMO-027-FAIL",
+          "DEMO-027-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-027-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-027-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-027-NOTE",
+              "fact": "Courier note: Note chung chung: cao điểm, chưa hoàn tất bàn giao.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "COD_READINESS",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-027-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-027-NOTE",
+              "fact": "Courier note: Note chung chung: cao điểm, chưa hoàn tất bàn giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-027-REPLY",
+              "fact": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply trực tiếp xác nhận payment obstacle; không nâng giả thuyết quá tải từ intent."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-027-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-027-NOTE",
+              "fact": "Courier note: Note chung chung: cao điểm, chưa hoàn tất bàn giao.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-027-REPLY",
+              "fact": "Tôi có gặp shipper nhưng chưa đủ COD nên chưa nhận. Mai đủ tiền và tôi ở nhà, vẫn muốn nhận.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "PAYMENT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply trực tiếp xác nhận payment obstacle; không nâng giả thuyết quá tải từ intent."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply trực tiếp xác nhận payment obstacle; không nâng giả thuyết quá tải từ intent.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-028",
+      "case_id": "DEMO-028",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Không rõ nguyên nhân; reply chỉ ra landmark",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-028",
+        "buyer_id": "BUYER-DEMO-028",
+        "failed_event_id": "DEMO-028-FAIL",
+        "raw_source_refs": [
+          "DEMO-028-FAIL",
+          "DEMO-028-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-028-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-028-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-028-NOTE",
+              "fact": "Courier note: Chỉ ghi giao không thành công, không có chi tiết.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-028-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-028-NOTE",
+              "fact": "Courier note: Chỉ ghi giao không thành công, không có chi tiết.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-028-REPLY",
+              "fact": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply cung cấp nguyên nhân và hướng dẫn trong địa điểm cũ, không đổi địa chỉ."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-028-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-028-NOTE",
+              "fact": "Courier note: Chỉ ghi giao không thành công, không có chi tiết.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-028-REPLY",
+              "fact": "Đơn thiếu mốc nên không tìm được cổng. Mốc tiệm tạp hóa đầu khu, tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "ADDRESS_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply cung cấp nguyên nhân và hướng dẫn trong địa điểm cũ, không đổi địa chỉ."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply cung cấp nguyên nhân và hướng dẫn trong địa điểm cũ, không đổi địa chỉ.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-029",
+      "case_id": "DEMO-029",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Không rõ nguyên nhân; reply xác nhận tắt SIM tạm thời",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-029",
+        "buyer_id": "BUYER-DEMO-029",
+        "failed_event_id": "DEMO-029-FAIL",
+        "raw_source_refs": [
+          "DEMO-029-FAIL",
+          "DEMO-029-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà.",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-029-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà."
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-029-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-029-NOTE",
+              "fact": "Courier note: Giao thất bại; chưa biết do vắng mặt hay liên hệ.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-029-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-029-NOTE",
+              "fact": "Courier note: Giao thất bại; chưa biết do vắng mặt hay liên hệ.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-029-REPLY",
+              "fact": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply trực tiếp xác nhận vấn đề kênh liên hệ; không bịa contact log."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-029-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-029-NOTE",
+              "fact": "Courier note: Giao thất bại; chưa biết do vắng mặt hay liên hệ.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-029-REPLY",
+              "fact": "Tôi tắt SIM tạm thời nên không nhận được liên hệ. Nay đã bật lại, tôi vẫn muốn nhận và mai ở nhà.",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "CONTACT_ISSUE",
+          "confidence": "HIGH",
+          "missing_info": [],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "STANDARD_REATTEMPT"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "STANDARD_REATTEMPT",
+          "reason": "Reply trực tiếp xác nhận vấn đề kênh liên hệ; không bịa contact log."
+        },
+        "change_type": "HYPOTHESIS_CHANGED",
+        "explanation": "Reply trực tiếp xác nhận vấn đề kênh liên hệ; không bịa contact log.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Điều gì khiến bạn chưa thể nhận đơn ở lần giao trước?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    },
+    {
+      "test_case_id": "TC-DEMO-030",
+      "case_id": "DEMO-030",
+      "group": "UNKNOWN_CAUSE",
+      "description": "Reply chỉ biểu tượng, nguyên nhân vẫn chưa rõ",
+      "ground_truth_status": "FINAL",
+      "precondition": {
+        "setup_mode": "RESET_SEED_AND_PROCESS_EXISTING_NEW_CASE",
+        "database_case_exists": true,
+        "create_new_case_on_incoming_trigger": false,
+        "initial_status": "NEW",
+        "evaluation_as_of": "2026-10-24T15:00:00+07:00",
+        "query_only_information_known_at_as_of": true
+      },
+      "input_refs": {
+        "order_id": "ORDER-DEMO-030",
+        "buyer_id": "BUYER-DEMO-030",
+        "failed_event_id": "DEMO-030-FAIL",
+        "raw_source_refs": [
+          "DEMO-030-FAIL",
+          "DEMO-030-NOTE"
+        ]
+      },
+      "simulation": {
+        "response_mode": "BUYER_REPLY",
+        "buyer_reply": "👍",
+        "wait_duration_hours": null,
+        "advance_logistics_clock_on_no_reply": false,
+        "events_after_start": [
+          {
+            "event_id": "DEMO-030-REPLY",
+            "event_type": "BUYER_REPLY",
+            "source_actor": "buyer_simulator",
+            "release_condition": "AFTER_ONE_ACTUAL_QUESTION_AND_MANUAL_DEMO_SELECTION",
+            "bind_question_id_from_pending_question": true,
+            "occurred_at": "2026-10-24T15:02:00+07:00",
+            "timestamp_rule": "Fixed synthetic scenario timestamp, not a reply waiting SLA.",
+            "payload": {
+              "text": "👍"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "initial_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-030-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-030-NOTE",
+              "fact": "Courier note: Giao thất bại, không có ghi chú giải thích.",
+              "verification": "UNVERIFIED_REPORT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "CLARIFY"
+        },
+        "initial_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "PERMITTED",
+          "final_action": "CLARIFY",
+          "reason": "Cho phép tối đa một câu hỏi tập trung vào khoảng trống có thể thay đổi đề xuất. Kết quả phải được validate và lưu trước khi mô phỏng hỏi buyer."
+        },
+        "after_reply_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-030-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-030-NOTE",
+              "fact": "Courier note: Giao thất bại, không có ghi chú giải thích.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-030-REPLY",
+              "fact": "👍",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "after_reply_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Biểu tượng không đủ xác định intent, availability hay nguyên nhân; giữ UNKNOWN/LOW."
+        },
+        "final_assessment_source": 2,
+        "final_assessment": {
+          "evidence": [
+            {
+              "source_ref": "DEMO-030-FAIL",
+              "fact": "Raw status=DELIVERY_FAILED_OTHER; đây là quan sát, không tự xác nhận nguyên nhân.",
+              "verification": "SOURCE_RECORD"
+            },
+            {
+              "source_ref": "DEMO-030-NOTE",
+              "fact": "Courier note: Giao thất bại, không có ghi chú giải thích.",
+              "verification": "UNVERIFIED_REPORT"
+            },
+            {
+              "source_ref": "DEMO-030-REPLY",
+              "fact": "👍",
+              "verification": "DIRECT_BUYER_STATEMENT"
+            }
+          ],
+          "hypothesis": "UNKNOWN_CAUSE",
+          "confidence": "LOW",
+          "missing_info": [
+            "CURRENT_BUYER_INTENT",
+            "RECEIVING_AVAILABILITY",
+            "CAUSE_CLARIFICATION"
+          ],
+          "question_key": "CONFIRM_INTENT",
+          "candidate_action": "ESCALATE_REVIEW"
+        },
+        "final_policy_output": {
+          "eligibility": "ELIGIBLE",
+          "policy_gate": "ESCALATED",
+          "final_action": "ESCALATE_REVIEW",
+          "reason": "Biểu tượng không đủ xác định intent, availability hay nguyên nhân; giữ UNKNOWN/LOW."
+        },
+        "change_type": "REPLY_INSUFFICIENT",
+        "explanation": "Biểu tượng không đủ xác định intent, availability hay nguyên nhân; giữ UNKNOWN/LOW.",
+        "must_not": [
+          "Read expected outputs or future reply as initial Agent input",
+          "Invent call counts or call logs",
+          "Treat silence as refusal",
+          "Dispatch, return, refund or alter address/COD in real systems",
+          "Generate a third assessment or send a second question on manual no-reply"
+        ],
+        "case_run_status": "COMPLETED",
+        "precheck": {
+          "input_valid": true,
+          "safe_for_ai": true,
+          "eligibility": "ELIGIBLE"
+        },
+        "question": {
+          "count": 1,
+          "target": "BUYER",
+          "question_key": "CONFIRM_INTENT",
+          "reference_text": "Lần giao trước bạn gặp trở ngại gì khi nhận đơn?",
+          "comparison": "One focused question if permitted; no contact for NOT_ASKED. Do not require exact wording."
+        }
+      }
+    }
+  ]
+}

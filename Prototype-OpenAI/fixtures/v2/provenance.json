@@ -1,15 +1,24 @@
 {
-  "pair_id": "order-rescue-demo-30-v2.4-reconciled",
-  "contract_version": "2.4",
+  "pair_id": "order-rescue-demo-30-v2.5",
+  "contract_version": "2.5",
   "synthetic": true,
   "case_count": 30,
   "ground_truth_status": "FINAL",
-  "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.4_reconciled.xlsx",
-  "source_workbook_sha256": "3d9f71a3dd9f8f65ab7122c2a5f4c8b94580b2763d1dcf361a4a15e7ab3d8585",
-  "previous_source": "archive/v2.2/provenance.json",
-  "approval_scope": "Product-approved synthetic fixture labels; not live-model acceptance or operational validation.",
+  "source_workbook": "Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx",
+  "source_workbook_path": "fixtures/source/Order_Rescue_Minimal_Simulation_30_Cases_v2.5.xlsx",
+  "source_workbook_sha256": "1583b8203c2bcee44cf53ddebec79dae60cbf9d7b697a21dd3efdc72dc10261a",
+  "previous_source": "archive/v2.4/provenance.json",
+  "approval_scope": "Team-confirmed v2.5 workbook labels; not live-model acceptance or operational validation.",
+  "importer": "scripts/import-workbook-v25.py (Python 3 standard library); scripts/import-v2.mjs (Node standard library)",
+  "normalization": [
+    "Evidence cell literal backslash-n separators normalized to line breaks before parsing.",
+    "Final IF/AND/equality formulas independently evaluated and compared with XLSX caches.",
+    "Workbook buyer_messages_t0 without occurred_at are available at failed_event.as_of; no earlier timestamp is inferred.",
+    "Scripted response event time is synthetic as_of+2 minutes; runtime interaction uses its own simulation clock.",
+    "Empty buyer_history explicitly validated; unsupported nonempty history fails import."
+  ],
   "sha256": {
-    "seed": "bbf65aba9cfb889c1d16e4f92ac9ef4b36bd68112ec4f6a7463c0ba3853fab79",
-    "tests": "1faeca656f73fe38c66ba5a6d7af3661bca6bb23b83237495cbeab8d5b365bd0"
+    "seed": "1db4d023820ea9e76add50710c3312df2416f19a5b061b027438f2c0d138a8ab",
+    "tests": "52affddba76ced11761100c2fd52f52092e5d1c8cc50439d4162ccc0735db00f"
   }
 }

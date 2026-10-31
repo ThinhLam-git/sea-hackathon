@@ -2,7 +2,7 @@
 
 Order Rescue hỗ trợ Ops review giao thất bại bằng bằng chứng, một câu hỏi tập trung khi cần và đề xuất qua policy gate. Dữ liệu synthetic, policy minh họa, không thực hiện hành động logistics thật.
 
-Ứng dụng hiện tại ở [Prototype-OpenAI](Prototype-OpenAI/README.md), dùng React/Vinext, OpenAI Agents SDK/Responses/Decisions và Cloudflare D1. Bản local đang được đồng bộ với policy v2.4 reconciled đã chốt ngày 31/10/2026; không đồng nghĩa bản hosted đã được cập nhật.
+Ứng dụng hiện tại ở [Prototype-OpenAI](Prototype-OpenAI/README.md), dùng React/Vinext, OpenAI Agents SDK/Responses/Decisions và Cloudflare D1. Bản local đang được đồng bộ với policy v2.5 đã chốt ngày 31/10/2026; không đồng nghĩa bản hosted đã được cập nhật.
 
 - [PRD và tiêu chí nghiệm thu](docs/PRD.md)
 - [Giải thích cập nhật policy](reports/policy-reconciliation-v2.4-2026-10-31.md)

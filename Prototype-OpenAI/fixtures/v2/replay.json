@@ -1,6 +1,6 @@
 {
-  "prompt_version": "assess-v2.4.0",
-  "policy_version": "demo-two-assessment-v2.4-reconciled",
+  "prompt_version": "assess-v2.5.0",
+  "policy_version": "demo-two-assessment-v2.5",
   "source": "hand_authored_final_fixture",
   "cases": {
     "DEMO-001": {
@@ -1032,6 +1032,8 @@
         "hypothesis": "LOGISTICS_ISSUE",
         "confidence": "HIGH",
         "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
           "LOGISTICS_VERIFICATION"
         ],
         "question_key": null,
@@ -1105,6 +1107,8 @@
         "hypothesis": "LOGISTICS_ISSUE",
         "confidence": "MEDIUM",
         "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
           "LOGISTICS_VERIFICATION"
         ],
         "question_key": null,
@@ -1134,6 +1138,8 @@
         "hypothesis": "LOGISTICS_ISSUE",
         "confidence": "HIGH",
         "missing_info": [
+          "CURRENT_BUYER_INTENT",
+          "RECEIVING_AVAILABILITY",
           "LOGISTICS_VERIFICATION"
         ],
         "question_key": null,

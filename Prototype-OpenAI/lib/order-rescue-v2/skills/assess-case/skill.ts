@@ -8,7 +8,7 @@ import type { RuntimeConfig } from "../../../server-runtime";
 export const RUNS_WHEN_HALTED=false;
 export { MODEL };
 export async function run(s:PipelineState,config:RuntimeConfig={}){
- s.model_info={mode:s.mode,prompt_version:PROMPT_VERSION,stage:s.stage,runtime:s.mode==="REPLAY"?"Replay":"OpenAI hosted agent",api:s.mode==="REPLAY"?null:"Agents API"};
+ s.model_info={mode:s.mode,prompt_version:PROMPT_VERSION,stage:s.stage,runtime:s.mode==="REPLAY"?"Replay":"OpenAI hosted agent",api:s.mode==="REPLAY"?null:"Agents API",service_calls:[],tools_configured:0};
  try {
   if(s.mode==="REPLAY"){
    const entry=(replays.cases as Record<string,any>)[s.run.case.case_id]?.[s.stage];
@@ -18,9 +18,15 @@ export async function run(s:PipelineState,config:RuntimeConfig={}){
    const key=config.apiKey??process.env.OPENAI_API_KEY;if(!key)throw new Error("model_unavailable");
    const model=config.model??MODEL;
    const audit:AgentAudit={status:"creating"};s.model_info.hosted_agent=audit;s.model_info.model=model;
-   s.assessment=await assessWithHostedAgent(key,model,s.snapshot,audit,{run_id:s.run.run_id,stage:s.stage});
+   const agentCall={service:"Agents API",operation:"Create isolated assessment session",status:"started",started_at:new Date().toISOString(),duration_ms:0};
+   s.model_info.service_calls.push(agentCall);const agentStarted=Date.now();
+   try{s.assessment=await assessWithHostedAgent(key,model,s.snapshot,audit,{run_id:s.run.run_id,stage:s.stage});agentCall.status="completed";}
+   catch(e){agentCall.status="failed";throw e;}finally{agentCall.duration_ms=Math.max(0,Date.now()-agentStarted);}
    s.model_info.confidence_scoring={status:"pending",model:CONFIDENCE_MODEL,rubric_version:RUBRIC_VERSION};
-   s.confidence_score=await score(key,s.snapshot,s.assessment);s.assessment.confidence=s.confidence_score.level;
+   const scoreCall={service:"Decisions API",operation:"Score evidence support",status:"started",started_at:new Date().toISOString(),duration_ms:0};
+   s.model_info.service_calls.push(scoreCall);const scoreStarted=Date.now();
+   try{s.confidence_score=await score(key,s.snapshot,s.assessment);s.assessment.confidence=s.confidence_score.level;scoreCall.status="completed";}
+   catch(e){scoreCall.status="failed";throw e;}finally{scoreCall.duration_ms=Math.max(0,Date.now()-scoreStarted);}
    s.model_info.confidence_scoring.status="scored";
   }
  }catch(e){

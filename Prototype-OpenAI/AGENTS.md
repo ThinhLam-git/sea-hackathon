@@ -45,6 +45,8 @@ The homepage uses Lucas’s layout in `features/judge-demo/`, adapted to this v2
 
 The header switches Vietnamese/English locally and persists the choice. Language changes must preserve the current review, typed input and API-call count. Translate interface text, approved questions and policy explanations; retain original buyer/source content and unchanged audit exports. English policy explanations map actual rule IDs, with the original policy note available.
 
+Trace is observation only. Record actual stage timings/statuses and sanitized service operations; distinguish app skills, model assessment and agent tool calls. Current agent tools are disabled. Do not expose private reasoning, credentials or provider errors, invent timings for historical rows, or animate unrecorded tool activity. Trace replay must never submit requests. Preserve old records; No reply records selection/audit without new AI operations.
+
 ## Verification and publication
 
 `npm test`; `npm run typecheck`; `npm run demo` (30 draft scenarios); `npm run demo:legacy` (25-case rollback path); Sites build helper.

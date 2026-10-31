@@ -7,3 +7,9 @@ The existing authenticated v2.2 API is the source of truth. The UI supports Repl
 The header language button switches Vietnamese/English locally and remembers the choice. It does not reload the review, submit input or call OpenAI. Interface text, approved question translations, policy explanations and clipboard recommendations follow the selected language. Buyer replies, courier notes and evidence quotes retain their original content. English policy explanations map actual backend rule IDs; the original Vietnamese policy note and untouched audit export remain available.
 
 `presentation.ts` maps actual final actions, including HOLD and unresolved No reply, without assuming every reply enables a retry. `i18n.ts` holds interface translations. No policy logic, model credentials or copied fixtures belong in this UI module.
+
+## Presentation trace
+
+The read-only Agent trace tab shows recorded backend stages, measured durations, the final assessment’s evidence, policy rules and service operations. OpenAI private reasoning is not collected. A dark inspector separates app skills, agent assessment and Decisions scoring; the current assessor has zero tools configured. Older decisions show their saved stages with unavailable timing rather than invented durations. New No reply events record only selection/audit and no new AI service operations.
+
+Replay recorded trace animates the saved stages locally. It never submits input, calls OpenAI, or changes the decision. While an assessment request is pending, the previous record stays visible with an explicit waiting banner; this MVP does not stream intermediate server events.

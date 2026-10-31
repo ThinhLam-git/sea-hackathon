@@ -33,11 +33,12 @@ export class Simulator {
   r.final_event={event_id:eventId,type:"BUYER_REPLY",text:reply};this.finalize(r,2);return d;
  }
  noReply(id:string,eventId:string,questionId:string):Decision|null {
+  const started=Date.now();
   const r=this.runs.get(id)!;
   if(r.final_event&&r.final_event.event_id===eventId&&r.question_wait_state?.question_id!==questionId)throw new TransitionError("event_conflict");
   if(r.final_event){if(r.final_event.event_id===eventId&&r.final_event.type==="USER_NO_REPLY")return null;if(r.final_event.event_id===eventId)throw new TransitionError("event_conflict");throw new TransitionError("finalized");}
   this.pending(r,questionId);r.question_wait_state!.status="NO_REPLY";r.final_event={event_id:eventId,type:"USER_NO_REPLY"};this.finalize(r,1);
-  const initial=this.history(id)[0],d:Decision={...structuredClone(initial),decision_id:crypto.randomUUID(),trigger:"USER_NO_REPLY",record_status:"FINAL",question_text:null,skills_run:["audit-log"],model_info:{...structuredClone(initial.model_info),final_selection:{source:1,new_assessment:false,control:"USER_NO_REPLY"}}};
+  const initial=this.history(id)[0],d:Decision={...structuredClone(initial),decision_id:crypto.randomUUID(),trigger:"USER_NO_REPLY",record_status:"FINAL",question_text:null,skills_run:["audit-log"],execution_trace:[{name:"select-initial",kind:"control",status:"completed",started_at:new Date().toISOString(),duration_ms:Math.max(0,Date.now()-started),summary:"Select the saved initial assessment without inference"},{name:"audit-log",kind:"skill",status:"completed",started_at:new Date().toISOString(),duration_ms:0,summary:"Append the final-selection record"}],workflow_execution_id:crypto.randomUUID(),model_info:{...structuredClone(initial.model_info),service_calls:[],origin_assessment_decision_id:initial.decision_id,final_selection:{source:1,new_assessment:false,control:"USER_NO_REPLY"}}};
   this.decisions.get(id)!.push(d);return d;
  }
  private pending(r:RunState,questionId:string){if(r.current_status!=="WAITING_FOR_BUYER"||r.question_wait_state?.status!=="PENDING")throw new TransitionError("not_waiting");if(r.question_wait_state.question_id!==questionId)throw new TransitionError("question_mismatch");}

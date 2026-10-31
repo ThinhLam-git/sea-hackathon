@@ -16,11 +16,16 @@ export type Assessment=z.infer<typeof Assessment>;
 export interface PolicyOutput {eligibility:"ELIGIBLE"|"INELIGIBLE"|"UNKNOWN";policy_gate:"PERMITTED"|"BLOCKED"|"ESCALATED";final_action:Assessment["candidate_action"];reason:string}
 export interface RawCase {case_id:string;input:AgentInput;sources:Source[]}
 export interface Question {question_id:string;question_key:NonNullable<Assessment["question_key"]>;question_text:string;status:"PENDING"|"ANSWERED"|"NO_REPLY";asked_at:string}
+export interface ExecutionStep {
+ name:string;kind:"skill"|"agent"|"policy"|"control";status:"completed"|"halted"|"skipped";
+ started_at:string;duration_ms:number;summary:string;
+}
 export interface Decision extends PolicyOutput {
  decision_id:string;run_id:string;case_id:string;trigger:string;decided_at:string;record_status:"PENDING"|"FINAL";
  agent:Assessment|null;confidence_score?:ConfidenceScore;question_text:string|null;rules:string[];validation_issues:string[];
  skills_run:string[];model_info:Record<string,any>;policy_version:string;snapshot_source_refs:string[];
  workflow_execution_id:string;reassess_at:null;labels:string[];
+ execution_trace?:ExecutionStep[];
 }
 export interface RunState {
  contract_version:"2.2";run_id:string;case:RawCase;input:AgentInput;now:string;applied:Source[];

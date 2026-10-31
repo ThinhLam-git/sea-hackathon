@@ -5,6 +5,7 @@ import type { RunView } from "@/lib/order-rescue-v2/view";
 import { decisionPresentation, submissionUsesLive } from "./presentation";
 import { translate, type Language } from "./i18n";
 import { policyReason } from "./policy-copy";
+import AgentTrace from "./AgentTrace";
 import "./judge.css";
 
 type Mode="REPLAY"|"LIVE_AI";
@@ -29,6 +30,7 @@ const errorText=(e:unknown)=>e instanceof Error?e.message:"Chưa thể hoàn th�
 
 export default function JudgeDemo(){
  const [language,setLanguage]=useState<Language>("vi");
+ const [workspaceTab,setWorkspaceTab]=useState<"case"|"trace">("case");
  const t=(value:string)=>translate(value,language);
  useEffect(()=>{const saved=localStorage.getItem("order-rescue-language");if(saved==="vi"||saved==="en")setLanguage(saved);},[]);
  function changeLanguage(next:Language){setLanguage(next);localStorage.setItem("order-rescue-language",next);document.documentElement.lang=next;}
@@ -86,13 +88,14 @@ export default function JudgeDemo(){
  const steps=[{name:t("Giao thất bại"),icon:Package},{name:t("Agent đọc bằng chứng"),icon:Search},{name:t("Làm rõ nếu cần"),icon:MessageCircle},{name:t("Policy kiểm tra"),icon:ShieldCheck},{name:t("Ops quyết định"),icon:UserRound}];
  return <div className="judge-app">
   <header className="judge-header"><a href="/" className="judge-brand"><Package size={23}/>Order Rescue</a><span>{t("Demo mô phỏng · dữ liệu giả lập")}</span><button className="judge-language" aria-label={language==="vi"?"Switch to English":"Chuyển sang Tiếng Việt"} onClick={()=>changeLanguage(language==="vi"?"en":"vi")}>{language==="vi"?"English":"Tiếng Việt"}</button><div className="judge-mode" role="group" aria-label={t("Chế độ đánh giá")}><button aria-pressed={!live} disabled={busy} onClick={()=>run&&start(run.case_id,"REPLAY")}>Replay</button><button aria-pressed={live} disabled={busy||!config?.live_available} onClick={()=>run&&start(run.case_id,"LIVE_AI")}>Live Agent</button></div></header>
-  <main className="judge-main">
+  <main className={`judge-main ${workspaceTab==="trace"?"is-trace":""}`}>
    <div className="judge-title"><div><h1>{t("Từ giao thất bại đến bước xử lý tiếp theo")}</h1><p>{t("Agent tổng hợp bằng chứng và đề xuất. Policy kiểm tra điều kiện. Ops quyết định.")}</p></div><button className="judge-reset" disabled={busy||!run} onClick={()=>run&&start(run.case_id)}><RotateCcw size={15}/>{t("Chạy lại")}</button></div>
    <nav className="judge-cases" aria-label={t("Tình huống nổi bật")}>{CASES.map((c,i)=><button key={c.id} aria-pressed={run?.case_id===c.id} disabled={busy} onClick={()=>start(c.id)}><span className="judge-case-index">{i+1}</span><span><strong>{t(c.name)}</strong><small>{t(c.lesson)}</small></span>{run?.case_id===c.id&&<Check size={18}/>}</button>)}</nav>
    <ol className="judge-steps" aria-label={t("Luồng hoạt động của agent")}>{steps.map((s,i)=>{const Icon=s.icon,skip=i===2&&finished&&!run?.question.asked;return <li key={s.name} className={skip?"skip":i<step?"done":i===step?"active":""} aria-current={i===step?"step":undefined}><span>{i<step&&!skip?<Check size={17}/>:<Icon size={17}/>}</span><strong>{s.name}</strong><small>{skip?t("Không cần hỏi"):i===4?t("Ops xem xét thực tế"):i===step?busy?t("Đang xử lý"):waiting?t("Chờ phản hồi"):t("Đã có đề xuất"):i<step?t("Đã hoàn tất"):""}</small></li>})}</ol>
    {error&&<div className="judge-error" role="alert"><p>{signIn?t("Đăng nhập ChatGPT để lưu lượt trải nghiệm của bạn."):t(error)}</p>{signIn?<a href="/signin-with-chatgpt?return_to=%2F" target="_top">{t("Đăng nhập ChatGPT")}</a>:<button disabled={busy} onClick={()=>run?void perform(()=>api<RunView>(`/runs/${run.run_id}`)):setBoot(v=>v+1)}>{run?t("Tải lại trạng thái"):t("Thử lại")}</button>}</div>}
    {!run?<div className="judge-loading" role="status">{busy?<><LoaderCircle className="spin"/>{t("Đang chuẩn bị tình huống…")}</>:t("Demo chưa tải được. Chọn Thử lại để tiếp tục.")}</div>:<>
-    <div className="judge-board" aria-busy={busy}>
+    <div className="judge-workspace-tabs" role="tablist" aria-label={language==="vi"?"Góc nhìn workspace":"Workspace view"}><button id="case-tab" role="tab" aria-selected={workspaceTab==="case"} aria-controls="case-workspace" onClick={()=>setWorkspaceTab("case")}><Package size={14}/>{language==="vi"?"Xử lý case":"Case workspace"}</button><button id="trace-tab" role="tab" aria-selected={workspaceTab==="trace"} aria-controls="agent-trace-panel" onClick={()=>setWorkspaceTab("trace")}><Sparkles size={14}/>{language==="vi"?"Trace của agent":"Agent trace"}<small>{language==="vi"?"Quan sát":"Observe"}</small></button></div>
+    {workspaceTab==="trace"?<div id="agent-trace-panel" role="tabpanel" aria-labelledby="trace-tab"><AgentTrace run={run} language={language} busy={busy}/></div>:<div id="case-workspace" role="tabpanel" aria-labelledby="case-tab"><div className="judge-board" aria-busy={busy}>
      <section className="judge-panel judge-case-panel" aria-labelledby="case-title"><header><Package size={17}/><h2 id="case-title">{t("Case giao thất bại")}</h2><span>{run.case_id}</span></header><div className="judge-panel-body">
       <h3>{t(activeCase?.name??run.title)}</h3><div className="judge-failed">{t("Lần giao chưa thành công")}</div>
       {note&&<blockquote className="judge-note"><span>{t("Ghi chú tài xế")}</span><p>{text(note.content)}</p><small>{t("Báo cáo chưa xác minh")}</small></blockquote>}
@@ -119,6 +122,7 @@ export default function JudgeDemo(){
      </div></aside>
     </div>
     <div className="judge-guide" role="status">{busy?<LoaderCircle className="spin" size={20}/>:<ArrowRight size={20}/>}<p>{busy?t("Đang đánh giá bằng chứng và kiểm tra policy…"):t(presentation!.guide)}</p></div>
+    </div>}
     <details className="judge-history"><summary>{t("Lịch sử đánh giá & cách hệ thống hoạt động")}</summary><p>{t("Hợp đồng v")}{run.contract_version} · {latest?.policy_version}{t(". Tối đa hai assessment; không có lượt thứ ba. Replay dùng nhãn DRAFT_NEEDS_USER_REVIEW, không chứng minh độ chính xác model.")}</p><ol>{run.history.map((d,i)=><li key={d.decision_id}><strong>{d.trigger==="USER_NO_REPLY"?t("Chọn kết quả ban đầu · không gọi AI"):i===0?t("Đánh giá ban đầu"):t("Đánh giá sau phản hồi")}</strong><span>{d.final_action} · {d.policy_gate} · {d.model_info.mode}</span><p>{policyReason(d,language)}</p>{d.model_info.hosted_agent&&<details><summary>{t("Phiên hosted agent")}</summary><pre>{JSON.stringify(d.model_info.hosted_agent,null,2)}</pre></details>}</li>)}</ol><details><summary>{t("Bảy bước xử lý cố định")}</summary><p>{run.pipeline.map(s=>s.name).join(" → ")}</p></details><button className="judge-text" onClick={()=>exportHistory(run)}><Download size={14}/>{t("Xuất lịch sử")}</button></details>
     <details className="judge-history"><summary>{t("Các tình huống khác & thông tin demo")}</summary><label className="judge-case-select">{t("Chọn trong 30 case")}<select aria-label={t("Chọn case demo")} value={run.case_id} disabled={busy} onChange={e=>start(e.target.value)}>{cases.map(c=><option key={c.case_id} value={c.case_id}>{c.case_id} · {t(CASES.find(x=>x.id===c.case_id)?.name??c.title)}</option>)}</select></label><p>{live?`Live Agent · ${config?.model??"GPT"}${t(" · sử dụng API credits.")}`:t("Replay miễn phí. Chọn Live Agent ở đầu trang để chạy agent và Decisions API thực tế.")}{" "}{t("Thời gian và kết quả thuộc tình huống giả lập. Mỗi tài khoản chỉ xem lượt của mình.")}</p></details>
    </>}

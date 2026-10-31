@@ -27,6 +27,7 @@ describe("v2 live API boundaries",()=>{
  it("uses one hosted session and one Decisions call per assessment and never a third round",async()=>{
   const {sim,assessor,scorer}=mock(),[run]=await sim.start("DEMO-001");
   expect(assessor).toHaveBeenCalledTimes(1);expect(scorer).toHaveBeenCalledTimes(1);
+  expect(sim.history(run.run_id)[0].model_info.service_calls.map((c:any)=>[c.service,c.status])).toEqual([["Agents API","completed"],["Decisions API","completed"]]);
   assessor.mockResolvedValue({finalOutput:structuredClone(scenarios[0].expected.after_reply_assessment)} as any);
   const event=crypto.randomUUID(),text=scenarios[0].simulation.buyer_reply!,q=run.question_wait_state!.question_id;
   await sim.recordBuyerReply(run.run_id,text,event,q);expect(assessor).toHaveBeenCalledTimes(2);expect(scorer).toHaveBeenCalledTimes(2);

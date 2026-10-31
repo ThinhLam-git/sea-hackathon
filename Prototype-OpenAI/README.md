@@ -12,6 +12,8 @@ A delivery-recovery workspace for operations staff. **30 synthetic cases, demo p
 4. Copy the approved question into your normal channel, record the buyer’s exact reply, then assess it. **No reply** selects the initial result without another AI call.
 5. Read **Policy & recommendation** in the right panel. Review evidence, the Decisions evidence-support score and history, then copy the recommendation for Ops.
 
+6. Open **Agent trace** to inspect recorded stages, timings, evidence, policy rules and API operations. **Replay recorded trace** animates the saved execution without calling AI.
+
 The homepage now uses Lucas’s Vietnamese/English UI with the existing v2.2 hosted agent backend. It derives holds, retries and unresolved outcomes from real API state. Source notes and buyer text remain in their original language. No real messages or delivery actions are executed. Reload restores the current review.
 
 ## Stack and flow

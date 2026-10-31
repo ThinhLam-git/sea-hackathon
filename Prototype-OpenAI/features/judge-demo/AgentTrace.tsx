@@ -1,0 +1,70 @@
+"use client";
+import {useEffect,useMemo,useState} from "react";
+import {Activity,ArrowRight,Check,ChevronRight,Clock3,Database,FileCheck2,Layers3,Pause,Play,Search,ShieldCheck,Sparkles,Terminal,Workflow,Wrench} from "lucide-react";
+import type {RunView} from "@/lib/order-rescue-v2/view";
+import type {Language} from "./i18n";
+import {policyReason} from "./policy-copy";
+import "./trace.css";
+const STAGES:Record<string,[string,string,string]>={
+ "load-case":["Nạp case","Load case","Read raw delivery facts and check lifecycle eligibility."],
+ "prepare-input":["Chuẩn bị bằng chứng","Prepare evidence","Project seven input fields and released sources only."],
+ "assess-case":["Agent đánh giá","Agent assessment","Assess current evidence, then score support with Decisions."],
+ "validate-output":["Kiểm tra đầu ra","Validate output","Validate schema, source references, verification and confidence."],
+ "policy-gate":["Kiểm tra policy","Policy gate","Apply deterministic rules to the validated evidence."],
+ "compose-recommendation":["Soạn đề xuất","Compose recommendation","Prepare a staff recommendation and permitted question."],
+ "audit-log":["Ghi audit","Write audit","Append the decision and its execution metadata."],
+ "select-initial":["Chọn đánh giá đầu","Select initial assessment","Keep the saved initial assessment without another AI call."],
+};
+const STAGE_VI:Record<string,string>={
+ "load-case":"Đọc dữ kiện giao hàng gốc và kiểm tra điều kiện vòng đời.",
+ "prepare-input":"Chiếu bảy trường đầu vào và chỉ các nguồn đã có tại lượt này.",
+ "assess-case":"Đánh giá bằng chứng hiện tại, rồi chấm mức hỗ trợ bằng Decisions.",
+ "validate-output":"Kiểm tra schema, tham chiếu nguồn, xác minh và độ tin cậy.",
+ "policy-gate":"Áp dụng quy tắc trong code lên bằng chứng đã kiểm tra.",
+ "compose-recommendation":"Soạn đề xuất cho Ops và câu hỏi được phép.",
+ "audit-log":"Lưu bản ghi quyết định cùng metadata thực thi.",
+ "select-initial":"Chọn assessment đầu đã lưu, không gọi AI lần nữa.",
+};
+const elapsed=(ms:number|undefined)=>ms===undefined?"—":ms<1000?`${ms} ms`:`${(ms/1000).toFixed(2)} s`;
+export default function AgentTrace({run,language,busy}:{run:RunView;language:Language;busy:boolean}){
+ const label=(vi:string,en:string)=>language==="vi"?vi:en;
+ const [selectedId,setSelectedId]=useState(run.history.at(-1)!.decision_id);
+ const decision=run.history.find(d=>d.decision_id===selectedId)??run.history.at(-1)!;
+ const [cursor,setCursor]=useState(0),[playing,setPlaying]=useState(false);
+ const recorded=!!decision.execution_trace;
+ const steps=useMemo(()=>decision.execution_trace??decision.skills_run.map(name=>({name,kind:name==="assess-case"?"agent":name==="policy-gate"?"policy":"skill",status:"completed",summary:STAGES[name]?.[2]??name,duration_ms:undefined,started_at:undefined})),[decision]);
+ useEffect(()=>{setPlaying(false);setCursor(Math.max(0,steps.findIndex(s=>s.name==="assess-case")));},[decision.decision_id,steps.length]);
+ useEffect(()=>{if(!playing)return;if(cursor>=steps.length-1){setPlaying(false);return;}const timer=setTimeout(()=>setCursor(v=>v+1),650);return()=>clearTimeout(timer);},[playing,cursor,steps.length]);
+ const current=steps[cursor]??steps.at(-1);
+ const noInference=decision.trigger==="USER_NO_REPLY";
+ const services:Array<{service:string;operation:string;status:string;duration_ms?:number}>=Array.isArray(decision.model_info.service_calls)?decision.model_info.service_calls:noInference?[]:[
+  ...(decision.model_info.hosted_agent?[{service:"Agents API",operation:"Saved assessment session",status:decision.model_info.hosted_agent.status}]:[]),
+  ...(decision.confidence_score?[{service:"Decisions API",operation:"Saved evidence score",status:"completed"}]:[]),
+ ];
+ const sources=run.sources.filter(s=>decision.snapshot_source_refs.includes(s.source_ref));
+ const total=recorded?decision.execution_trace!.reduce((n,s)=>n+s.duration_ms,0):undefined;
+ const score=decision.confidence_score;
+ const sourceMode=decision.model_info.mode??run.mode;
+ const stageTitle=(name:string)=>STAGES[name]?.[language==="vi"?0:1]??name;
+ const status=(value:string)=>({completed:label("Hoàn tất","Complete"),halted:label("Dừng an toàn","Halted safely"),skipped:label("Bỏ qua","Skipped"),failed:label("Thất bại","Failed")}[value]??value);
+ function replay(){if(playing){setPlaying(false);return;}setCursor(0);setPlaying(true);}
+ return <section className="trace-deck" aria-label={label("Quan sát agent","Agent observatory")}>
+  <div className="trace-topline"><span><Activity size={14}/>{label("QUAN SÁT THỰC THI","EXECUTION OBSERVATORY")} · {run.case_id}</span><span className="trace-signal"><i/>{busy?label("Đang chờ backend","Awaiting backend"):label("Bản ghi đã lưu","Recorded execution")}</span></div>
+  <header className="trace-title"><div><h2>{label("Từ bằng chứng đến quyết định.","From evidence to decision.")}</h2><p>{label("Các bước đã ghi nhận, tóm tắt bằng chứng và kiểm tra policy.","Recorded steps, evidence summaries and policy checks.")}</p></div><button onClick={replay} disabled={busy||steps.length<2}>{playing?<Pause size={15}/>:<Play size={15}/>} {playing?label("Tạm dừng","Pause"):label("Phát trace đã lưu","Replay recorded trace")}</button></header>
+  {busy&&<p className="trace-pending" role="status">{label("Backend đang xử lý. Bên dưới là bản ghi trước; trace mới xuất hiện sau khi request hoàn tất.","The backend is processing. The previous record remains below; the new trace appears when the request finishes.")}</p>}
+  <nav className="trace-records" aria-label={label("Chọn bản ghi","Choose trace record")}>{run.history.map((d,i)=><button key={d.decision_id} aria-pressed={d.decision_id===decision.decision_id} onClick={()=>setSelectedId(d.decision_id)}><span>{String(i+1).padStart(2,"0")}</span>{d.trigger==="USER_NO_REPLY"?label("Không phản hồi","No reply"):i===0?label("Đánh giá đầu","Initial assessment"):label("Sau phản hồi","After reply")}<small>{d.model_info.mode??run.mode}</small></button>)}</nav>
+  <div className="trace-metrics"><div><Layers3 size={16}/><strong>{steps.filter(s=>s.status!=="skipped").length}<small>/{steps.length}</small></strong><span>{label("Bước đã chạy","Stages executed")}</span></div><div><Database size={16}/><strong>{sources.length}</strong><span>{label("Nguồn trong snapshot","Sources in snapshot")}</span></div><div><Clock3 size={16}/><strong>{elapsed(total)}</strong><span>{label("Thời gian backend","Backend duration")}</span></div><div><Sparkles size={16}/><strong>{score?score.score:decision.agent?.confidence??"—"}{score&&<small>/100</small>}</strong><span>{label("Hỗ trợ bằng chứng","Evidence support")}</span></div></div>
+  {!recorded&&<p className="trace-legacy">{label("Bản ghi cũ có tên các bước; chưa lưu thời lượng. Bắt đầu case mới để xem timing.","This older record contains stage names without timings. Start a new case to capture durations.")}</p>}
+  {playing&&<p className="trace-playback" role="status">{label("Đang phát lại bản ghi · không chạy agent hoặc gọi API","Playing saved events · no agent execution or API calls")} · {cursor+1}/{steps.length}</p>}
+  <div className="trace-layout"><div className="trace-timeline" aria-label={label("Timeline các bước","Stage timeline")}>{steps.map((event,i)=>{const Icon=event.kind==="agent"?Sparkles:event.kind==="policy"?ShieldCheck:event.name==="audit-log"?FileCheck2:Workflow;return <button key={event.name} className={`${i===cursor?"is-selected":""} ${event.status} ${playing&&i>cursor?"is-future":""}`} onClick={()=>{setPlaying(false);setCursor(i);}} aria-pressed={i===cursor}><span className="trace-node"><Icon size={16}/></span><span className="trace-stage-copy"><small>{String(i+1).padStart(2,"0")} / {event.kind.toUpperCase()}</small><strong>{stageTitle(event.name)}</strong><em>{status(event.status)}</em></span><span className="trace-stage-time">{elapsed(event.duration_ms)}<ChevronRight size={13}/></span></button>})}</div>
+   <div className="trace-inspector" aria-live="polite"><div className="trace-inspector-label"><Terminal size={14}/>{label("CHI TIẾT BƯỚC","STAGE INSPECTOR")}<span>{current?.name}</span></div><h3>{current?stageTitle(current.name):label("Chưa có bước ghi nhận","No recorded stages")}</h3><p className="trace-stage-description">{language==="vi"?(STAGE_VI[current?.name??""]??current?.summary):current?.summary}</p><div className="trace-status-line"><span className={`trace-badge ${current?.status}`}>{current&&status(current.status)}</span><span>{elapsed(current?.duration_ms)}</span>{current?.started_at&&<time>{new Date(current.started_at).toLocaleTimeString(language==="vi"?"vi-VN":"en-GB",{timeZone:"Asia/Ho_Chi_Minh",hour12:false})} ICT</time>}</div>
+    {current?.status==="skipped"?<div className="trace-message"><ShieldCheck size={20}/><p>{label("Một kiểm tra trước đó đã dừng pipeline. Bước này không được thực thi.","An earlier check halted the pipeline. This stage was not executed.")}</p></div>:<>
+     {current?.name==="load-case"||current?.name==="prepare-input"?<div className="trace-inputs"><h4>{label("Snapshot hiện tại","Current snapshot")}</h4><div className="trace-code-tags">{["case_id","failed_event","attempts_used","return_state","deadline","buyer_history","operational_context"].map(k=><code key={k}>{k}</code>)}</div><h4>{label("Nguồn đã có tại lượt này","Sources available in this assessment")}</h4>{sources.map(s=><div className="trace-source" key={s.source_ref}><Database size={12}/><code>{s.source_ref}</code><span>{s.source_type}</span></div>)}</div>:current?.name==="assess-case"?<><div className="trace-model"><Sparkles size={17}/><div><strong>{sourceMode==="REPLAY"?label("Assessment Replay dựng sẵn","Prepared Replay assessment"):decision.model_info.model??"Hosted agent"}</strong><span>{sourceMode==="REPLAY"?label("Không gọi OpenAI cho lượt Replay","No OpenAI request for this Replay assessment"):"OpenAI hosted Agents API · structured output"}</span></div></div><h4>{label("Tóm tắt đầu ra","Output summary")}</h4><code className="trace-hypothesis">{decision.agent?.hypothesis??label("Không có assessment hợp lệ","No validated assessment")}</code>{decision.agent?.evidence.map((e,i)=><blockquote className="trace-evidence" key={i}><span>{e.source_ref} · {e.verification}</span><p>{e.fact}</p></blockquote>)}</>:current?.name==="validate-output"?<><h4>{label("Kiểm tra đã ghi nhận","Recorded validation")}</h4><p>{decision.validation_issues.length?label("Các điều chỉnh hoặc lỗi được ghi nhận:","Recorded adjustments or validation issues:"):decision.agent?label("Assessment hợp lệ sau kiểm tra nguồn và schema.","The assessment passed source and schema validation."):label("Không có assessment đã xác thực.","No validated assessment is available.")}</p>{decision.validation_issues.map((v,i)=><code className="trace-rule" key={i}>{v}</code>)}</>:current?.name==="policy-gate"||current?.name==="compose-recommendation"?<><div className="trace-policy-result"><ShieldCheck size={18}/><div><span>{decision.policy_gate}</span><strong>{decision.final_action}</strong></div></div><p>{policyReason(decision,language)}</p><div className="trace-code-tags">{decision.rules.map(rule=><code key={rule}>{rule}</code>)}</div></>:current?.name==="select-initial"?<div className="trace-message"><ShieldCheck size={22}/><p>{label("Giữ nguyên assessment đầu. Không có lượt AI mới; các nguồn và điểm số thuộc assessment gốc.","The initial assessment is retained. No new AI execution; sources and score belong to the original assessment.")}</p></div>:<div className="trace-audit"><h4>{label("Liên kết bản ghi","Record references")}</h4><span>decision_id</span><code>{decision.decision_id}</code><span>execution_id</span><code>{decision.workflow_execution_id}</code><span>policy / prompt</span><code>{decision.policy_version} / {decision.model_info.prompt_version??"—"}</code></div>}
+    </>}
+    <details className="trace-raw"><summary>{label("Xem metadata thực thi","Inspect execution metadata")}</summary><pre>{JSON.stringify({mode:sourceMode,trigger:decision.trigger,session:decision.model_info.hosted_agent,service_calls:services,final_selection:decision.model_info.final_selection},null,2)}</pre></details>
+   </div>
+  </div>
+  <section className="trace-services"><header><Activity size={15}/><h3>{label("Dịch vụ & công cụ","Services & tools")}</h3><span>{services.length} {label("lời gọi dịch vụ đã ghi nhận","recorded service operations")}</span></header><div className="trace-service-grid">{services.map((call,i)=><article key={`${call.service}-${i}`}><span className="trace-service-icon"><Sparkles size={18}/></span><div><strong>{call.service}</strong><p>{call.operation}</p><small>{status(call.status)} · {elapsed(call.duration_ms)}</small></div>{call.status==="completed"?<Check size={16}/>:<Activity size={16}/>}</article>)}<article className="trace-tool-card"><span className="trace-service-icon"><Wrench size={18}/></span><div><strong>{label("Công cụ của agent","Agent tools")}: 0</strong><p>{label("Assessor dùng snapshot được cung cấp. Các skill cố định do app chạy; Decisions là bước chấm điểm riêng.","The assessor uses the supplied snapshot. The app runs the fixed skills; Decisions is a separate scoring operation.")}</p><small>{label("Không có lời gọi công cụ trong agent này","No agent tool calls in this configuration")}</small></div></article></div>{!services.length&&<p className="trace-empty-services">{noInference?label("Chọn kết quả đã lưu, không gọi dịch vụ AI mới.","Saved outcome selected; no new AI service calls."):sourceMode==="REPLAY"?label("Replay dùng assessment dựng sẵn. Không có lời gọi OpenAI.","Replay uses prepared assessments. No OpenAI service calls."):label("Bản ghi này không có dữ liệu lời gọi dịch vụ.","No service-call data is available for this record.")}</p>}</section>
+  <footer className="trace-footer"><span><ShieldCheck size={13}/>{label("Chỉ quan sát · không thay đổi kết quả","Observation only · decisions stay unchanged")}</span><span>{label("Thời gian đo từ backend; hoạt ảnh là phát lại bản ghi.","Durations are measured by the backend; animation replays saved events.")}</span></footer>
+ </section>;
+}

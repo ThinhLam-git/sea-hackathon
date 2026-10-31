@@ -1,5 +1,7 @@
 import { z } from "zod";
 import type { AgentInput, ConfidenceScore, Source } from "../order-rescue/models";
+import type { BuyerInterpretation } from "./agents/business-facts";
+import type { ActionDecision, HypothesisDecisionRef } from "./agents/decisions";
 export type { AgentInput, ConfidenceScore, Source };
 export const CONTRACT_VERSION="2.2";
 export const POLICY_VERSION="demo-two-assessment-v2";
@@ -22,6 +24,10 @@ export interface Decision extends PolicyOutput {
  skills_run:string[];model_info:Record<string,any>;policy_version:string;snapshot_source_refs:string[];
  workflow_execution_id:string;reassess_at:null;labels:string[];
 }
+export interface AgentToolLedgerEntry {
+ tool_id:string;external_call_id:string|null;session_id:string|null;turn_id?:string|null;phase:"INITIAL"|"AFTER_REPLY";
+ tool_name:string;status:"COMPLETED";result:unknown;started_at:string;completed_at:string;latency_ms:number;decision_ids:string[];
+}
 export interface RunState {
  contract_version:"2.2";run_id:string;case:RawCase;input:AgentInput;now:string;applied:Source[];
  current_status:"NEW"|"WAITING_FOR_BUYER"|"COMPLETED";question_wait_state:Question|null;
@@ -29,12 +35,22 @@ export interface RunState {
  after_reply_assessment:Assessment|null;after_reply_policy_output:PolicyOutput|null;
  final_assessment_source:1|2|null;final_assessment:Assessment|null;final_policy_output:PolicyOutput|null;
  final_event:{event_id:string;text?:string;type:"BUYER_REPLY"|"USER_NO_REPLY"}|null;
+ pending_event?:{event_id:string;text:string;type:"BUYER_REPLY";question_id:string}|null;
+ agent_session_id?:string|null;agent_session_status?:"CREATING"|"ACTIVE"|"IDLE"|"FAILED";
+ agent_environment_id?:string|null;agent_turn_id?:string|null;agent_tool_ledger?:AgentToolLedgerEntry[];
 }
 export interface PipelineState {
  run:RunState;mode:"REPLAY"|"LIVE_AI";stage:"INITIAL"|"AFTER_REPLY";trigger:string;
  snapshot:any;source_index:Record<string,Source>;assessment:Assessment|null;confidence_score?:ConfidenceScore;
  result:PolicyOutput|null;rules:string[];issues:string[];model_info:Record<string,any>;
  halted:boolean;trace:string[];decision:Decision|null;execution_id:string;
+ agent_session_id?:string|null;agent_turn_id?:string|null;agent_environment_id?:string|null;
+ agent_decisions?:{snapshot_hash:string;evidence_hash:string;action_input_hash:string;hypothesis:HypothesisDecisionRef;action:ActionDecision;buyer_facts:BuyerInterpretation;missing_info:Assessment["missing_info"]};
+ semantic_facts?:BuyerInterpretation;
+ requested_question?:{question_key:NonNullable<Assessment["question_key"]>;question_text:string}|null;
+ policy_checked?:boolean;
+ agent_execution?:{model:string;session_id:string;turn_id:string|null;environment_id:string|null;tool_calls:Array<{name:string;call_id?:string;turn_id?:string}>;event_ids:string[];usage:unknown;decision_requests:number;skill_names:string[];status:"COMPLETED"|"FAILED"};
+ agent_tool_ledger?:AgentToolLedgerEntry[];
 }
 export const ms=(value:string)=>Date.parse(value);
 export const normalize=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase();

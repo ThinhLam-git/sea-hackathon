@@ -1,0 +1,571 @@
+{
+  "DEMO-001": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-001-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-001-REPLY",
+          "quote": "ngày mai có người ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-002": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-002-REPLY",
+          "quote": "tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-002-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-003": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-003-REPLY",
+          "quote": "tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-003-REPLY",
+          "quote": "ngày mai tôi ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-006": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-006-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-006-REPLY",
+          "quote": "mai có người ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-007": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-007-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-007-REPLY",
+          "quote": "ngày làm việc tới tôi xuống cổng nhận được"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-008": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-008-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-008-REPLY",
+          "quote": "ngày mai có người ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-011": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-011-REPLY",
+          "quote": "Vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-011-REPLY",
+          "quote": "ngày mai tôi ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-012": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-012-REPLY",
+          "quote": "tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-012-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-016": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-016-REPLY",
+          "quote": "Tôi muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-016-REPLY",
+          "quote": "Mai đủ tiền và tôi ở nhà nhận"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-016-REPLY",
+          "quote": "Mai đủ tiền"
+        }
+      ]
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-017": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-017-REPLY",
+          "quote": "Tôi đồng ý nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-017-REPLY",
+          "quote": "ngày mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-019": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-019-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-019-REPLY",
+          "quote": "có ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-019-REPLY",
+          "quote": "mai đủ COD hiện tại"
+        }
+      ]
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-020": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-020-REPLY",
+          "quote": "tôi muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-020-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-020-REPLY",
+          "quote": "Tiền COD tôi đã chuẩn bị"
+        }
+      ]
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-021": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-021-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-021-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-021-REPLY",
+          "quote": "đã đủ COD trên đơn"
+        }
+      ]
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-024": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-024-REPLY",
+          "quote": "Tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-024-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-027": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-027-REPLY",
+          "quote": "vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-027-REPLY",
+          "quote": "Mai đủ tiền và tôi ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-027-REPLY",
+          "quote": "Mai đủ tiền"
+        }
+      ]
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-028": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-028-REPLY",
+          "quote": "tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-028-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  },
+  "DEMO-029": {
+    "intent": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-029-REPLY",
+          "quote": "tôi vẫn muốn nhận"
+        }
+      ]
+    },
+    "availability": {
+      "state": "YES",
+      "citations": [
+        {
+          "source_ref": "DEMO-029-REPLY",
+          "quote": "mai ở nhà"
+        }
+      ]
+    },
+    "cod_readiness": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "address_change": {
+      "state": "UNKNOWN",
+      "citations": []
+    },
+    "after_deadline": {
+      "state": "UNKNOWN",
+      "citations": []
+    }
+  }
+}

@@ -1,27 +1,47 @@
-import { database, runtime, HttpError } from "../order-rescue/repository";
+import { env } from "cloudflare:workers";
+import { database, HttpError } from "../order-rescue/repository";
+import { MODEL } from "./skills/assess-case/skill";
+import type { RuntimeConfig } from "../order-rescue/pipeline";
 import { Simulator } from "./simulator";
 import type { Decision, RunState } from "./models";
-export { runtime, HttpError };
+export { HttpError };
+export function runtime():RuntimeConfig {
+ const timeout=Number(env.ORDER_RESCUE_AGENT_TIMEOUT_MS||process.env.ORDER_RESCUE_AGENT_TIMEOUT_MS),toolCalls=Number(env.ORDER_RESCUE_MAX_TOOL_CALLS||process.env.ORDER_RESCUE_MAX_TOOL_CALLS);
+ return {apiKey:env.OPENAI_API_KEY||process.env.OPENAI_API_KEY,model:env.ORDER_RESCUE_MODEL||process.env.ORDER_RESCUE_MODEL||MODEL,
+  agentRuntime:(env.ORDER_RESCUE_RUNTIME||process.env.ORDER_RESCUE_RUNTIME)==="LEGACY_RESPONSES"?"LEGACY_RESPONSES":"AGENTS_API",
+  agentTimeoutMs:Number.isFinite(timeout)&&timeout>=10000&&timeout<=120000?timeout:110000,
+  maxAgentToolCalls:Number.isInteger(toolCalls)&&toolCalls>=5&&toolCalls<=12?toolCalls:7,tracing:false};
+}
 export async function restore(id:string,owner:string,forMutation=false){
  const row=await database().prepare("SELECT * FROM rescue_runs WHERE id = ? AND owner = ?").bind(id,owner).first<{mode:"REPLAY"|"LIVE_AI";state:string;revision:number;write_token:string}>();
  if(!row)throw new HttpError(404,"Review session not found.");
  if(forMutation&&row.write_token.startsWith("lock:")&&Number(row.write_token.split(":")[1])>Date.now())throw new HttpError(409,"This case is already being assessed. Wait for the current review to finish.");
  const state=JSON.parse(row.state) as RunState;
  if(state.contract_version!=="2.2")throw new HttpError(409,"This session uses the older demo. Start a new v2.2 review; the old record is preserved.");
+ if(forMutation&&["CREATING","ACTIVE"].includes(state.agent_session_status??""))throw new HttpError(409,"Agent work was interrupted before its result was recorded. This run needs explicit recovery; do not resubmit the event.");
  const sim=new Simulator(row.mode,runtime());sim.runs.set(id,state);
  const rows=await database().prepare("SELECT payload FROM rescue_decisions WHERE run_id = ? ORDER BY sequence").bind(id).all<{payload:string}>();
  sim.decisions.set(id,rows.results.map(r=>JSON.parse(r.payload) as Decision));return {sim,revision:row.revision};
 }
-export async function persist(sim:Simulator,id:string,owner:string,revision?:number){
+export async function persist(sim:Simulator,id:string,owner:string,revision?:number,expectedWriteToken?:string){
  const db=database(),run=sim.runs.get(id)!,token=crypto.randomUUID();
- const mutation=revision===undefined?db.prepare("INSERT INTO rescue_runs (id,owner,mode,state,revision,write_token,created_at) VALUES (?,?,?,?,0,?,?)").bind(id,owner,sim.mode,JSON.stringify(run),token,new Date().toISOString()):db.prepare("UPDATE rescue_runs SET state = ?, mode = ?, revision = revision + 1, write_token = ? WHERE id = ? AND owner = ? AND revision = ?").bind(JSON.stringify(run),sim.mode,token,id,owner,revision);
+ const mutation=revision===undefined?db.prepare("INSERT INTO rescue_runs (id,owner,mode,state,revision,write_token,created_at) VALUES (?,?,?,?,0,?,?)").bind(id,owner,sim.mode,JSON.stringify(run),token,new Date().toISOString()):expectedWriteToken
+  ?db.prepare("UPDATE rescue_runs SET state = ?, mode = ?, revision = revision + 1, write_token = ? WHERE id = ? AND owner = ? AND revision = ? AND write_token = ?").bind(JSON.stringify(run),sim.mode,token,id,owner,revision,expectedWriteToken)
+  :db.prepare("UPDATE rescue_runs SET state = ?, mode = ?, revision = revision + 1, write_token = ? WHERE id = ? AND owner = ? AND revision = ?").bind(JSON.stringify(run),sim.mode,token,id,owner,revision);
  const inserts=sim.history(id).map((d,i)=>db.prepare("INSERT OR IGNORE INTO rescue_decisions (id,run_id,sequence,payload) SELECT ?,?,?,? WHERE EXISTS (SELECT 1 FROM rescue_runs WHERE id = ? AND write_token = ?)").bind(d.decision_id,id,i,JSON.stringify(d),id,token));
  const result=await db.batch([mutation,...inserts]);if(result[0].meta.changes!==1)throw new HttpError(409,"This case changed in another tab. Refresh before continuing.");
 }
 
+/** Checkpoint state while preserving the reply lease and its revision. */
+export async function checkpoint(sim:Simulator,id:string,owner:string,lease:{revision:number;token:string}){
+ const result=await database().prepare("UPDATE rescue_runs SET state = ?, mode = ? WHERE id = ? AND owner = ? AND revision = ? AND write_token = ?")
+  .bind(JSON.stringify(sim.runs.get(id)!),sim.mode,id,owner,lease.revision,lease.token).run();
+ if(result.meta.changes!==1)throw new HttpError(409,"This case changed while its assessment was running. The result needs explicit recovery.");
+}
+
 /** A short reservation serializes reply/no-reply without adding an account or queue system. */
 export async function reserve(id:string,owner:string,revision:number){
- const token=`lock:${Date.now()+90000}:${crypto.randomUUID()}`;
+ const token=`lock:${Date.now()+180000}:${crypto.randomUUID()}`;
  const result=await database().prepare("UPDATE rescue_runs SET write_token = ?, revision = revision + 1 WHERE id = ? AND owner = ? AND revision = ? AND (write_token NOT LIKE 'lock:%' OR CAST(substr(write_token,6,13) AS INTEGER) <= ?)").bind(token,id,owner,revision,Date.now()).run();
  if(result.meta.changes!==1)throw new HttpError(409,"This case is already being reviewed or changed in another tab. Refresh before continuing.");
  return {revision:revision+1,token};

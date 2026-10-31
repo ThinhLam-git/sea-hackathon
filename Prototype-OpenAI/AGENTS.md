@@ -14,13 +14,15 @@ This app recommends; delivery-operations staff decides. Synthetic data, demo pol
 - `fixtures/v2/test-cases.json` is evaluator-only; its labels remain `DRAFT_NEEDS_USER_REVIEW`. Replay assessments and demo reply controls are generated separately by `scripts/import-v2.mjs`. Never force arbitrary live replies to match scripted labels.
 - Policy version `demo-two-assessment-v2` governs the demo. The reference policy workbook contains broader proposals and public references, not verified live-carrier parameters. Where the broad workbook differs, the user-selected v2.2 runtime contract governs this MVP.
 
-## Fixed seven-stage assessment pipeline
+## Backend pipeline and managed agent
 
 `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`
 
-Each stage has `skills/<name>/SKILL.md` and `skill.ts`. `name` must match the folder. `policy-gate`, `compose-recommendation`, and `audit-log` run after a halt; AI preparation/assessment/validation are skipped when halted before AI. The model cannot choose or skip stages, and has no tools/handoffs.
+Each stage has `skills/<name>/SKILL.md` and `skill.ts`. `name` must match the folder. `policy-gate`, `compose-recommendation`, and `audit-log` run after a halt; AI preparation/assessment/validation are skipped when halted before AI. The fixed stages belong to the backend; the managed agent uses only its allowed tools within `assess-case`.
 
-LIVE_AI uses one tool-free Agents SDK/Responses turn followed by one Decisions score in the same assessment stage. REPLAY uses a hand-authored draft assessment and never fabricates an API score. Failures/refusals/invalid output go to Ops without fallback. Keys and provider errors never enter responses, state, traces or browser code.
+LIVE_AI uses an OpenAI-hosted Agents API session with four app-local skills and five narrowly scoped backend function tools. The agent interprets source meaning, then calls hypothesis selection, evidence-support scoring, and action selection through Decisions in the required order. The backend owns snapshots, validates tool arguments and provenance, enforces lifecycle/policy/question limits, checkpoints session/tool results in D1, and accepts only the stored decision chain at the six-field assessment commit. A buyer reply continues the same run session. Manual no-reply never calls the agent or Decisions.
+
+`ORDER_RESCUE_RUNTIME=AGENTS_API` selects the active path. `ORDER_RESCUE_RUNTIME=LEGACY_RESPONSES` explicitly selects the retained Responses rollback; Agents API failures never fall back. REPLAY uses hand-authored draft outputs plus exact-sample semantic controls and never fabricates API probabilities. Live replies are never mapped to scripted labels. Failures/refusals/invalid output go to Ops. Keys and provider errors never enter responses, state, traces or browser code. Agent usage remains unknown when the API omits it.
 
 ## Two assessments, one immutable final
 
@@ -41,6 +43,6 @@ LIVE_AI uses one tool-free Agents SDK/Responses turn followed by one Decisions s
 
 ## Verification and publication
 
-`npm test`; `npm run typecheck`; `npm run demo` (30 draft scenarios); `npm run demo:legacy` (25-case rollback path); Sites build helper.
+`npm test`; `npm run typecheck`; `npm run build`; `npm run demo` (30 draft scenarios); `npm run demo:legacy` (25-case rollback path). Live API rehearsal is synthetic and separately budgeted; never deploy or publish without explicit authorization.
 
 Keep `.openai/hosting.json` identity and public audience. Secrets stay in runtime env. Preserve auth and per-user ownership. Never commit env files, credentials, local databases, generated builds or node_modules. Downloaded original reference documents remain in the parent workspace; deploy only reviewed synthetic inputs and app code.

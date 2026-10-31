@@ -16,10 +16,10 @@ Clock values belong to the synthetic scenario. An initial CLARIFY kept after No 
 
 ## Stack and flow
 
-- OpenAI Agents SDK with one structured, tool-free Responses call per assessment (`gpt-5.4-mini`).
-- Decisions API evidence-support scoring (`gpt-6-luna`) after each live assessment.
+- OpenAI Agents API managed sessions (`gpt-6-sol`) in an OpenAI-hosted environment with four loaded skills and five backend function tools.
+- Decisions API cause and action distributions plus separate evidence-support scoring (`gpt-6-luna`) in each live assessment.
 - React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
-- The same seven stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`.
+- The backend retains its seven deterministic stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`. Inside `assess-case`, one durable agent session extracts evidence, invokes the Decisions-backed business tools in order, and submits the six-field proposal for backend validation.
 
 At most **two assessments**: initial and after a matching buyer reply. Manual No reply selects initial exactly; there is no third assessment or second question. Concurrent outcomes are serialized before inference and saved with revision checks. Failures go to Ops without silent Replay fallback. Auth remains lightweight; no roles, teams or administration screens.
 
@@ -29,7 +29,7 @@ The nine logical tables from the supplied raw seed are joined into an explicit s
 
 The user-selected contract is `order-rescue-demo-30-v2.2`, policy `demo-two-assessment-v2`. See [source mapping](docs/DATA-SOURCES.md).
 
-`fixtures/v2/seed.json` and `test-cases.json` preserve the downloaded originals. `replay.json`, `controls.json` and `provenance.json` are generated from them. The supplied expected labels are **DRAFT_NEEDS_USER_REVIEW**; a Replay match demonstrates synthetic behavior, not real model accuracy.
+`fixtures/v2/seed.json` and `test-cases.json` preserve the downloaded originals. `replay.json`, `controls.json`, `replay-semantics.json` and `provenance.json` are generated separately. Replay semantics apply only to the exact scripted synthetic reply; live replies always go through the agent. The supplied expected labels are **DRAFT_NEEDS_USER_REVIEW**; a Replay match demonstrates synthetic behavior, not real model accuracy.
 
 Regenerate from a downloaded reference folder:
 
@@ -51,7 +51,10 @@ Create an ignored `.env` in this project:
 
 ```dotenv
 OPENAI_API_KEY=your-own-key
-ORDER_RESCUE_MODEL=gpt-5.4-mini
+ORDER_RESCUE_MODEL=gpt-6-sol
+ORDER_RESCUE_RUNTIME=AGENTS_API
+ORDER_RESCUE_AGENT_TIMEOUT_MS=110000
+ORDER_RESCUE_MAX_TOOL_CALLS=7
 ```
 
 Keep keys out of chat, Git and browser code. Replay needs no key. Build and initialize the local database once:
@@ -77,7 +80,7 @@ Live results can differ from scripted labels. A custom reply is never forced to 
 
 ## Confidence and boundaries
 
-The Decisions rating measures support for the proposed cause. Its weighted LOW/MEDIUM/HIGH score is scaled from 0–2 to 0–100, with demo bands 0–24, 25–74 and 75–100. Source validation caps score and band together. Scorer certainty is separate metadata. This is **not a calibrated delivery-success probability** and never overrides policy. T0 buyer context or verified operational evidence can support strong cause confidence while current intent/availability remain missing.
+The Decisions rating measures support for the proposed cause. Its weighted LOW/MEDIUM/HIGH score is scaled from 0–2 to 0–100, with demo bands 0–24, 25–74 and 75–100. Output validation caps the displayed band to the separate evidence-support result (and caps unknown causes at LOW), while retaining the raw score and cap reason. Scorer certainty is separate metadata. This is **not a calibrated delivery-success probability** and never overrides policy. T0 buyer context or verified operational evidence can support strong cause confidence while current intent/availability remain missing.
 
 The policy workbook contains broader proposals and public references. Only the selected versioned demo profile supplies executable parameters; this is not verified live Shopee/SPX policy. No carrier integration, messaging, address/COD edits, refunds, returns or dispatch.
 
@@ -85,7 +88,8 @@ The policy workbook contains broader proposals and public references. Only the s
 
 - `app/page.tsx`, `app/globals.css`: colored three-panel workflow board.
 - `app/api/`: authenticated case/session, reply and manual no-reply routes.
-- `lib/order-rescue-v2/`: active v2.2 projection, simulator, seven skills, policy, scoring, storage and evaluator.
+- `lib/order-rescue-v2/`: active v2.2 projection, simulator, hosted Agents API session adapter, loaded skills, backend business tools, Decisions contracts, policy, scoring, storage and evaluator.
+- `ORDER_RESCUE_RUNTIME=LEGACY_RESPONSES`: explicit rollback to the retained Responses assessment path. Agents API errors never switch runtimes automatically.
 - `fixtures/v2/`: versioned synthetic inputs and isolated replay/test data.
 - `lib/order-rescue/`, original `fixtures/`: retained v0.5 rollback path.
 - `db/`, `drizzle/`: existing D1 schema and migration; no new operational-schema migration was needed.

@@ -2,10 +2,10 @@ import { check, activeDisruption, buyerFacts } from "../../guards";
 import { type PipelineState, type PolicyOutput } from "../../models";
 export const RUNS_WHEN_HALTED=true;
 export function run(s:PipelineState){
- if(s.halted)return s;check(s);if(s.halted)return s;
+ if(s.halted||s.policy_checked)return s;check(s);if(s.halted){s.policy_checked=true;return s;}
  const a=s.assessment!,facts=buyerFacts(s);
  function decide(action:PolicyOutput["final_action"],reason:string,rule:string,gate:PolicyOutput["policy_gate"]="PERMITTED"){
-  s.result={eligibility:"ELIGIBLE",policy_gate:gate,final_action:action,reason};s.rules.push(rule);return s;
+  s.result={eligibility:"ELIGIBLE",policy_gate:gate,final_action:action,reason};s.rules.push(rule);s.policy_checked=true;return s;
  }
  const review=(reason:string,rule:string)=>decide("ESCALATE_REVIEW",reason,rule,"ESCALATED");
  if(facts.unsupported)return review("Yêu cầu đổi địa điểm hoặc hành động ngoài MVP; Ops cần xác minh, không tự thay đổi đơn.","UNSUPPORTED_REQUEST");

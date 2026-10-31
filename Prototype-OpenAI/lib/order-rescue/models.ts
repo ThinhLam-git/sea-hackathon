@@ -90,12 +90,14 @@ export interface ConfidenceScore {
   rubric_version: string;
   /** Validated evidence-support rating (0–100), never delivery-success probability. */
   score: number;
+  latency_ms?: number;
   raw_score: number;
   rubric_score: number;
   level: Assessment["confidence"];
   scorer_confidence: number;
   probabilities: {value:number;label:string;probability:number}[];
   capped: boolean;
+  cap_reason?: string;
 }
 
 export interface Decision {

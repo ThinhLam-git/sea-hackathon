@@ -9,8 +9,15 @@ export const POST = (request: Request) => handle(async () => {
   const user = await owner(), body = bodySchema.parse(await request.json());
   if (!caseIds.includes(body.case_id)) throw new HttpError(404,"Unknown case");
   if (body.mode === "LIVE_AI" && !runtime().apiKey) throw new HttpError(503,"Live GPT is not configured yet. Replay is available.");
-  const sim = new Simulator(body.mode,runtime());
-  const [run] = await sim.start(body.case_id);
+  let revision=0;
+  const sim = new Simulator(body.mode,runtime()), run=sim.createRun(body.case_id);
   await persist(sim,run.run_id,user);
+  sim.bindAgentCheckpoints({
+    onSessionCreated:async()=>{await persist(sim,run.run_id,user,revision);revision++;},
+    onTurnStarted:async()=>{await persist(sim,run.run_id,user,revision);revision++;},
+    onToolResult:async()=>{await persist(sim,run.run_id,user,revision);revision++;},
+  });
+  await sim.assessInitial(run.run_id);
+  await persist(sim,run.run_id,user,revision);
   return runView(sim,run.run_id);
 });

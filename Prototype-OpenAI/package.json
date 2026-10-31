@@ -15,7 +15,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "demo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue-v2/cli.ts",
-    "demo:legacy": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue/cli.ts"
+    "demo:legacy": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue/cli.ts",
+    "spike:agents-api": "node --env-file-if-exists=.env --import tsx scripts/agents-api-spike.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -75,5 +76,5 @@
       "sharp": "0.35.4"
     }
   },
-  "description": "Order Rescue v2.2 \u2014 OpenAI Agents SDK, Responses and Decisions; 30 synthetic delivery cases"
+  "description": "Order Rescue v2.2 \u2014 OpenAI Agents API and Decisions; 30 synthetic delivery cases"
 }

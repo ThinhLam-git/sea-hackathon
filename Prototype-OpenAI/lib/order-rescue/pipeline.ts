@@ -8,7 +8,18 @@ import * as policyGate from "./skills/policy-gate/skill";
 import * as composeRecommendation from "./skills/compose-recommendation/skill";
 import * as auditLog from "./skills/audit-log/skill";
 
-export interface RuntimeConfig { apiKey?: string; model?: string; tracing?: boolean }
+export interface RuntimeConfig {
+  apiKey?: string;
+  model?: string;
+  tracing?: boolean;
+  agentTimeoutMs?: number;
+  maxAgentToolCalls?: number;
+  agentRuntime?: "AGENTS_API" | "LEGACY_RESPONSES";
+  agentSessions?: import("openai").default["beta"]["agents"]["sessions"];
+  onAgentSessionCreated?: (runId: string, sessionId: string, environmentId: string | null) => void | Promise<void>;
+  onAgentTurnStarted?: (runId: string, turnId: string) => void | Promise<void>;
+  onAgentToolResult?: (runId: string, entry: import("../order-rescue-v2/models").AgentToolLedgerEntry) => void | Promise<void>;
+}
 export const PIPELINE: [string, Skill, string][] = [
   ["load-case", loadCase, "Gate 1 · eligibility"],
   ["prepare-input", prepareInput, "Current facts only"],

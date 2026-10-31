@@ -15,10 +15,19 @@ export function run(s:PipelineState){
  }
  if(s.stage==="AFTER_REPLY"&&a.question_key!==s.run.question_wait_state?.question_key)stop(s,"AI:question_mismatch","Kết quả không khớp câu hỏi đã hỏi; chuyển Ops.","ELIGIBLE");
  if(s.halted){if(s.confidence_score){s.model_info.confidence_scoring={status:"invalidated",raw_result:s.confidence_score};s.confidence_score=undefined;}s.assessment=null;return s;}
- const confirmed=a.evidence.some(e=>["DIRECT_BUYER_STATEMENT","VERIFIED_OPS_SIGNAL"].includes(e.verification));
- const cap=a.hypothesis==="UNKNOWN_CAUSE"?"LOW":confirmed?"HIGH":"MEDIUM";
- const order=["LOW","MEDIUM","HIGH"];
- if(order.indexOf(a.confidence)>order.indexOf(cap)){s.issues.push(`confidence_capped:${a.confidence}->${cap}`);a.confidence=cap;}
- if(s.confidence_score){const limit={LOW:24,MEDIUM:74,HIGH:100}[a.confidence];s.confidence_score.score=Math.min(s.confidence_score.raw_score,limit);s.confidence_score.level=a.confidence;s.confidence_score.capped=s.confidence_score.score<s.confidence_score.raw_score;}
+ if(s.confidence_score){
+  const cap=a.hypothesis==="UNKNOWN_CAUSE"?"LOW":s.confidence_score.level;
+  const order=["LOW","MEDIUM","HIGH"];
+  if(order.indexOf(a.confidence)>order.indexOf(cap)){
+   s.issues.push(`confidence_capped:${a.confidence}->${cap}`);
+   s.confidence_score.cap_reason=a.hypothesis==="UNKNOWN_CAUSE"?"unknown_cause":"evidence_support_band";
+   a.confidence=cap;
+  }
+  const limit={LOW:24,MEDIUM:74,HIGH:100}[a.confidence];
+  if(s.confidence_score.raw_score>limit&&!s.confidence_score.cap_reason)s.confidence_score.cap_reason=a.hypothesis==="UNKNOWN_CAUSE"?"unknown_cause":"evidence_support_band";
+  s.confidence_score.score=Math.min(s.confidence_score.raw_score,limit);
+  s.confidence_score.level=a.confidence;
+  s.confidence_score.capped=s.confidence_score.score<s.confidence_score.raw_score;
+ }
  return s;
 }

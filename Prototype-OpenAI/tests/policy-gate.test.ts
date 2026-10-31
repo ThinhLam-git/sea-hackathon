@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { run as runPolicy } from "../lib/order-rescue-v2/skills/policy-gate/skill";
-import { loadCase } from "../lib/order-rescue-v2/fixtures";
-import type { BuyerInterpretation } from "../lib/order-rescue-v2/agents/business-facts";
+import { run as runPolicy } from "../packages/agent/src/skills/policy-gate/skill";
+import { loadCase } from "../apps/web/lib/application/v2-workflow-data";
+import type { BuyerInterpretation } from "../packages/agent/src/semantics/business-facts";
 
 function retryState(caseId: string, facts: Partial<BuyerInterpretation>, text = "Buyer reply recorded.") {
   const raw=loadCase(caseId),ref=`${caseId}-REPLY`,reply={source_ref:ref,phase:"RUNTIME" as const,source_type:"BUYER_REPLY" as const,actor:"buyer_recorded_by_staff",occurred_at:raw.input.failed_event.as_of,content:{text,question_id:"q1",event_id:"event1"}};
@@ -35,6 +35,64 @@ describe("policy gate application", () => {
       address_change:{state:"NO",citations:[{source_ref:"DEMO-001-REPLY",quote:"same address"}]},
     });
     runPolicy(state);expect(state.result.final_action).toBe("STANDARD_REATTEMPT");expect(state.result.policy_gate).toBe("PERMITTED");
+  });
+
+  it("escalates an unresolved location conflict instead of treating it as a negative", () => {
+    const state=retryState("DEMO-001",{
+      intent:{state:"YES",citations:[{source_ref:"DEMO-001-REPLY",quote:"I still want it"}]},
+      availability:{state:"YES",citations:[{source_ref:"DEMO-001-REPLY",quote:"tomorrow I can receive it"}]},
+      address_change:{state:"CONFLICTING",citations:[
+        {source_ref:"DEMO-001-REPLY",quote:"the registered location is correct"},
+        {source_ref:"DEMO-001-REPLY",quote:"please use the other location"},
+      ]},
+    });
+    runPolicy(state);
+    expect(state.result.final_action).toBe("ESCALATE_REVIEW");
+    expect(state.result.policy_gate).toBe("ESCALATED");
+    expect(state.result.reason).toMatch(/conflict|xung đột/i);
+    expect(state.rules).toContain("SEMANTIC_CONFLICT");
+  });
+
+  it("keeps negation and conditional meaning in model-assessed states", () => {
+    const state=retryState("DEMO-001",{
+      intent:{state:"NO",citations:[{source_ref:"DEMO-001-REPLY",quote:"I do not want it"}]},
+      availability:{state:"CONDITIONAL",citations:[{source_ref:"DEMO-001-REPLY",quote:"if my sister gets home, she can receive it"}]},
+    },"I do not want it. If my sister gets home, she can receive it.");
+    runPolicy(state);
+    expect(state.result.final_action).toBe("ESCALATE_REVIEW");
+    expect(state.rules).toContain("BUYER_DECLINED");
+  });
+
+  it("does not let an irrelevant unknown fact block a fully supported non-COD retry", () => {
+    const state=retryState("DEMO-001",{
+      intent:{state:"YES",citations:[{source_ref:"DEMO-001-REPLY",quote:"I still want it"}]},
+      availability:{state:"YES",citations:[{source_ref:"DEMO-001-REPLY",quote:"tomorrow I can receive it"}]},
+    });
+    runPolicy(state);
+    expect(state.result.final_action).toBe("STANDARD_REATTEMPT");
+    expect(state.result.policy_gate).toBe("PERMITTED");
+  });
+
+  it("does not permit retry when required payment readiness is conditional", () => {
+    const state=retryState("DEMO-016",{
+      intent:{state:"YES",citations:[{source_ref:"DEMO-016-REPLY",quote:"I still want it"}]},
+      availability:{state:"YES",citations:[{source_ref:"DEMO-016-REPLY",quote:"tomorrow I can receive it"}]},
+      cod_readiness:{state:"CONDITIONAL",citations:[{source_ref:"DEMO-016-REPLY",quote:"if I can get cash tomorrow"}]},
+    },"I still want it. Tomorrow I can receive it if I can get cash.");
+    runPolicy(state);
+    expect(state.result.final_action).toBe("ESCALATE_REVIEW");
+    expect(state.rules).toContain("RETRY_REQUIREMENTS");
+  });
+
+  it("does not permit retry when receipt time is conditional on the handling deadline", () => {
+    const state=retryState("DEMO-001",{
+      intent:{state:"YES",citations:[{source_ref:"DEMO-001-REPLY",quote:"I still want it"}]},
+      availability:{state:"YES",citations:[{source_ref:"DEMO-001-REPLY",quote:"I can receive it"}]},
+      after_deadline:{state:"CONDITIONAL",citations:[{source_ref:"DEMO-001-REPLY",quote:"only after the handling deadline"}]},
+    });
+    runPolicy(state);
+    expect(state.result.final_action).toBe("ESCALATE_REVIEW");
+    expect(state.rules).toContain("SEMANTIC_CONDITIONAL");
   });
 
   it("requires COD readiness and sends an actual address-change request to Ops", () => {

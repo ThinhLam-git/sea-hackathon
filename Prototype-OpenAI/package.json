@@ -14,7 +14,7 @@
     "db:generate": "drizzle-kit generate",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "demo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue-v2/cli.ts",
+    "demo": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/demo-v2.ts",
     "demo:legacy": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx lib/order-rescue/cli.ts",
     "spike:agents-api": "node --env-file-if-exists=.env --import tsx scripts/agents-api-spike.ts"
   },

@@ -25,6 +25,15 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@web/*": [
+        "./apps/web/*"
+      ],
+      "@agent/*": [
+        "./packages/agent/src/*"
+      ],
+      "@contracts": [
+        "./packages/contracts/src/index.ts"
       ]
     },
     "types": [

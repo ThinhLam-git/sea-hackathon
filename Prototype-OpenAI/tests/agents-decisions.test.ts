@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import OpenAI from "openai";
 import { Decisions } from "openai/resources/decisions";
-import { evaluateActionDecision, evaluateHypothesisDecision, parseChoiceDecision } from "../lib/order-rescue-v2/agents/decisions";
-import { HYPOTHESES } from "../lib/order-rescue-v2/models";
+import { evaluateActionDecision, evaluateHypothesisDecision, parseChoiceDecision } from "../packages/agent/src/decisions";
+import { HYPOTHESES } from "../packages/agent/src/models";
 
 const labels = ["H1", "H2", "UNKNOWN"] as const;
 const response = {

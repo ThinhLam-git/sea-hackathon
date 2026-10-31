@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { runManagedAgentTurn } from "../lib/order-rescue-v2/agents/session";
+import { runManagedAgentTurn } from "../packages/agent/src/runtime/session";
 
 function stream(sessionId: string, turnId: string, output: string, calls: Array<{ name: string; call_id: string }> = []) {
   const events = [

@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { readFile } from "node:fs/promises";
-import { runManagedAgentTurn } from "../lib/order-rescue-v2/agents/session";
-import { HYPOTHESES } from "../lib/order-rescue-v2/models";
+import { runManagedAgentTurn } from "../packages/agent/src/runtime/session";
+import { HYPOTHESES } from "../packages/agent/src/models";
 
 const apiKey = process.env.OPENAI_API_KEY;
 if (process.argv[2] !== "--run-live") throw new Error("Pass --run-live to run the bounded synthetic API probe.");
@@ -68,7 +68,7 @@ const handlers = {
     return decisionEvidence;
   },
 };
-const skillText = await readFile(new URL("../lib/order-rescue-v2/agents/skills/investigate-case/SKILL.md", import.meta.url), "utf8");
+const skillText = await readFile(new URL("../packages/agent/src/skills/hosted/investigate-case/SKILL.md", import.meta.url), "utf8");
 const [, frontmatter, instructions] = skillText.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
 if (!frontmatter || !instructions) throw new Error("investigate_case_skill_manifest_invalid");
 

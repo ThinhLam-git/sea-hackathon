@@ -13,12 +13,14 @@ export interface RuntimeConfig {
   model?: string;
   tracing?: boolean;
   agentTimeoutMs?: number;
+  assessmentSignal?: AbortSignal;
   maxAgentToolCalls?: number;
   agentRuntime?: "AGENTS_API" | "LEGACY_RESPONSES";
   agentSessions?: import("openai").default["beta"]["agents"]["sessions"];
   onAgentSessionCreated?: (runId: string, sessionId: string, environmentId: string | null) => void | Promise<void>;
   onAgentTurnStarted?: (runId: string, turnId: string) => void | Promise<void>;
-  onAgentToolResult?: (runId: string, entry: import("../order-rescue-v2/models").AgentToolLedgerEntry) => void | Promise<void>;
+  onAgentToolResult?: (runId: string, entry: import("../../packages/agent/src/models").AgentToolLedgerEntry) => void | Promise<void>;
+  onAgentRemoteCancel?: (runId: string, status: "NOT_REQUESTED"|"ACCEPTED"|"AMBIGUOUS"|"UNAVAILABLE") => void | Promise<void>;
 }
 export const PIPELINE: [string, Skill, string][] = [
   ["load-case", loadCase, "Gate 1 · eligibility"],

@@ -1,15 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Runner } from "@openai/agents";
 import { Decisions } from "openai/resources/decisions";
-import { Simulator, TransitionError } from "../lib/order-rescue-v2/simulator";
-import { scenarios } from "../lib/order-rescue-v2/evaluator";
-import { loadCase, caseIds } from "../lib/order-rescue-v2/fixtures";
-import { run as prepare } from "../lib/order-rescue-v2/skills/prepare-input/skill";
-import type { PipelineState } from "../lib/order-rescue-v2/models";
+import OpenAI from "openai";
+import { Simulator, TransitionError } from "../packages/agent/src/workflow/simulator";
+import { workflowData } from "../apps/web/lib/application/v2-workflow-data";
+import { scenarios } from "../apps/web/lib/application/v2-evaluator";
+import { loadCase, caseIds } from "../apps/web/lib/application/v2-workflow-data";
+import { run as prepare } from "../packages/agent/src/skills/prepare-input/skill";
+import type { PipelineState } from "../packages/agent/src/models";
 afterEach(()=>vi.restoreAllMocks());
 describe("v2.2 two-assessment contract",()=>{
  it.each(scenarios.map(c=>[c.case_id,c] as const))("runs %s against the supplied draft behavior fixture",async(id,c)=>{
-  const sim=new Simulator(),[run,initial]=await sim.start(id),before=JSON.stringify(initial);
+  const sim=new Simulator("REPLAY",{},workflowData),[run,initial]=await sim.start(id),before=JSON.stringify(initial);
   const a=c.expected.initial_assessment;
   expect(initial.agent).toEqual(a);expect(initial.final_action).toBe(c.expected.initial_policy_output.final_action);
   expect(run.current_status).toBe("WAITING_FOR_BUYER");expect(run.question_wait_state?.question_key).toBe(a.question_key);
@@ -24,12 +26,12 @@ describe("v2.2 two-assessment contract",()=>{
   expect(JSON.stringify(sim.history(run.run_id)[0])).toBe(before);
  });
  it("keeps initial input isolated from all draft answers and future replies",async()=>{
-  const sim=new Simulator(),[run]=await sim.start("DEMO-001"),state=prepare({run} as PipelineState),body=JSON.stringify(state.snapshot);
+  const sim=new Simulator("REPLAY",{},workflowData),[run]=await sim.start("DEMO-001"),state=prepare({run} as PipelineState),body=JSON.stringify(state.snapshot);
   expect(state.snapshot.runtime_context).toEqual([]);expect(Object.keys(state.snapshot.core_input)).toHaveLength(7);
   for(const bad of ["expected","simulation","after_reply_assessment","DEMO-001-REPLY",scenarios[0].simulation.buyer_reply!])expect(body).not.toContain(bad);
  });
  it("selects initial on manual no-reply without inference, a timer, or a synthetic buyer refusal",async()=>{
-  const sim=new Simulator(),[run]=await sim.start("DEMO-005"),now=run.now,initial=JSON.stringify(run.initial_assessment);
+  const sim=new Simulator("REPLAY",{},workflowData),[run]=await sim.start("DEMO-005"),now=run.now,initial=JSON.stringify(run.initial_assessment);
   const agent=vi.spyOn(Runner.prototype,"run"),scorer=vi.spyOn(Decisions.prototype,"create"),id=crypto.randomUUID(),q=run.question_wait_state!.question_id;
   sim.noReply(run.run_id,id,q);expect(sim.noReply(run.run_id,id,q)).toBeNull();
   expect(run.now).toBe(now);expect(run.after_reply_assessment).toBeNull();expect(JSON.stringify(run.final_assessment)).toBe(initial);
@@ -38,7 +40,7 @@ describe("v2.2 two-assessment contract",()=>{
   await expect(sim.recordBuyerReply(run.run_id,"Reply",crypto.randomUUID(),q,true)).rejects.toThrow("finalized");
  });
  it("binds one reply to the actual question and rejects conflicting retries",async()=>{
-  const sim=new Simulator(),[run]=await sim.start("DEMO-001"),text=scenarios[0].simulation.buyer_reply!,event=crypto.randomUUID(),q=run.question_wait_state!.question_id;
+  const sim=new Simulator("REPLAY",{},workflowData),[run]=await sim.start("DEMO-001"),text=scenarios[0].simulation.buyer_reply!,event=crypto.randomUUID(),q=run.question_wait_state!.question_id;
   await expect(sim.recordBuyerReply(run.run_id,text,event,"wrong-question")).rejects.toThrow("question_mismatch");
   expect(run.applied).toHaveLength(0);await sim.recordBuyerReply(run.run_id,text,event,q);
   expect(await sim.recordBuyerReply(run.run_id,text,event,q)).toBeNull();
@@ -48,14 +50,14 @@ describe("v2.2 two-assessment contract",()=>{
   expect(sim.history(run.run_id)).toHaveLength(2);
  });
  it("rejects arbitrary text in Replay without an explicit live assessment",async()=>{
-  const sim=new Simulator(),[run]=await sim.start("DEMO-001");
+  const sim=new Simulator("REPLAY",{},workflowData),[run]=await sim.start("DEMO-001");
   await expect(sim.recordBuyerReply(run.run_id,"Custom text",crypto.randomUUID(),run.question_wait_state!.question_id)).rejects.toBeInstanceOf(TransitionError);
   expect(run.applied).toHaveLength(0);expect(sim.mode).toBe("REPLAY");
  });
  it.each(["STARTED","COMPLETED"] as const)("blocks return state %s before any model call",async(value)=>{
   const c=loadCase("DEMO-001");c.input.return_state=value;
   const agent=vi.spyOn(Runner.prototype,"run"),scorer=vi.spyOn(Decisions.prototype,"create");
-  const [run,d]=await new Simulator("LIVE_AI",{apiKey:"test-key"}).start(c.case_id,c);
+  const [run,d]=await new Simulator("LIVE_AI",{openAIClient:new OpenAI({apiKey:"synthetic-test-key",maxRetries:0})},workflowData).start(c.case_id,c);
   expect(d.policy_gate).toBe("BLOCKED");expect(run.current_status).toBe("COMPLETED");expect(run.question_wait_state).toBeNull();
   expect(agent).not.toHaveBeenCalled();expect(scorer).not.toHaveBeenCalled();
  });

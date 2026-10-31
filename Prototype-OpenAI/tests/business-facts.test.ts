@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { validateBuyerInterpretation, type BuyerInterpretation } from "../lib/order-rescue-v2/agents/business-facts";
-import { buyerFacts } from "../lib/order-rescue-v2/guards";
+import { validateBuyerInterpretation, type BuyerInterpretation } from "../packages/agent/src/semantics/business-facts";
+import { buyerFacts } from "../packages/agent/src/policy/guards";
 import type { Source } from "../lib/order-rescue/models";
 
 const fact = (state: "YES" | "NO" | "CONDITIONAL" | "UNKNOWN" | "CONFLICTING", source_ref: string | null, quote: string | null) => ({ state, citations: source_ref && quote ? [{ source_ref, quote }] : [] });
@@ -49,9 +49,14 @@ describe("buyer semantic facts preserve provenance without keyword classificatio
     expect(() => validateBuyerInterpretation(proposed, [buyer])).toThrow("invalid_semantic_provenance");
   });
 
-  it("does not classify buyer semantics from reply keywords", () => {
-    const source: Source = { ...buyer, source_ref: "BUYER-REPLY", source_type: "BUYER_REPLY", content: { text: "Tôi vẫn muốn nhận, ngày mai có người ở nhà, mã COD đã chuẩn bị." } };
-    const state = { run: { applied: [source] }, semantic_facts: undefined } as any;
-    expect(buyerFacts(state)).toEqual({ intent: false, declined: false, availability: false, cod: false, unsupported: false, afterDeadline: false });
+  it("passes negation and conditional replies through from semantic assessment without keyword rules", () => {
+    const source: Source = { ...buyer, source_ref: "BUYER-REPLY", source_type: "BUYER_REPLY", content: { text: "I do not want the parcel. If my sister gets home, she can receive it." } };
+    const proposed: BuyerInterpretation = {
+      intent: fact("NO", source.source_ref, "I do not want the parcel"),
+      availability: fact("CONDITIONAL", source.source_ref, "If my sister gets home, she can receive it"),
+      cod_readiness: fact("UNKNOWN", null, null), address_change: fact("UNKNOWN", null, null), after_deadline: fact("UNKNOWN", null, null),
+    };
+    const interpreted = validateBuyerInterpretation(proposed, [source]);
+    expect(buyerFacts({ semantic_facts: interpreted } as any)).toEqual(proposed);
   });
 });

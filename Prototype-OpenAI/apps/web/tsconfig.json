@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["app/**/*.ts", "app/**/*.tsx", "components/**/*.ts", "components/**/*.tsx", "hooks/**/*.ts", "lib/**/*.ts", "lib/**/*.mts", "worker/**/*.ts", "db/**/*.ts", "../../cloudflare-env.d.ts", "../../lib/connector-preview.d.ts"],
+  "exclude": ["node_modules"]
+}

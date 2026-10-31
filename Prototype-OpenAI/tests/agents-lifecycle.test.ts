@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Decisions } from "openai/resources/decisions";
-import { Simulator } from "../lib/order-rescue-v2/simulator";
-import { HYPOTHESES } from "../lib/order-rescue-v2/models";
-import { loadCase } from "../lib/order-rescue-v2/fixtures";
+import OpenAI from "openai";
+import { Simulator } from "../packages/agent/src/workflow/simulator";
+import { workflowData } from "../apps/web/lib/application/v2-workflow-data";
+import { HYPOTHESES } from "../packages/agent/src/models";
+import { loadCase } from "../apps/web/lib/application/v2-workflow-data";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -80,7 +82,7 @@ describe("Agents API v2.2 lifecycle", () => {
         return stream(sessionId, "turn_after_reply", secondTools, false);
       }),
     };
-    const sim = new Simulator("LIVE_AI", { apiKey: "synthetic-test-key", model: "gpt-6-sol", agentRuntime: "AGENTS_API", agentSessions: sessions as any });
+    const sim = new Simulator("LIVE_AI", { openAIClient: new OpenAI({apiKey:"synthetic-test-key",maxRetries:0}), model: "gpt-6-sol", agentRuntime: "AGENTS_API", agentSessions: sessions as any }, workflowData);
     const [run] = await sim.start(raw.case_id, raw);
     expect(run.agent_session_status).toBe("IDLE");
     expect(run.question_wait_state?.status).toBe("PENDING");
@@ -95,8 +97,14 @@ describe("Agents API v2.2 lifecycle", () => {
     expect(run.final_assessment_source).toBe(2);
     expect(run.final_policy_output?.final_action).toBe("STANDARD_REATTEMPT");
     expect(decisions).toHaveBeenCalledTimes(6);
-    expect(run.agent_tool_ledger?.filter((entry) => entry.phase === "INITIAL")).toHaveLength(firstTools.length + 1);
-    expect(run.agent_tool_ledger?.filter((entry) => entry.phase === "AFTER_REPLY")).toHaveLength(secondTools.length + 1);
+    const initialLedger = run.agent_tool_ledger?.filter((entry) => entry.phase === "INITIAL") ?? [];
+    const afterReplyLedger = run.agent_tool_ledger?.filter((entry) => entry.phase === "AFTER_REPLY") ?? [];
+    // The ledger now retains each Decisions dispatch attempt and its normalized
+    // result alongside the managed-agent function-call results.
+    expect(initialLedger.filter((entry) => entry.attempt_id)).toHaveLength(3);
+    expect(afterReplyLedger.filter((entry) => entry.attempt_id)).toHaveLength(3);
+    expect(initialLedger.filter((entry) => entry.external_call_id && !entry.attempt_id)).toHaveLength(firstTools.length);
+    expect(afterReplyLedger.filter((entry) => entry.external_call_id && !entry.attempt_id)).toHaveLength(secondTools.length);
     expect(run.agent_tool_ledger?.some((entry) => entry.tool_name === "decisions_hypothesis_choice")).toBe(true);
     expect(run.agent_tool_ledger?.every((entry) => entry.session_id === "sess_run_1" && entry.turn_id)).toBe(true);
   });
@@ -104,7 +112,7 @@ describe("Agents API v2.2 lifecycle", () => {
   it("does not continue the session or call Decisions when manually selecting no-reply", async () => {
     const first = vi.spyOn(Decisions.prototype, "create").mockRejectedValue(new Error("unused"));
     const session = { create: vi.fn(), stream: vi.fn() };
-    const sim = new Simulator("LIVE_AI", { apiKey: "test-key", model: "gpt-6-sol", agentRuntime: "AGENTS_API", agentSessions: session as any });
+    const sim = new Simulator("LIVE_AI", { openAIClient: new OpenAI({apiKey:"synthetic-test-key",maxRetries:0}), model: "gpt-6-sol", agentRuntime: "AGENTS_API", agentSessions: session as any }, workflowData);
     // No inference is needed to exercise the no-reply selection path.
     const raw = loadCase("DEMO-005");
     const run = sim.createRun(raw.case_id, raw);

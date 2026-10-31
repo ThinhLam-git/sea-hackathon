@@ -16,7 +16,7 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
-  main: "./worker/index.ts",
+  main: "./apps/web/worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
     ? [
@@ -52,8 +52,16 @@ export default defineConfig(async ({ command }) => {
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),
     },
+    publicDir: "apps/web/public",
+    resolve: {
+      alias: {
+        "@web": new URL("./apps/web", import.meta.url).pathname,
+        "@agent": new URL("./packages/agent/src", import.meta.url).pathname,
+        "@contracts": new URL("./packages/contracts/src/index.ts", import.meta.url).pathname,
+      },
+    },
     plugins: [
-      vinext(),
+      vinext({ appDir: "apps/web" }),
       sites({ mockAuth: !managedLinux }),
       connectorPreview(),
       cloudflare({

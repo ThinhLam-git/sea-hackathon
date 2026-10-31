@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { run as validate } from "../lib/order-rescue-v2/skills/validate-output/skill";
+import { run as validate } from "../packages/agent/src/skills/validate-output/skill";
 
 function stateFor(hypothesis: string, confidence = "HIGH") {
   return {

@@ -18,8 +18,10 @@ Clock values belong to the synthetic scenario. An initial CLARIFY kept after No 
 
 - OpenAI Agents API managed sessions (`gpt-6-sol`) in an OpenAI-hosted environment with four loaded skills and five backend function tools.
 - Decisions API cause and action distributions plus separate evidence-support scoring (`gpt-6-luna`) in each live assessment.
-- React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
+- React/Vinext/TypeScript on ChatGPT Sites / Cloudflare Workers; the web application and agent implementation are separate source packages in this repository and ship in one Worker. D1 stores sessions, two assessment slots, final selection and an append-only audit timeline.
 - The backend retains its seven deterministic stages: `load-case → prepare-input → assess-case → validate-output → policy-gate → compose-recommendation → audit-log`. Inside `assess-case`, one durable agent session extracts evidence, invokes the Decisions-backed business tools in order, and submits the six-field proposal for backend validation.
+- Each Decisions request is checkpointed before dispatch and records its result, model, request ID when available, latency, usage availability, and sanitized status. Request cancellation stops new work, rejects stale commits, and sends a separate documented remote cancel event when a session turn is known.
+- An owner-authenticated recovery endpoint inspects an interrupted remote session and reconciles only stored tool results. It never creates a replacement session or repeats an uncertain billable request.
 
 At most **two assessments**: initial and after a matching buyer reply. Manual No reply selects initial exactly; there is no third assessment or second question. Concurrent outcomes are serialized before inference and saved with revision checks. Failures go to Ops without silent Replay fallback. Auth remains lightweight; no roles, teams or administration screens.
 
@@ -67,11 +69,17 @@ npm run dev
 
 Open the printed Local URL, normally `http://127.0.0.1:5173/`. Hosted API keys are separate Sites runtime secrets. Local development has a local presenter identity; hosted API routes require ChatGPT sign-in.
 
+The built Worker can also be started with `npm start`; it uses `.wrangler/state` for local D1 persistence. For that built config, Wrangler reads local secrets from `dist/server/.dev.vars` beside the generated `dist/server/wrangler.json`. Keep that file local and remove it after a bounded live rehearsal. Hosted deployments keep secrets in runtime bindings.
+
 ## Verify
 
 ```bash
 npm test
 npm run typecheck
+npx tsc -p packages/contracts/tsconfig.json --noEmit
+npx tsc -p packages/agent/tsconfig.json --noEmit
+npx tsc -p apps/web/tsconfig.json --noEmit
+npm run build
 npm run demo          # 30 supplied draft v2.2 scenarios
 npm run demo:legacy   # preserved 25-case v0.5 regression path
 ```
@@ -84,14 +92,19 @@ The Decisions rating measures support for the proposed cause. Its weighted LOW/M
 
 The policy workbook contains broader proposals and public references. Only the selected versioned demo profile supplies executable parameters; this is not verified live Shopee/SPX policy. No carrier integration, messaging, address/COD edits, refunds, returns or dispatch.
 
-## Code map / publishing
+## Code map and boundaries
 
-- `app/page.tsx`, `app/globals.css`: colored three-panel workflow board.
-- `app/api/`: authenticated case/session, reply and manual no-reply routes.
-- `lib/order-rescue-v2/`: active v2.2 projection, simulator, hosted Agents API session adapter, loaded skills, backend business tools, Decisions contracts, policy, scoring, storage and evaluator.
-- `ORDER_RESCUE_RUNTIME=LEGACY_RESPONSES`: explicit rollback to the retained Responses assessment path. Agents API errors never switch runtimes automatically.
-- `fixtures/v2/`: versioned synthetic inputs and isolated replay/test data.
-- `lib/order-rescue/`, original `fixtures/`: retained v0.5 rollback path.
-- `db/`, `drizzle/`: existing D1 schema and migration; no new operational-schema migration was needed.
+- `apps/web/app/`, `components/`, `hooks/`, `public/`: UI, styles, public assets, auth integration, and thin API routes.
+- `apps/web/lib/application/`: use-case services, server-only v2.2 workflow data, evaluator adapter, and public view projection.
+- `apps/web/lib/infrastructure/`: D1 persistence, owner scoping, runtime secret resolution, and agent recovery adapter. `apps/web/db/` is the Drizzle schema; `drizzle/` retains the existing migration.
+- `apps/web/worker/index.ts`: the single Cloudflare Worker entry point. Root `vite.config.ts` keeps Vinext and the Cloudflare/Sites plugins at the repository root, with `apps/web` configured as Vinext's `appDir`.
+- `packages/contracts/src/`: browser-safe DTOs and schemas. It imports Zod only and contains no provider, Worker, persistence, or secret configuration.
+- `packages/agent/src/runtime/`, `decisions/`, `semantics/`, `workflow/`, `policy/`, `skills/`, `ports/`: Agents API sessions and recovery; Decisions; typed semantic facts; lifecycle and simulator; policy constraints; stage and hosted skills; and infrastructure interfaces. Agent code imports contracts and provider libraries, never UI, framework routes, Cloudflare bindings, browser state, or environment secrets.
+- `packages/agent/src/skills/hosted/`: four app-local `SKILL.md` sources loaded into the Agents API session definition by Vite's raw asset imports.
+- `fixtures/v2/`: v2.2 synthetic inputs and evaluator-only labels. Server-only adapters keep future replies and labels out of browser DTOs and live model input.
+- `lib/order-rescue/` and original `fixtures/`: the v0.5 rollback path. `ORDER_RESCUE_RUNTIME=LEGACY_RESPONSES` explicitly selects its retained Responses assessment mode; Agents API errors never switch runtimes automatically.
+- `tests/`, `scripts/`, `reports/`: retained and new regressions, replay tools, and implementation handover.
+
+The refactor keeps one root npm install and one Workers deployment. It does not introduce a separate service, build system, or package-manager workspace migration. `apps/web/tsconfig.json`, `packages/agent/tsconfig.json`, and `packages/contracts/tsconfig.json` allow each boundary to be typechecked independently.
 
 Preserve `.openai/hosting.json` Site identity/public audience and use Sites source/build/publication tools. Never commit env files, credentials, local databases, generated builds or node_modules.

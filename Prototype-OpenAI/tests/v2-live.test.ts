@@ -1,13 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Runner } from "@openai/agents";
 import { Decisions } from "openai/resources/decisions";
-import { Simulator } from "../lib/order-rescue-v2/simulator";
-import { scenarios } from "../lib/order-rescue-v2/evaluator";
-import { loadCase } from "../lib/order-rescue-v2/fixtures";
+import OpenAI from "openai";
+import { Simulator } from "../packages/agent/src/workflow/simulator";
+import { workflowData } from "../apps/web/lib/application/v2-workflow-data";
+import { scenarios } from "../apps/web/lib/application/v2-evaluator";
+import { loadCase } from "../apps/web/lib/application/v2-workflow-data";
 const answer={answers:[{type:"score",name:"evidence_support",score:1,confidence:.85,probabilities:[{value:0,label:"LOW",probability:0},{value:1,label:"MEDIUM",probability:1},{value:2,label:"HIGH",probability:0}]}]};
 const initial=()=>structuredClone(scenarios[0].expected.initial_assessment);
 afterEach(()=>vi.restoreAllMocks());
-function mock(){const assessor=vi.spyOn(Runner.prototype,"run").mockResolvedValue({finalOutput:initial()} as any);const scorer=vi.spyOn(Decisions.prototype,"create").mockResolvedValue(answer as any);return {sim:new Simulator("LIVE_AI",{apiKey:"test-key"}),assessor,scorer};}
+function mock(){const assessor=vi.spyOn(Runner.prototype,"run").mockResolvedValue({finalOutput:initial()} as any);const scorer=vi.spyOn(Decisions.prototype,"create").mockResolvedValue(answer as any);return {sim:new Simulator("LIVE_AI",{openAIClient:new OpenAI({apiKey:"synthetic-test-key",maxRetries:0}),agentRuntime:"LEGACY_RESPONSES"},workflowData),assessor,scorer};}
 describe("v2 live API boundaries",()=>{
  it("uses one Responses and one Decisions call per assessment and never a third round",async()=>{
   const {sim,assessor,scorer}=mock(),[run]=await sim.start("DEMO-001");
